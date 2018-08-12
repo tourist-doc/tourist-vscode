@@ -11,5 +11,6 @@
 		],
 		"triple-equals": true
 	},
-	"defaultSeverity": "warning"
+	"defaultSeverity": "warning",
+	"indent": [true, "spaces", 2]
 }
