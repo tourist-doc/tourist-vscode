@@ -11,16 +11,24 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.sayHello"
+        "onCommand:extension.takeTour"
     ],
     "main": "./out/extension",
     "contributes": {
         "commands": [
             {
-                "command": "extension.sayHello",
-                "title": "Hello World"
+                "command": "extension.takeTour",
+                "title": "Take a tour"
             }
-        ]
+        ],
+        "views": {
+            "explorer": [
+                {
+                    "id": "touristView",
+                    "name": "Tourist"
+                }
+            ]
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
