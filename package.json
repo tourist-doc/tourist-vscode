@@ -18,7 +18,13 @@
         "commands": [
             {
                 "command": "extension.takeTour",
-                "title": "Take a tour"
+                "title": "Take a tour",
+                "category": "Tourist"
+            },
+            {
+                "command": "extension.gotoTourStop",
+                "title": "Go to tour stop",
+                "category": "Tourist"
             }
         ],
         "views": {
