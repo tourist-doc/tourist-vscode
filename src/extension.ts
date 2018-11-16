@@ -4,10 +4,13 @@
 import * as vscode from 'vscode';
 
 interface Tourstop {
-    title: string,
+    title: string
     message: string
-    filePath: string,
-    position: vscode.Position,
+    filePath: string
+    position: {
+        row: number
+        col: number
+    }
 }
 
 class Tour implements vscode.TreeDataProvider<Tourstop> {
@@ -42,29 +45,23 @@ export function activate(context: vscode.ExtensionContext) {
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
-    let disposable = vscode.commands.registerCommand('extension.takeTour', () => {
-        const tour = new Tour([{
-            title: 'Tourstop #1',
-            message: 'This is a message lol',
-            filePath: 'src/extension.ts',
-            position: new vscode.Position(25, 3)
-        },
-        {
-            title: 'activate()',
-            message: 'This function is called when the extension is activated!',
-            filePath: 'C:/Users/jason/Desktop/tourist-vscode/src/extension.ts',
-            position: new vscode.Position(40, 0)
-        }]);
-        vscode.window.createTreeView<Tourstop>('touristView', { treeDataProvider: tour });
+    vscode.workspace.findFiles("*.tour").then(uris => {
+        // TODO:  decide how to handle multiple .tour files
+        const file = uris[0];
+        vscode.workspace.openTextDocument(file).then((document) => {
+            console.log(document.getText());
+            const tourstops: Tourstop[] = JSON.parse(document.getText());
+            const tour = new Tour(tourstops);
+            vscode.window.createTreeView<Tourstop>('touristView', { treeDataProvider: tour });
+        });
     });
 
-    context.subscriptions.push(disposable);
-
-    disposable = vscode.commands.registerCommand('extension.gotoTourStop', (tourstop: Tourstop) => {
+    const disposable = vscode.commands.registerCommand('extension.gotoTourStop', (tourstop: Tourstop) => {
         const fileURI = vscode.Uri.file(tourstop.filePath);
         vscode.workspace.openTextDocument(fileURI).then(doc => {
             vscode.window.showTextDocument(doc).then(editor => {
-                editor.selection = new vscode.Selection(tourstop.position, tourstop.position)
+                const pos = new vscode.Position(tourstop.position.row, tourstop.position.col);
+                editor.selection = new vscode.Selection(pos, pos);
                 vscode.window.showInformationMessage(tourstop.message);
             });
         }, (error: any) => {
