@@ -9,6 +9,7 @@ Creating tours
     - Perhaps from File > New tour
 - Re-arrange tourstops in GUI
 - Delete tourstops in GUI
+- Ability to save .tour file
 
 Better tour-taking experience
 =============================

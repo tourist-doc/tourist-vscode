@@ -76,7 +76,12 @@ export function activate(context: vscode.ExtensionContext) {
     const disposable = vscode.commands.registerCommand('extension.gotoTourStop', gotoTourStop);
     context.subscriptions.push(disposable);
 
-    const disposable2 = vscode.commands.registerCommand('extension.addTourStop', (filepath = '', position = { row: 0, col: 0 }) => {
+    const disposable2 = vscode.commands.registerCommand('extension.addTourStop', () => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor === undefined) {
+            return;
+        }
+
         const tour: Tour | undefined = context.workspaceState.get('tour');
 
         if (tour === undefined) {
@@ -85,8 +90,11 @@ export function activate(context: vscode.ExtensionContext) {
             tour.addTourStop({
                 title: 'Shiny new tourstop',
                 message: 'Please explain here, oh wise one',
-                filePath: filepath,
-                position: position
+                filePath: editor.document.fileName,
+                position: {
+                    row: editor.selection.active.line,
+                    col: editor.selection.active.character
+                }
             });
             context.workspaceState.update('tour', tour);
             showTour(tour);
