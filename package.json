@@ -20,6 +20,11 @@
                 "command": "extension.gotoTourStop",
                 "title": "Go to tour stop",
                 "category": "Tourist"
+            },
+            {
+                "command": "extension.addTourStop",
+                "title": "Add a tour stop",
+                "category": "Tourist"
             }
         ],
         "views": {
@@ -29,6 +34,19 @@
                     "name": "Tourist"
                 }
             ]
+        },
+        "menus": {
+            "editor/context": [
+                {
+                    "command": "extension.addTourStop",
+                    "group": "Tourist"
+                }
+            ]
+        },
+        "keybindings": {
+            "command": "extension.addTourStop",
+            "key": "Ctrl+Shift+S",
+            "when": "editorTextFocus"
         }
     },
     "scripts": {

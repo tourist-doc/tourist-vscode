@@ -17,9 +17,13 @@ interface Tourstop {
 class Tour implements vscode.TreeDataProvider<Tourstop> {
     private tourstops: Tourstop[] = [];
 
-    constructor(tourfile: vscode.Uri) {
-        vscode.workspace.openTextDocument(tourfile).then((document) => {
-            this.tourstops = JSON.parse(document.getText());
+    constructor(stops: Tourstop[]) {
+        this.tourstops = stops;
+    }
+
+    static parseTour(tourfile: vscode.Uri): Thenable<Tour> {
+        return vscode.workspace.openTextDocument(tourfile).then((document) => {
+            return new Tour(JSON.parse(document.getText()));
         }, (error: any) => {
             console.error(error);
             vscode.window.showErrorMessage(`Unable to open ${tourfile.fsPath}`);
@@ -43,23 +47,52 @@ class Tour implements vscode.TreeDataProvider<Tourstop> {
     getChildren(element?: Tourstop | undefined): vscode.ProviderResult<Tourstop[]> {
         return this.tourstops;
     }
+
+    addTourStop(tourstop: Tourstop) {
+        this.tourstops.push(tourstop);
+    }
 }
 
 /**
  * Called when a workspace is opened with a .tour file at the top level
  */
 export function activate(context: vscode.ExtensionContext) {
+    // If a .tour file exists at the top level of the workspace, parse it
     vscode.workspace.findFiles("*.tour").then(uris => {
         if (uris.length > 0) {
             // TODO:  decide how to handle multiple .tour files
             const tourfile = uris[0];
-            const tour = new Tour(tourfile);
-            vscode.window.createTreeView<Tourstop>('touristView', { treeDataProvider: tour });
+            Tour.parseTour(tourfile).then((tour: Tour) => {
+                context.workspaceState.update('tour', tour);
+                showTour(tour);
+            }, (error) => {
+                console.error(error);
+            });
+        } else {
+            console.log("No .tour file found");
         }
     });
 
-    const disposable = vscode.commands.registerCommand('extension.gotoTourStop',  gotoTourStop);
+    const disposable = vscode.commands.registerCommand('extension.gotoTourStop', gotoTourStop);
     context.subscriptions.push(disposable);
+
+    const disposable2 = vscode.commands.registerCommand('extension.addTourStop', (filepath = '', position = { row: 0, col: 0 }) => {
+        const tour: Tour | undefined = context.workspaceState.get('tour');
+
+        if (tour === undefined) {
+            console.error("Uh oh, tour was undefined!");
+        } else {
+            tour.addTourStop({
+                title: 'Shiny new tourstop',
+                message: 'Please explain here, oh wise one',
+                filePath: filepath,
+                position: position
+            });
+            context.workspaceState.update('tour', tour);
+            showTour(tour);
+        }
+    });
+    context.subscriptions.push(disposable2);
 }
 
 /**
@@ -83,4 +116,11 @@ function gotoTourStop(tourstop: Tourstop) {
         console.error(error);
         vscode.window.showErrorMessage(`Unable to open ${file.fsPath}`);
     });
+}
+
+/**
+ * Show the given tour in the sidebar
+ */
+function showTour(tour: Tour) {
+    vscode.window.createTreeView<Tourstop>('touristView', { treeDataProvider: tour });
 }
