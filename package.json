@@ -25,6 +25,11 @@
                 "command": "extension.addTourStop",
                 "title": "Add a tour stop",
                 "category": "Tourist"
+            },
+            {
+                "command": "extension.newTour",
+                "title": "Create a new tour",
+                "category": "Tourist"
             }
         ],
         "views": {

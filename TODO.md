@@ -5,8 +5,6 @@ Bug fixes
 
 Creating tours
 ==============
-- "New tour" command
-    - Perhaps from File > New tour
 - Re-arrange tourstops in GUI
 - Delete tourstops in GUI
 - Ability to save .tour file
@@ -15,7 +13,11 @@ Better tour-taking experience
 =============================
 - Show description under tourstop in sidebar
 - "Next tourstop"/"Previous tourstop" commands
-- Maybe visual marker of tourstop in editor
+- Visual marker(s) of tourstop in editor
+    - Gutter icon
+    - Line background
+    - Config which/either/both, color
+- Codelens?
 
 Other ideas
 ===========

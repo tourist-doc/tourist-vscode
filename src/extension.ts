@@ -15,9 +15,9 @@ interface Tourstop {
  * A wrapper around a list of Tourstops which provides data to the GUI
  */
 class Tour implements vscode.TreeDataProvider<Tourstop> {
-    private tourstops: Tourstop[] = [];
+    private tourstops: Tourstop[];
 
-    constructor(stops: Tourstop[]) {
+    constructor(stops: Tourstop[] = []) {
         this.tourstops = stops;
     }
 
@@ -101,6 +101,17 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
     context.subscriptions.push(disposable2);
+
+    const disposable3 = vscode.commands.registerCommand('extension.newTour', () => {
+        // TODO:  Ask for name
+        const tour: Tour = new Tour();
+
+        context.workspaceState.update('tour', tour);
+        showTour(tour);
+
+        // TODO:  Create new .tour file
+    });
+    context.subscriptions.push(disposable3);
 }
 
 /**
