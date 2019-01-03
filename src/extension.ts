@@ -129,6 +129,7 @@ function gotoTourStop(tourstop: Tourstop) {
         vscode.window.showTextDocument(doc).then(editor => {
             const pos = new vscode.Position(tourstop.position.row, tourstop.position.col);
             editor.selection = new vscode.Selection(pos, pos);
+            editor.revealRange(editor.selection, vscode.TextEditorRevealType.Default);
             vscode.window.showInformationMessage(tourstop.message);
         });
     }, (error: any) => {
