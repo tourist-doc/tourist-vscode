@@ -112,6 +112,14 @@ export function activate(context: vscode.ExtensionContext) {
         // TODO:  Create new .tour file
     });
     context.subscriptions.push(disposable3);
+
+    const virtualDocumentProvider = new class implements vscode.TextDocumentContentProvider {
+        provideTextDocumentContent(uri: vscode.Uri): string {
+            return "Testing..." + uri.path;
+        }
+    }();
+    const disposable4 = vscode.workspace.registerTextDocumentContentProvider("tourist", virtualDocumentProvider);
+    context.subscriptions.push(disposable4);
 }
 
 /**
@@ -131,6 +139,11 @@ function gotoTourStop(tourstop: Tourstop) {
             editor.selection = new vscode.Selection(pos, pos);
             editor.revealRange(editor.selection, vscode.TextEditorRevealType.Default);
             vscode.window.showInformationMessage(tourstop.message);
+        }).then(() => {
+            let uri =  vscode.Uri.parse(`tourist:${tourstop.message}`);
+            vscode.workspace.openTextDocument(uri).then(doc => {
+                vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside, true);
+            });
         });
     }, (error: any) => {
         console.error(error);
