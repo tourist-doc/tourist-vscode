@@ -27,6 +27,16 @@
                 "category": "Tourist"
             },
             {
+                "command": "extension.editTitle",
+                "title": "Edit a tour stop's title",
+                "category": "Tourist"
+            },
+            {
+                "command": "extension.editMessage",
+                "title": "Edit a tour stop's message",
+                "category": "Tourist"
+            },
+            {
                 "command": "extension.newTour",
                 "title": "Create a new tour",
                 "category": "Tourist"
@@ -45,6 +55,14 @@
                 {
                     "command": "extension.addTourStop",
                     "group": "Tourist"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "extension.editTitle"
+                },
+                {
+                    "command": "extension.editMessage"
                 }
             ]
         },

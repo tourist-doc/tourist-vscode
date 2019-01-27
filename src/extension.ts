@@ -11,6 +11,21 @@ interface Tourstop {
     };
 }
 
+class TourstopTreeItem extends vscode.TreeItem {
+    tourstop: Tourstop;
+
+    constructor (tourstop: Tourstop) { 
+        super(tourstop.title);
+        this.command = {
+            title: 'lol what?', // TODO: what does this option actually do?
+            command: "extension.gotoTourStop",
+            arguments: [tourstop]
+        } 
+        this.tooltip = tourstop.message;
+        this.tourstop = tourstop;
+    }
+}
+
 /**
  * A wrapper around a list of Tourstops which provides data to the GUI
  */
@@ -32,16 +47,8 @@ class Tour implements vscode.TreeDataProvider<Tourstop> {
 
     onDidChangeTreeData?: vscode.Event<Tourstop | null | undefined> | undefined;
 
-    getTreeItem(element: Tourstop): vscode.TreeItem {
-        return {
-            label: element.title,
-            tooltip: element.message,
-            command: {
-                title: 'lol what?', // TODO: what does this option actually do?
-                command: "extension.gotoTourStop",
-                arguments: [element]
-            }
-        };
+    getTreeItem(element: Tourstop): TourstopTreeItem {
+        return new TourstopTreeItem(element);
     }
 
     getChildren(element?: Tourstop | undefined): vscode.ProviderResult<Tourstop[]> {
@@ -73,49 +80,81 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    const disposable = vscode.commands.registerCommand('extension.gotoTourStop', gotoTourStop);
-    context.subscriptions.push(disposable);
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.gotoTourStop', gotoTourStop));
 
-    const disposable2 = vscode.commands.registerCommand('extension.addTourStop', () => {
-        const editor = vscode.window.activeTextEditor;
-        if (editor === undefined) {
-            return;
-        }
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.addTourStop', () => {
+            const editor = vscode.window.activeTextEditor;
+            if (editor === undefined) {
+                return;
+            }
 
-        const tour: Tour | undefined = context.workspaceState.get('tour');
+            const tour: Tour | undefined = context.workspaceState.get('tour');
 
-        if (tour === undefined) {
-            console.error("Uh oh, tour was undefined!");
-        } else {
-            tour.addTourStop({
-                title: 'Shiny new tourstop',
-                message: 'Please explain here, oh wise one',
-                filePath: editor.document.fileName,
-                position: {
-                    row: editor.selection.active.line,
-                    col: editor.selection.active.character
-                }
-            });
+            if (tour === undefined) {
+                console.error("Uh oh, tour was undefined!");
+            } else {
+                tour.addTourStop({
+                    title: 'Shiny new tourstop',
+                    message: 'Please explain here, oh wise one',
+                    filePath: editor.document.fileName,
+                    position: {
+                        row: editor.selection.active.line,
+                        col: editor.selection.active.character
+                    }
+                });
+                context.workspaceState.update('tour', tour);
+                showTour(tour);
+            }
+        }));
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.editTitle', (tourstop: Tourstop) => {
+            const tour: Tour | undefined = context.workspaceState.get('tour');
+            if (tour === undefined) {
+                console.warn("tour is undefined. Ignoring edit tourstop command");
+            } else {
+                vscode.window.showInputBox().then((title) => {
+                    if (title !== undefined) {
+                        tourstop.title = title;
+                        // TODO: showTour() is probably overkill here
+                        showTour(tour);
+                    }
+                });
+            }
+        }));
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.editMessage', (tourstop: Tourstop) => {
+            const tour: Tour | undefined = context.workspaceState.get('tour');
+            if (tour === undefined) {
+                console.warn("tour is undefined. Ignoring edit tourstop command");
+            } else {
+                vscode.window.showInputBox().then((message) => {
+                    if (message !== undefined) {
+                        tourstop.message = message;
+                        // TODO: showTour() is probably overkill here
+                        showTour(tour);
+                    }
+                });
+            }
+        }));
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.newTour', () => {
+            // TODO:  Ask for name
+            const tour: Tour = new Tour();
+
             context.workspaceState.update('tour', tour);
             showTour(tour);
-        }
-    });
-    context.subscriptions.push(disposable2);
 
-    const disposable3 = vscode.commands.registerCommand('extension.newTour', () => {
-        // TODO:  Ask for name
-        const tour: Tour = new Tour();
-
-        context.workspaceState.update('tour', tour);
-        showTour(tour);
-
-        // TODO:  Create new .tour file
-    });
-    context.subscriptions.push(disposable3);
+            // TODO:  Create new .tour file
+        }));
 
     const virtualDocumentProvider = new class implements vscode.TextDocumentContentProvider {
         provideTextDocumentContent(uri: vscode.Uri): string {
-            return "Testing..." + uri.path;
+            return uri.path;
         }
     }();
     const disposable4 = vscode.workspace.registerTextDocumentContentProvider("tourist", virtualDocumentProvider);
