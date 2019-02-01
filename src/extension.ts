@@ -1,5 +1,6 @@
 'use strict';
 import * as vscode from 'vscode';
+import * as fs from 'fs';
 
 interface Tourstop {
     title: string;
@@ -20,7 +21,7 @@ class TourstopTreeItem extends vscode.TreeItem {
             title: 'lol what?', // TODO: what does this option actually do?
             command: "extension.gotoTourStop",
             arguments: [tourstop]
-        } 
+        };
         this.tooltip = tourstop.message;
         this.tourstop = tourstop;
     }
@@ -30,15 +31,17 @@ class TourstopTreeItem extends vscode.TreeItem {
  * A wrapper around a list of Tourstops which provides data to the GUI
  */
 class Tour implements vscode.TreeDataProvider<Tourstop> {
+    private filepath?: string;
     private tourstops: Tourstop[];
 
-    constructor(stops: Tourstop[] = []) {
+    constructor(stops: Tourstop[] = [], filepath?: string) {
+        this.filepath = filepath;
         this.tourstops = stops;
     }
 
     static parseTour(tourfile: vscode.Uri): Thenable<Tour> {
         return vscode.workspace.openTextDocument(tourfile).then((document) => {
-            return new Tour(JSON.parse(document.getText()));
+            return new Tour(JSON.parse(document.getText()), tourfile.fsPath);
         }, (error: any) => {
             console.error(error);
             vscode.window.showErrorMessage(`Unable to open ${tourfile.fsPath}`);
@@ -57,6 +60,20 @@ class Tour implements vscode.TreeDataProvider<Tourstop> {
 
     addTourStop(tourstop: Tourstop) {
         this.tourstops.push(tourstop);
+    }
+
+    writeToDisk() {
+        // TODO: is there a need to keep track of dirty state and only do IO if it changed?
+        if (this.filepath) {
+            console.log(`Attempting to save ${this.filepath}`);
+            fs.writeFile(this.filepath, JSON.stringify(this.tourstops, null, 4), (err) => {
+                if (err) {
+                    console.log(err);
+                    throw err;
+                }
+                console.log("The file has been saved!");
+            });
+        }
     }
 }
 
@@ -104,7 +121,7 @@ export function activate(context: vscode.ExtensionContext) {
                         col: editor.selection.active.character
                     }
                 });
-                context.workspaceState.update('tour', tour);
+                tour.writeToDisk();
                 showTour(tour);
             }
         }));
@@ -118,6 +135,7 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showInputBox().then((title) => {
                     if (title !== undefined) {
                         tourstop.title = title;
+                        tour.writeToDisk()
                         // TODO: showTour() is probably overkill here
                         showTour(tour);
                     }
@@ -135,6 +153,7 @@ export function activate(context: vscode.ExtensionContext) {
                     if (message !== undefined) {
                         tourstop.message = message;
                         // TODO: showTour() is probably overkill here
+                        tour.writeToDisk();
                         showTour(tour);
                     }
                 });
@@ -143,13 +162,16 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.newTour', () => {
-            // TODO:  Ask for name
-            const tour: Tour = new Tour();
+            // TODO: default name maybe folder name?
+            vscode.window.showInputBox({ value: 'My tour', prompt: 'Tour name:' }).then((tourName) => {
+                if (tourName !== undefined) {
+                    const filepath = vscode.workspace.rootPath + tourName.replace(' ', '_').toLowerCase() + '.tour';
+                    const tour: Tour = new Tour([], filepath);
 
-            context.workspaceState.update('tour', tour);
-            showTour(tour);
-
-            // TODO:  Create new .tour file
+                    context.workspaceState.update('tour', tour);
+                    showTour(tour);
+                }
+            });
         }));
 
     const virtualDocumentProvider = new class implements vscode.TextDocumentContentProvider {

@@ -9,8 +9,8 @@
         }
     },
     {
-        "title": "gonna",
-        "message": "gonna",
+        "title": "by golly, it worked!",
+        "message": "just right click on a tourstop to edit it!",
         "filePath": "C:/Users/jason/Desktop/tourist-vscode/src/extension.ts",
         "position": {
             "row": 1,
