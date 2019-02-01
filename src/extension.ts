@@ -135,7 +135,7 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showInputBox().then((title) => {
                     if (title !== undefined) {
                         tourstop.title = title;
-                        tour.writeToDisk()
+                        tour.writeToDisk();
                         // TODO: showTour() is probably overkill here
                         showTour(tour);
                     }
@@ -162,8 +162,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.newTour', () => {
-            // TODO: default name maybe folder name?
-            vscode.window.showInputBox({ value: 'My tour', prompt: 'Tour name:' }).then((tourName) => {
+            const folderName = vscode.workspace.rootPath ?
+                vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
+                : 'My Tour';
+            vscode.window.showInputBox({ value: folderName, prompt: 'Tour name:' }).then((tourName) => {
                 if (tourName !== undefined) {
                     const filepath = vscode.workspace.rootPath + tourName.replace(' ', '_').toLowerCase() + '.tour';
                     const tour: Tour = new Tour([], filepath);
