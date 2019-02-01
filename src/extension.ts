@@ -199,7 +199,8 @@ function gotoTourStop(tourstop: Tourstop) {
             const pos = new vscode.Position(tourstop.position.row, tourstop.position.col);
             editor.selection = new vscode.Selection(pos, pos);
             editor.revealRange(editor.selection, vscode.TextEditorRevealType.Default);
-            vscode.window.showInformationMessage(tourstop.message);
+            // TODO:  put this behind a setting
+            // vscode.window.showInformationMessage(tourstop.message);
         }).then(() => {
             let uri =  vscode.Uri.parse(`tourist:${tourstop.message}`);
             vscode.workspace.openTextDocument(uri).then(doc => {
