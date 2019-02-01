@@ -27,6 +27,11 @@
                 "category": "Tourist"
             },
             {
+                "command": "extension.deleteTourStop",
+                "title": "Delete a tour stop",
+                "category": "Tourist"
+            },
+            {
                 "command": "extension.editTitle",
                 "title": "Edit a tour stop's title",
                 "category": "Tourist"
@@ -63,6 +68,9 @@
                 },
                 {
                     "command": "extension.editMessage"
+                },
+                {
+                    "command": "extension.deleteTourStop"
                 }
             ]
         },

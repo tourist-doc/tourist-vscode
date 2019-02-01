@@ -62,6 +62,10 @@ class Tour implements vscode.TreeDataProvider<Tourstop> {
         this.tourstops.push(tourstop);
     }
 
+    deleteTourStop(tourstop: Tourstop) {
+        this.tourstops = this.tourstops.filter(stop => stop !== tourstop);
+    }
+
     writeToDisk() {
         // TODO: is there a need to keep track of dirty state and only do IO if it changed?
         if (this.filepath) {
@@ -121,6 +125,18 @@ export function activate(context: vscode.ExtensionContext) {
                         col: editor.selection.active.character
                     }
                 });
+                tour.writeToDisk();
+                showTour(tour);
+            }
+        }));
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.deleteTourStop', (tourstop: Tourstop) => {
+            const tour: Tour | undefined = context.workspaceState.get('tour');
+            if (tour === undefined) {
+                console.warn("tour is undefined. Ignoring add tourstop command");
+            } else {
+                tour.deleteTourStop(tourstop);
                 tour.writeToDisk();
                 showTour(tour);
             }
