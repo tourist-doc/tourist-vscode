@@ -30,7 +30,7 @@ class TourstopTreeItem extends vscode.TreeItem {
 /**
  * A wrapper around a list of Tourstops which provides data to the GUI
  */
-class Tour implements vscode.TreeDataProvider<Tourstop> {
+export class Tour implements vscode.TreeDataProvider<Tourstop> {
     private filepath?: string;
     private tourstops: Tourstop[];
 
