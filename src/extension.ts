@@ -39,107 +39,32 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.addTourStop', () => {
-            const editor = vscode.window.activeTextEditor;
-            if (editor === undefined) {
-                return;
-            }
-
-            const tour: Tour | undefined = context.workspaceState.get('tour');
-
-            if (tour === undefined) {
-                console.error("Uh oh, tour was undefined!");
-            } else {
-                tour.addTourStop({
-                    title: 'Shiny new tourstop',
-                    message: 'Please explain here, oh wise one',
-                    filePath: editor.document.fileName,
-                    position: {
-                        row: editor.selection.active.line,
-                        col: editor.selection.active.character
-                    }
-                });
-                tour.writeToDisk();
-                showTour(context, tour);
-            }
+            addTourstop(context);
         }));
 
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.deleteTourStop', (tourstop: Tourstop) => {
-            const tour: Tour | undefined = context.workspaceState.get('tour');
-            if (tour === undefined) {
-                console.warn("tour is undefined. Ignoring add tourstop command");
-            } else {
-                tour.deleteTourStop(tourstop);
-                tour.writeToDisk();
-                showTour(context, tour);
-            }
+            deleteTourstop(context, tourstop);
         }));
 
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.editTitle', (tourstop: Tourstop) => {
-            const tour: Tour | undefined = context.workspaceState.get('tour');
-            if (tour === undefined) {
-                console.warn("tour is undefined. Ignoring edit tourstop command");
-            } else {
-                vscode.window.showInputBox().then((title) => {
-                    if (title !== undefined) {
-                        tourstop.title = title;
-                        tour.writeToDisk();
-                        // TODO: showTour() is probably overkill here
-                        showTour(context, tour);
-                    }
-                });
-            }
+            editTitle(context, tourstop);
         }));
 
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.editMessage', (tourstop: Tourstop) => {
-            const tour: Tour | undefined = context.workspaceState.get('tour');
-            if (tour === undefined) {
-                console.warn("tour is undefined. Ignoring edit tourstop command");
-            } else {
-                vscode.window.showInputBox().then((message) => {
-                    if (message !== undefined) {
-                        tourstop.message = message;
-                        // TODO: showTour() is probably overkill here
-                        tour.writeToDisk();
-                        showTour(context, tour);
-                    }
-                });
-            }
+            editMessage(context, tourstop);
         }));
 
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.startTour', (tour: Tour) => {
-            vscode.window.showOpenDialog({
-                filters: {
-                    'Tours': ['tour']
-                },
-                openLabel: "Start tour"
-            }).then((uris: vscode.Uri[] | undefined) => {
-                if (uris) {
-                    Tour.parseTour(uris[0]).then((tour: Tour) => {
-                        context.workspaceState.update('tour', tour);
-                        showTour(context, tour);
-                    });
-                }
-            });
+            startTour(context, tour);
         }));
 
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.newTour', () => {
-            const folderName = vscode.workspace.rootPath ?
-                vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
-                : 'My Tour';
-            vscode.window.showInputBox({ value: folderName, prompt: 'Tour name:' }).then((tourName) => {
-                if (tourName !== undefined) {
-                    const filepath = vscode.workspace.rootPath + tourName.replace(' ', '_').toLowerCase() + '.tour';
-                    const tour: Tour = new Tour([], filepath);
-
-                    context.workspaceState.update('tour', tour);
-                    showTour(context, tour);
-                }
-            });
+            newTour(context);
         }));
 
     const virtualDocumentProvider = new class implements vscode.TextDocumentContentProvider {
@@ -147,8 +72,8 @@ export function activate(context: vscode.ExtensionContext) {
             return uri.path;
         }
     }();
-    const disposable4 = vscode.workspace.registerTextDocumentContentProvider("tourist", virtualDocumentProvider);
-    context.subscriptions.push(disposable4);
+    context.subscriptions.push(
+        vscode.workspace.registerTextDocumentContentProvider("tourist", virtualDocumentProvider));
 }
 
 /**
@@ -220,6 +145,123 @@ function prevTourStop(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage("No more tourstops!");
         }
     }
+}
+
+/**
+ * Adds a Tourstop to the current Tour
+ */
+function addTourstop(context: vscode.ExtensionContext) {
+    const editor = vscode.window.activeTextEditor;
+    if (editor === undefined) {
+        return;
+    }
+
+    const tour: Tour | undefined = context.workspaceState.get('tour');
+
+    if (tour === undefined) {
+        console.error("Uh oh, tour was undefined!");
+    } else {
+        tour.addTourStop({
+            title: 'Shiny new tourstop',
+            message: 'Please explain here, oh wise one',
+            filePath: editor.document.fileName,
+            position: {
+                row: editor.selection.active.line,
+                col: editor.selection.active.character
+            }
+        });
+        tour.writeToDisk();
+        showTour(context, tour);
+    }
+}
+
+/**
+ * Delete Tourstop from current Tour
+ */
+function deleteTourstop(context: vscode.ExtensionContext, tourstop: Tourstop) {
+    const tour: Tour | undefined = context.workspaceState.get('tour');
+    if (tour === undefined) {
+        console.warn("tour is undefined. Ignoring add tourstop command");
+    } else {
+        tour.deleteTourStop(tourstop);
+        tour.writeToDisk();
+        showTour(context, tour);
+    }
+}
+
+/**
+ * Edits the title of a Tourstop in the current Tour
+*/
+function editTitle(context: vscode.ExtensionContext, tourstop: Tourstop) {
+    const tour: Tour | undefined = context.workspaceState.get('tour');
+    if (tour === undefined) {
+        console.warn("tour is undefined. Ignoring edit tourstop command");
+    } else {
+        vscode.window.showInputBox().then((title) => {
+            if (title !== undefined) {
+                tourstop.title = title;
+                tour.writeToDisk();
+                // TODO: showTour() is probably overkill here
+                showTour(context, tour);
+            }
+        });
+    }
+}
+
+/**
+ * Edits the message of a Tourstop in the current Tour
+ */
+function editMessage(context: vscode.ExtensionContext, tourstop: Tourstop) {
+    const tour: Tour | undefined = context.workspaceState.get('tour');
+    if (tour === undefined) {
+        console.warn("tour is undefined. Ignoring edit tourstop command");
+    } else {
+        vscode.window.showInputBox().then((message) => {
+            if (message !== undefined) {
+                tourstop.message = message;
+                // TODO: showTour() is probably overkill here
+                tour.writeToDisk();
+                showTour(context, tour);
+            }
+        });
+    }
+}
+
+/**
+ * Starts a Tour from a .tour file
+ */
+function startTour(context: vscode.ExtensionContext, tour: Tour) {
+    vscode.window.showOpenDialog({
+        filters: {
+            'Tours': ['tour']
+        },
+        openLabel: "Start tour"
+    }).then((uris: vscode.Uri[] | undefined) => {
+        if (uris) {
+            Tour.parseTour(uris[0]).then((tour: Tour) => {
+                context.workspaceState.update('tour', tour);
+                showTour(context, tour);
+            });
+        }
+    });
+}
+
+/**
+ * Creates a new Tour. Currently, a .tour file is not actually created until a Tourstop is added
+ */
+function newTour(context: vscode.ExtensionContext) {
+    const folderName = vscode.workspace.rootPath ?
+        vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
+        : 'My Tour';
+    vscode.window.showInputBox({ value: folderName, prompt: 'Tour name:' }).then((tourName) => {
+        if (tourName !== undefined) {
+            const filepath = vscode.workspace.rootPath + tourName.replace(' ', '_').toLowerCase() + '.tour';
+            const tour: Tour = new Tour([], filepath);
+
+            context.workspaceState.update('tour', tour);
+            showTour(context, tour);
+        }
+    });
 }
 
 /**
