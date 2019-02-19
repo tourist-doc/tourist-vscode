@@ -22,50 +22,30 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extension.gotoTourStop', (tourstop: Tourstop) => {
-            gotoTourStop(context, tourstop);
-        }));
+    const justContext: [string, Function][] = [
+        ['extension.nextTourstop', nextTourStop],
+        ['extension.prevTourstop', prevTourStop],
+        ['extension.addTourstop', addTourstop],
+        ['extension.startTour', startTour],
+        ['extension.newTour', newTour]
+    ];
+    justContext.forEach((command: [string, Function]) => {
+        vscode.commands.registerCommand(command[0], () => {
+            command[1](context);
+        });
+    });
 
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extension.nextTourstop', () => {
-            nextTourStop(context);
-        }));
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extension.prevTourstop', () => {
-            prevTourStop(context);
-        }));
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extension.addTourStop', () => {
-            addTourstop(context);
-        }));
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extension.deleteTourStop', (tourstop: Tourstop) => {
-            deleteTourstop(context, tourstop);
-        }));
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extension.editTitle', (tourstop: Tourstop) => {
-            editTitle(context, tourstop);
-        }));
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extension.editMessage', (tourstop: Tourstop) => {
-            editMessage(context, tourstop);
-        }));
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extension.startTour', (tour: Tour) => {
-            startTour(context, tour);
-        }));
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extension.newTour', () => {
-            newTour(context);
-        }));
+    const contextAndTourstop: [string, Function][] = [
+        ['extension.gotoTourStop', gotoTourStop],
+        ['extension.deleteTourstop', deleteTourstop],
+        ['extension.editTitle', editTitle],
+        ['extension.editMessage', editMessage]
+    ];
+    contextAndTourstop.forEach((command: [string, Function]) => {
+        vscode.commands.registerCommand(command[0], (tourstop: Tourstop) => {
+            command[1](context, tourstop);
+        });
+    });
 
     const virtualDocumentProvider = new class implements vscode.TextDocumentContentProvider {
         provideTextDocumentContent(uri: vscode.Uri): string {
@@ -94,6 +74,8 @@ function gotoTourStop(context: vscode.ExtensionContext, tourstop: Tourstop) {
     }
 
     tour.setCurrentTourstop(tourstop);
+
+    // In the TreeView, select the new tourstop
     tourView.reveal(tourstop);
 
     const file = vscode.Uri.file(tourstop.filePath);
@@ -230,7 +212,7 @@ function editMessage(context: vscode.ExtensionContext, tourstop: Tourstop) {
 /**
  * Starts a Tour from a .tour file
  */
-function startTour(context: vscode.ExtensionContext, tour: Tour) {
+function startTour(context: vscode.ExtensionContext) {
     vscode.window.showOpenDialog({
         filters: {
             'Tours': ['tour']
