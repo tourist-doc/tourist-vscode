@@ -110,6 +110,23 @@ export function activate(context: vscode.ExtensionContext) {
         }));
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('extension.startTour', (tour: Tour) => {
+            vscode.window.showOpenDialog({
+                filters: {
+                    'Tours': ['tour']
+                },
+                openLabel: "Start tour"
+            }).then((uris: vscode.Uri[] | undefined) => {
+                if (uris) {
+                    Tour.parseTour(uris[0]).then((tour: Tour) => {
+                        context.workspaceState.update('tour', tour);
+                        showTour(context, tour);
+                    });
+                }
+            });
+        }));
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('extension.newTour', () => {
             const folderName = vscode.workspace.rootPath ?
                 vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()

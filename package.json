@@ -53,6 +53,11 @@
                 "category": "Tourist"
             },
             {
+                "command": "extension.startTour",
+                "title": "Start a tour",
+                "category": "Tourist"
+            },
+            {
                 "command": "extension.newTour",
                 "title": "Create a new tour",
                 "category": "Tourist"
