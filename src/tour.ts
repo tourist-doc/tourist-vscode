@@ -33,10 +33,12 @@ class TourstopTreeItem extends vscode.TreeItem {
 export class Tour implements vscode.TreeDataProvider<Tourstop> {
     private filepath?: string;
     private tourstops: Tourstop[];
+    private currentStopIndex?: number;
 
     constructor(stops: Tourstop[] = [], filepath?: string) {
         this.filepath = filepath;
         this.tourstops = stops;
+        this.currentStopIndex = undefined;
     }
 
     static parseTour(tourfile: vscode.Uri): Thenable<Tour> {
@@ -61,6 +63,14 @@ export class Tour implements vscode.TreeDataProvider<Tourstop> {
         return [];
       }
     }
+    
+    getParent(element: Tourstop): vscode.ProviderResult<Tourstop> {
+        return undefined;
+    }
+
+    setCurrentTourstop(tourstop: Tourstop) {
+        this.currentStopIndex = this.tourstops.indexOf(tourstop);
+    }
 
     addTourStop(tourstop: Tourstop) {
         this.tourstops.push(tourstop);
@@ -68,6 +78,26 @@ export class Tour implements vscode.TreeDataProvider<Tourstop> {
 
     deleteTourStop(tourstop: Tourstop) {
         this.tourstops = this.tourstops.filter(stop => stop !== tourstop);
+    }
+
+    /**
+     * Returns the next tourstop, if it exists, and undefined otherwise.
+     */
+    nextTourStop(): Tourstop | undefined {
+        if (this.currentStopIndex && this.currentStopIndex < this.tourstops.length) {
+            return this.tourstops[this.currentStopIndex + 1];
+        }
+        return undefined;
+    }
+
+    /**
+     * Returns the next tourstop, if it exists, and undefined otherwise.
+     */
+    prevTourStop(): Tourstop | undefined {
+        if (this.currentStopIndex && this.currentStopIndex > 0) {
+            return this.tourstops[this.currentStopIndex - 1];
+        }
+        return undefined;
     }
 
     writeToDisk() {

@@ -27,6 +27,17 @@
                 "category": "Tourist"
             },
             {
+
+                "command": "extension.nextTourstop",
+                "title": "Go to next tour stop",
+                "category": "Tourist"
+            },
+            {
+                "command": "extension.prevTourstop",
+                "title": "Go to previous tour stop",
+                "category": "Tourist"
+            },
+            {
                 "command": "extension.deleteTourStop",
                 "title": "Delete a tour stop",
                 "category": "Tourist"
@@ -74,11 +85,21 @@
                 }
             ]
         },
-        "keybindings": {
-            "command": "extension.addTourStop",
-            "key": "Ctrl+Shift+S",
-            "when": "editorTextFocus"
-        }
+        "keybindings": [
+            {
+                "command": "extension.addTourStop",
+                "key": "Ctrl+Shift+S",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.nextTourstop",
+                "key": "Ctrl+Shift+Alt+J"
+            },
+            {
+                "command": "extension.prevTourstop",
+                "key": "Ctrl+Shift+Alt+K"
+            }
+        ]
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",

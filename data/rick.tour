@@ -2,7 +2,7 @@
     {
         "title": "Never",
         "message": "Never",
-        "filePath": "C:/Users/jason/Desktop/tourist-vscode/src/extension.ts",
+        "filePath": "C:/Users/jfields/Desktop/tourist-vscode/data/rick.tour",
         "position": {
             "row": 0,
             "col": 0
@@ -11,7 +11,7 @@
     {
         "title": "by golly, it worked!",
         "message": "just right click on a tourstop to edit it!",
-        "filePath": "C:/Users/jason/Desktop/tourist-vscode/src/extension.ts",
+        "filePath": "C:/Users/jfields/Desktop/tourist-vscode/data/rick.tour",
         "position": {
             "row": 1,
             "col": 1
@@ -20,7 +20,7 @@
     {
         "title": "give",
         "message": "let",
-        "filePath": "C:/Users/jason/Desktop/tourist-vscode/src/extension.ts",
+        "filePath": "C:/Users/jfields/Desktop/tourist-vscode/data/rick.tour",
         "position": {
             "row": 2,
             "col": 2
@@ -29,7 +29,7 @@
     {
         "title": "you",
         "message": "you",
-        "filePath": "C:/Users/jason/Desktop/tourist-vscode/src/extension.ts",
+        "filePath": "C:/Users/jfields/Desktop/tourist-vscode/data/rick.tour",
         "position": {
             "row": 3,
             "col": 3
@@ -38,7 +38,7 @@
     {
         "title": "up",
         "message": "down",
-        "filePath": "C:/Users/jason/Desktop/tourist-vscode/src/extension.ts",
+        "filePath": "C:/Users/jfields/Desktop/tourist-vscode/data/rick.tour",
         "position": {
             "row": 4,
             "col": 4

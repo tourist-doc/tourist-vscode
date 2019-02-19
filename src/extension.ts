@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
             const tourfile = uris[0];
             Tour.parseTour(tourfile).then((tour: Tour) => {
                 context.workspaceState.update('tour', tour);
-                showTour(tour);
+                showTour(context, tour);
             }, (error) => {
                 console.error(error);
             });
@@ -23,7 +23,19 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('extension.gotoTourStop', gotoTourStop));
+        vscode.commands.registerCommand('extension.gotoTourStop', (tourstop: Tourstop) => {
+            gotoTourStop(context, tourstop);
+        }));
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.nextTourstop', () => {
+            nextTourStop(context);
+        }));
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.prevTourstop', () => {
+            prevTourStop(context);
+        }));
 
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.addTourStop', () => {
@@ -47,7 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                 });
                 tour.writeToDisk();
-                showTour(tour);
+                showTour(context, tour);
             }
         }));
 
@@ -59,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
             } else {
                 tour.deleteTourStop(tourstop);
                 tour.writeToDisk();
-                showTour(tour);
+                showTour(context, tour);
             }
         }));
 
@@ -74,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
                         tourstop.title = title;
                         tour.writeToDisk();
                         // TODO: showTour() is probably overkill here
-                        showTour(tour);
+                        showTour(context, tour);
                     }
                 });
             }
@@ -91,7 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
                         tourstop.message = message;
                         // TODO: showTour() is probably overkill here
                         tour.writeToDisk();
-                        showTour(tour);
+                        showTour(context, tour);
                     }
                 });
             }
@@ -108,7 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
                     const tour: Tour = new Tour([], filepath);
 
                     context.workspaceState.update('tour', tour);
-                    showTour(tour);
+                    showTour(context, tour);
                 }
             });
         }));
@@ -131,13 +143,24 @@ export function deactivate() {
 /**
  * Goes to the given tourstop in the active editor
  */
-function gotoTourStop(tourstop: Tourstop) {
+function gotoTourStop(context: vscode.ExtensionContext, tourstop: Tourstop) {
+    const tour: Tour | undefined = context.workspaceState.get('tour');
+    const tourView: vscode.TreeView<Tourstop> | undefined = context.workspaceState.get('touristView');
+
+    if (tour === undefined || tourView === undefined) {
+        return;
+    }
+
+    tour.setCurrentTourstop(tourstop);
+    tourView.reveal(tourstop);
+
     const file = vscode.Uri.file(tourstop.filePath);
     vscode.workspace.openTextDocument(file).then(doc => {
         vscode.window.showTextDocument(doc).then(editor => {
             const pos = new vscode.Position(tourstop.position.row, tourstop.position.col);
             editor.selection = new vscode.Selection(pos, pos);
             editor.revealRange(editor.selection, vscode.TextEditorRevealType.Default);
+
             // TODO:  put this behind a setting
             // vscode.window.showInformationMessage(tourstop.message);
         }).then(() => {
@@ -153,8 +176,39 @@ function gotoTourStop(tourstop: Tourstop) {
 }
 
 /**
+ * Goes to the next tourstop in the active editor
+ */
+function nextTourStop(context: vscode.ExtensionContext) {
+    const tour: Tour | undefined = context.workspaceState.get('tour');
+    if (tour !== undefined) {
+        const next = tour.nextTourStop();
+        if (next) {
+            gotoTourStop(context, next);
+        } else {
+            vscode.window.showInformationMessage("No more tourstops!");
+        }
+    }
+}
+
+/**
+ * Goes to the previous tourstop in the active editor
+ */
+function prevTourStop(context: vscode.ExtensionContext) {
+    const tour: Tour | undefined = context.workspaceState.get('tour');
+    if (tour !== undefined) {
+        const prev = tour.prevTourStop();
+        if (prev) {
+            gotoTourStop(context, prev);
+        } else {
+            vscode.window.showInformationMessage("No more tourstops!");
+        }
+    }
+}
+
+/**
  * Show the given tour in the sidebar
  */
-function showTour(tour: Tour) {
-    vscode.window.createTreeView<Tourstop>('touristView', { treeDataProvider: tour });
+function showTour(context: vscode.ExtensionContext, tour: Tour) {
+    const touristView = vscode.window.createTreeView<Tourstop>('touristView', { treeDataProvider: tour });
+    context.workspaceState.update('touristView', touristView);
 }
