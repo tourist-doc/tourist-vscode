@@ -1,6 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import { Tour, Tourstop } from './tour';
+import { relative } from 'path';
 
 /**
  * Called when a workspace is opened with a .tour file at the top level
@@ -56,6 +57,39 @@ export function activate(context: vscode.ExtensionContext) {
     }();
     context.subscriptions.push(
         vscode.workspace.registerTextDocumentContentProvider("tourist", virtualDocumentProvider));
+
+    const codelensProvider = new class implements vscode.CodeLensProvider {
+        provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CodeLens[]> {
+            const tour: Tour | undefined = context.workspaceState.get('tour');
+
+            let lenses = [] as vscode.CodeLens[];
+            if (tour) {
+                tour.getTourstops().forEach((tourstop: Tourstop) => {
+                    // TODO: don't do this. This is wrong and broken.
+                    if (relative('C:', document.fileName) === relative('C:', tourstop.filePath)) {
+                        const position = new vscode.Position(tourstop.position.row, tourstop.position.col);
+                        lenses.push(
+                            new vscode.CodeLens(
+                                new vscode.Range(position, position),
+                                {
+                                    title: tourstop.title,
+                                    command: 'extension.gotoTourStop',
+                                    arguments: [tourstop]
+                                }
+                            ));
+                    }
+                });
+            }
+            
+            return lenses;
+        }
+
+        resolveCodeLens(codeLens: vscode.CodeLens, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CodeLens> {
+            return codeLens;
+        }
+    }();
+    context.subscriptions.push(
+        vscode.languages.registerCodeLensProvider({scheme: 'file'}, codelensProvider));
 }
 
 /**
