@@ -9,15 +9,6 @@
         }
     },
     {
-        "title": "by golly, it worked!",
-        "message": "just right click on a tourstop to edit it!",
-        "filePath": "C:/Users/jfields/Desktop/tourist-vscode/data/rick.tour",
-        "position": {
-            "row": 1,
-            "col": 1
-        }
-    },
-    {
         "title": "give",
         "message": "let",
         "filePath": "C:/Users/jfields/Desktop/tourist-vscode/data/rick.tour",
@@ -42,6 +33,15 @@
         "position": {
             "row": 4,
             "col": 4
+        }
+    },
+    {
+        "title": "by golly, it worked!",
+        "message": "just right click on a tourstop to edit it!",
+        "filePath": "C:/Users/jfields/Desktop/tourist-vscode/data/rick.tour",
+        "position": {
+            "row": 1,
+            "col": 1
         }
     }
 ]

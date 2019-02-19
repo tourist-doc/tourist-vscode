@@ -38,6 +38,8 @@ export function activate(context: vscode.ExtensionContext) {
     const contextAndTourstop: [string, Function][] = [
         ['extension.gotoTourStop', gotoTourStop],
         ['extension.deleteTourstop', deleteTourstop],
+        ['extension.moveTourstopUp', moveTourstopUp],
+        ['extension.moveTourstopDown', moveTourstopDown],
         ['extension.editTitle', editTitle],
         ['extension.editMessage', editMessage]
     ];
@@ -206,6 +208,24 @@ function editMessage(context: vscode.ExtensionContext, tourstop: Tourstop) {
                 showTour(context, tour);
             }
         });
+    }
+}
+
+function moveTourstopUp(context: vscode.ExtensionContext, tourstop: Tourstop) {
+    const tour: Tour | undefined = context.workspaceState.get('tour');
+    if (tour) {
+        tour.moveTourstopUp(tourstop);
+        tour.writeToDisk();
+        showTour(context, tour);
+    }
+}
+
+function moveTourstopDown(context: vscode.ExtensionContext, tourstop: Tourstop) {
+    const tour: Tour | undefined = context.workspaceState.get('tour');
+    if (tour) {
+        tour.moveTourstopDown(tourstop);
+        tour.writeToDisk();
+        showTour(context, tour);
     }
 }
 

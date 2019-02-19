@@ -80,6 +80,24 @@ export class Tour implements vscode.TreeDataProvider<Tourstop> {
         this.tourstops = this.tourstops.filter(stop => stop !== tourstop);
     }
 
+    moveTourstopUp(tourstop: Tourstop) {
+        const index = this.tourstops.indexOf(tourstop);
+        if (index > 0) {
+            const other = this.tourstops[index - 1];
+            this.tourstops[index - 1] = tourstop;
+            this.tourstops[index] = other;
+        }
+    }
+
+    moveTourstopDown(tourstop: Tourstop) {
+        const index = this.tourstops.indexOf(tourstop);
+        if (index < this.tourstops.length - 1) {
+            const other = this.tourstops[index + 1];
+            this.tourstops[index + 1] = tourstop;
+            this.tourstops[index] = other;
+        }
+    }
+
     /**
      * Returns the next tourstop, if it exists, and undefined otherwise.
      */

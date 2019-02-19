@@ -43,6 +43,16 @@
                 "category": "Tourist"
             },
             {
+                "command": "extension.moveTourstopUp",
+                "title": "Move a tour stop up",
+                "category": "Tourist"
+            },
+            {
+                "command": "extension.moveTourstopDown",
+                "title": "Move a tour stop down",
+                "category": "Tourist"
+            },
+            {
                 "command": "extension.editTitle",
                 "title": "Edit a tour stop's title",
                 "category": "Tourist"
@@ -87,6 +97,12 @@
                 },
                 {
                     "command": "extension.deleteTourStop"
+                },
+                {
+                    "command": "extension.moveTourstopUp"
+                },
+                {
+                    "command": "extension.moveTourstopDown"
                 }
             ]
         },
