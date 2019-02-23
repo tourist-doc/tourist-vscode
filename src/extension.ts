@@ -1,7 +1,8 @@
 'use strict';
 import * as vscode from 'vscode';
-import { Tour, Tourstop } from './tour';
 import { relative } from 'path';
+import { Tour, Tourstop } from './tour';
+import { TouristWebview } from './webview';
 
 /**
  * Called when a workspace is opened with a .tour file at the top level
@@ -49,14 +50,6 @@ export function activate(context: vscode.ExtensionContext) {
             command[1](context, tourstop);
         });
     });
-
-    const virtualDocumentProvider = new class implements vscode.TextDocumentContentProvider {
-        provideTextDocumentContent(uri: vscode.Uri): string {
-            return uri.path;
-        }
-    }();
-    context.subscriptions.push(
-        vscode.workspace.registerTextDocumentContentProvider("tourist", virtualDocumentProvider));
 
     const codelensProvider = new class implements vscode.CodeLensProvider {
         provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CodeLens[]> {
@@ -116,18 +109,12 @@ function gotoTourStop(context: vscode.ExtensionContext, tourstop: Tourstop) {
 
     const file = vscode.Uri.file(tourstop.filePath);
     vscode.workspace.openTextDocument(file).then(doc => {
-        vscode.window.showTextDocument(doc).then(editor => {
+        vscode.window.showTextDocument(doc, vscode.ViewColumn.One).then(editor => {
             const pos = new vscode.Position(tourstop.position.row, tourstop.position.col);
             editor.selection = new vscode.Selection(pos, pos);
             editor.revealRange(editor.selection, vscode.TextEditorRevealType.Default);
-
-            // TODO:  put this behind a setting
-            // vscode.window.showInformationMessage(tourstop.message);
         }).then(() => {
-            let uri =  vscode.Uri.parse(`tourist:${tourstop.message}`);
-            vscode.workspace.openTextDocument(uri).then(doc => {
-                vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside, true);
-            });
+            TouristWebview.showTourstop(tourstop);
         });
     }, (error: any) => {
         console.error(error);

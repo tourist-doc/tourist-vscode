@@ -19,7 +19,7 @@
     },
     {
         "title": "you",
-        "message": "you",
+        "message": "**Oooh**, fancy *markdown*",
         "filePath": "C:/Users/jfields/Desktop/tourist-vscode/data/rick.tour",
         "position": {
             "row": 3,

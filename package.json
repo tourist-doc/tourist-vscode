@@ -27,7 +27,6 @@
                 "category": "Tourist"
             },
             {
-
                 "command": "extension.nextTourstop",
                 "title": "Go to next tour stop",
                 "category": "Tourist"
@@ -138,6 +137,8 @@
     },
     "dependencies": {
         "@types/chai": "^4.1.7",
-        "chai": "^4.2.0"
+        "@types/showdown": "^1.9.2",
+        "chai": "^4.2.0",
+        "showdown": "^1.9.0"
     }
 }
