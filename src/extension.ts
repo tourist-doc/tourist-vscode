@@ -51,6 +51,8 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
+    TouristWebview.setContext(context);
+
     const codelensProvider = new class implements vscode.CodeLensProvider {
         provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CodeLens[]> {
             const tour: Tour | undefined = context.workspaceState.get('tour');
@@ -125,7 +127,7 @@ function gotoTourStop(context: vscode.ExtensionContext, tourstop: Tourstop) {
 /**
  * Goes to the next tourstop in the active editor
  */
-function nextTourStop(context: vscode.ExtensionContext) {
+export function nextTourStop(context: vscode.ExtensionContext) {
     const tour: Tour | undefined = context.workspaceState.get('tour');
     if (tour !== undefined) {
         const next = tour.nextTourStop();
@@ -140,7 +142,7 @@ function nextTourStop(context: vscode.ExtensionContext) {
 /**
  * Goes to the previous tourstop in the active editor
  */
-function prevTourStop(context: vscode.ExtensionContext) {
+export function prevTourStop(context: vscode.ExtensionContext) {
     const tour: Tour | undefined = context.workspaceState.get('tour');
     if (tour !== undefined) {
         const prev = tour.prevTourStop();

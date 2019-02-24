@@ -48,4 +48,26 @@ suite("Tour unit tests", function () {
         assert.equal(treeItem.tooltip, tourstop.message);
         assert.equal(treeItem.label, tourstop.title);
     });
+
+    test("nextAndPrevTourstop", function() {
+        const tourstops = [createTestTourstop(), createTestTourstop(), createTestTourstop()];
+        const tour = new Tour(tourstops);
+
+        tour.setCurrentTourstop(tourstops[0]);
+
+        assert.equal(tour.prevTourStop(), undefined);
+        assert.equal(tour.nextTourStop(), tourstops[1]);
+        tour.setCurrentTourstop(tour.nextTourStop()!);
+        assert.equal(tour.nextTourStop(), tourstops[2]);
+        tour.setCurrentTourstop(tour.nextTourStop()!);
+        assert.equal(tour.nextTourStop(), undefined);
+        assert.equal(tour.prevTourStop(), tourstops[1]);
+        tour.setCurrentTourstop(tour.prevTourStop()!);
+        assert.equal(tour.prevTourStop(), tourstops[0]);
+        tour.setCurrentTourstop(tour.prevTourStop()!);
+        assert.equal(tour.prevTourStop(), undefined);
+    });
+});
+
+suite("Webview unit tests", function () {
 });

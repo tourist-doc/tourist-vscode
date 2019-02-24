@@ -106,7 +106,8 @@ export class Tour implements vscode.TreeDataProvider<Tourstop> {
      * Returns the next tourstop, if it exists, and undefined otherwise.
      */
     nextTourStop(): Tourstop | undefined {
-        if (this.currentStopIndex && this.currentStopIndex < this.tourstops.length) {
+        if (this.currentStopIndex !== undefined
+            && this.currentStopIndex < this.tourstops.length) {
             return this.tourstops[this.currentStopIndex + 1];
         }
         return undefined;
@@ -116,7 +117,8 @@ export class Tour implements vscode.TreeDataProvider<Tourstop> {
      * Returns the next tourstop, if it exists, and undefined otherwise.
      */
     prevTourStop(): Tourstop | undefined {
-        if (this.currentStopIndex && this.currentStopIndex > 0) {
+        if (this.currentStopIndex !== undefined
+            && this.currentStopIndex > 0) {
             return this.tourstops[this.currentStopIndex - 1];
         }
         return undefined;
