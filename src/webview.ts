@@ -51,8 +51,11 @@ export class TouristWebview {
     </script>
     ${title}
     ${message}
-    <a onclick="nextTourstop()" style="cursor: pointer; user-select: none;">Next tourstop</a> | 
-    <a onclick="prevTourstop()" style="cursor: pointer; user-select: none;">Previous tourstop</a>
+    <hr>
+    <div style="user-select: none;">
+      <a onclick="prevTourstop()" style="cursor: pointer;">Previous tourstop</a> | 
+      <a onclick="nextTourstop()" style="cursor: pointer;">Next tourstop</a>
+    </div>
     `;
   }
 }
