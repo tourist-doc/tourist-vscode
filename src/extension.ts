@@ -116,7 +116,7 @@ function gotoTourStop(context: vscode.ExtensionContext, tourstop: Tourstop) {
             editor.selection = new vscode.Selection(pos, pos);
             editor.revealRange(editor.selection, vscode.TextEditorRevealType.Default);
         }).then(() => {
-            TouristWebview.showTourstop(tourstop);
+            TouristWebview.showTourstop(tour, tourstop);
         });
     }, (error: any) => {
         console.error(error);
@@ -199,7 +199,7 @@ function deleteTourstop(context: vscode.ExtensionContext, tourstop: Tourstop) {
 /**
  * Edits the title of a Tourstop in the current Tour
 */
-function editTitle(context: vscode.ExtensionContext, tourstop: Tourstop) {
+export function editTitle(context: vscode.ExtensionContext, tourstop: Tourstop) {
     const tour: Tour | undefined = context.workspaceState.get('tour');
     if (tour === undefined) {
         console.warn("tour is undefined. Ignoring edit tourstop command");
@@ -209,6 +209,7 @@ function editTitle(context: vscode.ExtensionContext, tourstop: Tourstop) {
                 tourstop.title = title;
                 tour.writeToDisk();
                 // TODO: showTour() is probably overkill here
+                // TODO: if edited tourstop is currently shown in the web view, update it
                 showTour(context, tour);
             }
         });
@@ -218,7 +219,7 @@ function editTitle(context: vscode.ExtensionContext, tourstop: Tourstop) {
 /**
  * Edits the message of a Tourstop in the current Tour
  */
-function editMessage(context: vscode.ExtensionContext, tourstop: Tourstop) {
+export function editMessage(context: vscode.ExtensionContext, tourstop: Tourstop) {
     const tour: Tour | undefined = context.workspaceState.get('tour');
     if (tour === undefined) {
         console.warn("tour is undefined. Ignoring edit tourstop command");
@@ -227,6 +228,7 @@ function editMessage(context: vscode.ExtensionContext, tourstop: Tourstop) {
             if (message !== undefined) {
                 tourstop.message = message;
                 // TODO: showTour() is probably overkill here
+                // TODO: if edited tourstop is currently shown in the web view, update it
                 tour.writeToDisk();
                 showTour(context, tour);
             }

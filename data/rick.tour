@@ -18,8 +18,8 @@
         }
     },
     {
-        "title": "you",
-        "message": "**Oooh**, fancy *markdown*",
+        "title": "new title!",
+        "message": "***M A R K D O W N***",
         "filePath": "C:/Users/jfields/Desktop/tourist-vscode/data/rick.tour",
         "position": {
             "row": 3,

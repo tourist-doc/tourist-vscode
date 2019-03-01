@@ -32,7 +32,7 @@ class TourstopTreeItem extends vscode.TreeItem {
  */
 export class Tour implements vscode.TreeDataProvider<Tourstop> {
     private filepath?: string;
-    private tourstops: Tourstop[];
+    public tourstops: Tourstop[];
     private currentStopIndex?: number;
 
     constructor(stops: Tourstop[] = [], filepath?: string) {
