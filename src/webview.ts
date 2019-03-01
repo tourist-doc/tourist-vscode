@@ -25,6 +25,9 @@ export class TouristWebview {
             break;
         }
       });
+      this.panel.onDidDispose((event) => {
+        this.panel = undefined;
+      });
     }
     return this.panel!;
   }
