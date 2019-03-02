@@ -1,7 +1,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import { relative } from 'path';
-import { Tour, Tourstop } from './tour';
+import { Tour, Tourstop, TourstopQuickPickItem } from './tour';
 import { TouristWebview } from './webview';
 
 /**
@@ -29,7 +29,8 @@ export function activate(context: vscode.ExtensionContext) {
         ['extension.prevTourstop', prevTourStop],
         ['extension.addTourstop', addTourstop],
         ['extension.startTour', startTour],
-        ['extension.newTour', newTour]
+        ['extension.newTour', newTour],
+        ['extension.moveTourstop', moveTourstop]
     ];
     justContext.forEach((command: [string, Function]) => {
         vscode.commands.registerCommand(command[0], () => {
@@ -251,6 +252,27 @@ function moveTourstopDown(context: vscode.ExtensionContext, tourstop: Tourstop) 
         tour.moveTourstopDown(tourstop);
         tour.writeToDisk();
         showTour(context, tour);
+    }
+}
+
+// TODO: this should probably be renamed, since it has nothing to do with moveTourstopUp/Down
+function moveTourstop(context: vscode.ExtensionContext, tourstop: Tourstop) {
+    const tour: Tour | undefined = context.workspaceState.get('tour');
+    if (tour) {
+        const quickPickItems = tour.tourstops.map(tourstop => { return new TourstopQuickPickItem(tourstop); })
+        vscode.window.showQuickPick<TourstopQuickPickItem>(quickPickItems, {canPickMany: false}).then((item) => {
+            if (item) {
+                const editor = vscode.window.activeTextEditor;
+                if (editor) {
+                    item.tourstop.filePath = editor.document.fileName;
+                    item.tourstop.position = {
+                        row: editor.selection.active.line,
+                        col: editor.selection.active.character
+                    };
+                    tour.writeToDisk();
+                }
+            }
+        });
     }
 }
 

@@ -52,6 +52,11 @@
                 "category": "Tourist"
             },
             {
+                "command": "extension.moveTourstop",
+                "title": "Move a tour stop to a different location in a file",
+                "category": "Tourist"
+            },
+            {
                 "command": "extension.editTitle",
                 "title": "Edit a tour stop's title",
                 "category": "Tourist"
@@ -84,6 +89,10 @@
             "editor/context": [
                 {
                     "command": "extension.addTourStop",
+                    "group": "Tourist"
+                },
+                {
+                    "command": "extension.moveTourstop",
                     "group": "Tourist"
                 }
             ],
