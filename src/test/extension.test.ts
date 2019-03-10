@@ -3,43 +3,43 @@
 // Please refer to their documentation on https://mochajs.org/ for help.
 //
 
-import * as assert from 'assert';
-import { expect } from 'chai';
-import { Tour } from '../tour';
+import * as assert from "assert";
+import { expect } from "chai";
+import { Tour, Tourstop } from "../tour";
 
-function createTestTourstop() {
+function createTestTourstop(): Tourstop {
     return {
-        title: 'Test tourstop 1',
-        message: 'abc',
-        filePath: '',
+        title: "Test tourstop 1",
+        message: "abc",
+        filePath: "",
         position: {
             row: 5,
-            col: 5
-        }
+            col: 5,
+        },
     };
 }
 
-suite("Tour unit tests", function () {
-    test("getChildren()", function () {
+suite("Tour unit tests", () => {
+    test("getChildren()", () => {
         const tour = new Tour();
 
         const children = tour.getChildren(undefined);
-        expect(children).to.be.an('array').that.is.empty;
+        expect(children).to.be.an("array").that.is.empty;
 
         const tourstops = [createTestTourstop(), createTestTourstop(), createTestTourstop()];
-        tourstops.forEach(stop => {
+        tourstops.forEach((stop) => {
             tour.addTourStop(stop);
         });
 
         assert.deepEqual(
             tour.getChildren(undefined),
             tourstops);
-        tourstops.forEach(stop => {
-            expect(tour.getChildren(stop)).to.be.an('array').that.is.empty;
+        tourstops.forEach((stop) => {
+            expect(tour.getChildren(stop)).to.be.an("array").that.is.empty;
         });
     });
 
-    test("getTreeItem()", function () {
+    test("getTreeItem()",  () => {
         const tourstop = createTestTourstop();
         const tour = new Tour([tourstop]);
 
@@ -49,7 +49,7 @@ suite("Tour unit tests", function () {
         assert.equal(treeItem.label, tourstop.title);
     });
 
-    test("nextAndPrevTourstop", function() {
+    test("nextAndPrevTourstop", () => {
         const tourstops = [createTestTourstop(), createTestTourstop(), createTestTourstop()];
         const tour = new Tour(tourstops);
 
@@ -67,7 +67,4 @@ suite("Tour unit tests", function () {
         tour.setCurrentTourstop(tour.prevTourStop()!);
         assert.equal(tour.prevTourStop(), undefined);
     });
-});
-
-suite("Webview unit tests", function () {
 });

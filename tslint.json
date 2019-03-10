@@ -1,16 +1,16 @@
 {
-	"rules": {
-		"no-string-throw": true,
-		"no-unused-expression": true,
-		"no-duplicate-variable": true,
-		"curly": true,
-		"class-name": true,
-		"semicolon": [
-			true,
-			"always"
-		],
-		"triple-equals": true
-	},
+	"extends": [
+		"tslint:latest"
+    ],
 	"defaultSeverity": "warning",
-	"indent": [true, "spaces", 2]
+	"indent": [true, "spaces", 2],
+	"rules": {
+		"object-literal-sort-keys": {
+			"options": [
+				"match-declaration-order"
+			]
+		},
+		"no-console": false,
+		"interface-name": false
+	}
 }
