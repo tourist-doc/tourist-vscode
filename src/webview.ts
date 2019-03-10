@@ -1,41 +1,41 @@
+import { template } from "dot";
 import * as showdown from "showdown";
 import * as vscode from "vscode";
 
 import { editMessage, editTitle, nextTourStop, prevTourStop } from "./extension";
 import { Tour, Tourstop } from "./tour";
 
+interface TemplateArgs {
+  title: string;
+  message: string;
+}
+
 export class TouristWebview {
   public static setContext(ctx: vscode.ExtensionContext) {
     this.context = ctx;
+    vscode.workspace.openTextDocument(this.context.asAbsolutePath("src/webview.html")).then(((templateDoc) => {
+      this.htmlTemplate = template(templateDoc.getText());
+    }));
   }
 
   public static showTourstop(tour: Tour, tourstop: Tourstop) {
-    this.getPanel().title = tourstop.title;
+    if (this.htmlTemplate === undefined) {
+      console.error("htmlTemplate is undefined in showTourstop()");
+      return;
+    }
 
-    const title = this.mdConverter.makeHtml(`#${tourstop.title}#`);
-    const message = this.mdConverter.makeHtml(tourstop.message);
-    const tourstopIndex = tour.tourstops.indexOf(tourstop);
-    this.getPanel().webview.html =
-    `
-    <script>
-      const vscode = acquireVsCodeApi();
-    </script>
-    ${title}
-    ${message}
-    <hr>
-    <div style="user-select: none;">
-      <a onclick='vscode.postMessage({command: "prevTourstop"});' style='cursor: pointer;'>Previous tourstop</a> |
-      <a onclick='vscode.postMessage({command: "nextTourstop"});' style='cursor: pointer;'>Next tourstop</a>
-      <br>
-      <a onclick='vscode.postMessage({command: "editTitle", tourstopIndex: ${tourstopIndex}});' style='cursor: pointer;'>Edit title</a>
-      <br>
-      <a onclick='vscode.postMessage({command: "editMessage", tourstopIndex: ${tourstopIndex}});' style='cursor: pointer;'>Edit message</a>
-    </div>
-    `;
+    this.tourstop = tourstop;
+    this.getPanel().title = tourstop.title;
+    this.getPanel().webview.html = this.htmlTemplate({
+      title: tourstop.title,
+      message: this.mdConverter.makeHtml(tourstop.message),
+    });
   }
 
-  private static panel: vscode.WebviewPanel | undefined;
+  private static panel?: vscode.WebviewPanel;
   private static mdConverter = new showdown.Converter();
+  private static htmlTemplate?: (args: TemplateArgs) => string;
+  private static tourstop?: Tourstop;
 
   // TODO: Don't use this context bullshit
   private static context: vscode.ExtensionContext;
@@ -49,7 +49,6 @@ export class TouristWebview {
 
       this.panel = vscode.window.createWebviewPanel("tour", "title", vscode.ViewColumn.Beside, { enableScripts: true });
       this.panel.webview.onDidReceiveMessage((message: any) => {
-        const tourstop = message.tourstopIndex !== undefined ? tour.getTourstops()[message.tourstopIndex] : undefined;
         switch (message.command) {
           case "nextTourstop":
             nextTourStop(this.context);
@@ -58,10 +57,10 @@ export class TouristWebview {
             prevTourStop(this.context);
             break;
           case "editTitle":
-              editTitle(this.context, tourstop!);
+              editTitle(this.context, this.tourstop!);
               break;
           case "editMessage":
-              editMessage(this.context, tourstop!);
+              editMessage(this.context, this.tourstop!);
               break;
         }
       });

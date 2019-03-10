@@ -1,0 +1,16 @@
+<script>
+  const vscode = acquireVsCodeApi();
+</script>
+
+<b>{{=it.title}}</b>
+{{=it.message}}
+
+<hr>
+<div style="user-select: none;">
+  <a onclick='vscode.postMessage({command: "prevTourstop"});' style='cursor: pointer;'>Previous tourstop</a> |
+  <a onclick='vscode.postMessage({command: "nextTourstop"});' style='cursor: pointer;'>Next tourstop</a>
+  <br>
+  <a onclick='vscode.postMessage({command: "editTitle", tourstopIndex: 1});' style='cursor: pointer;'>Edit title</a>
+  <br>
+  <a onclick='vscode.postMessage({command: "editMessage", tourstopIndex: 1});' style='cursor: pointer;'>Edit message</a>
+</div>
