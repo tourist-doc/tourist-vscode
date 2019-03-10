@@ -1,16 +1,33 @@
-<script>
-  const vscode = acquireVsCodeApi();
-</script>
+<html>
+  <head>
+    <style>
+      a {
+        cursor: pointer;
+      }
+      #footer {
+        user-select: none;
+      }
+    </style>
 
-<b>{{=it.title}}</b>
-{{=it.message}}
+    <script>
+      const vscode = acquireVsCodeApi();
+    </script>
+  </head>
 
-<hr>
-<div style="user-select: none;">
-  <a onclick='vscode.postMessage({command: "prevTourstop"});' style='cursor: pointer;'>Previous tourstop</a> |
-  <a onclick='vscode.postMessage({command: "nextTourstop"});' style='cursor: pointer;'>Next tourstop</a>
-  <br>
-  <a onclick='vscode.postMessage({command: "editTitle", tourstopIndex: 1});' style='cursor: pointer;'>Edit title</a>
-  <br>
-  <a onclick='vscode.postMessage({command: "editMessage", tourstopIndex: 1});' style='cursor: pointer;'>Edit message</a>
-</div>
+  <body>
+    <b>{{=it.title}}</b>
+    {{=it.message}}
+
+    <hr>
+    <div id="footer">
+      <a title="Previous tourstop" onclick='vscode.postMessage({command: "prevTourstop"});'>Previous tourstop</a> |
+      <a title="Next tourstop" onclick='vscode.postMessage({command: "nextTourstop"});'>Next tourstop</a>
+
+      <br>
+      <a title="Edit title" onclick='vscode.postMessage({command: "editTitle"});'>Edit title</a>
+
+      <br>
+      <a title="Edit message" onclick='vscode.postMessage({command: "editMessage"});'>Edit message</a>
+    </div>
+  </body>
+</html>
