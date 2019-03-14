@@ -1,8 +1,8 @@
 import { relative } from "path";
 import * as vscode from "vscode";
 
+import { quickPickTourstop } from "./quickPick";
 import { Tour, Tourstop } from "./tour";
-import { TourstopQuickPickItem } from "./tourstopQuickPickItem";
 import { TouristWebview } from "./webview";
 
 /**
@@ -48,8 +48,17 @@ export function activate(context: vscode.ExtensionContext) {
         ["extension.editMessage", editMessage],
     ];
     contextAndTourstop.forEach((command) => {
-        vscode.commands.registerCommand(command[0], (tourstop: Tourstop) => {
-            command[1](context, tourstop);
+        vscode.commands.registerCommand(command[0], async (tourstop?: Tourstop) => {
+            const tour: Tour | undefined = context.workspaceState.get("tour");
+            if (tour) {
+                if (tourstop === undefined) {
+                    tourstop = await quickPickTourstop(tour);
+                }
+
+                if (tourstop) {
+                    command[1](context, tourstop);
+                }
+            }
         });
     });
 
@@ -261,23 +270,21 @@ function moveTourstopDown(context: vscode.ExtensionContext, tourstop: Tourstop) 
 }
 
 // TODO: this should probably be renamed, since it has nothing to do with moveTourstopUp/Down
-function moveTourstop(context: vscode.ExtensionContext) {
+async function moveTourstop(context: vscode.ExtensionContext) {
     const tour: Tour | undefined = context.workspaceState.get("tour");
     if (tour) {
-        const quickPickItems = tour.tourstops.map((tourstop) => new TourstopQuickPickItem(tourstop));
-        vscode.window.showQuickPick<TourstopQuickPickItem>(quickPickItems, {canPickMany: false}).then((item) => {
-            if (item) {
-                const editor = vscode.window.activeTextEditor;
-                if (editor) {
-                    item.tourstop.filePath = editor.document.fileName;
-                    item.tourstop.position = {
-                        row: editor.selection.active.line,
-                        col: editor.selection.active.character,
-                    };
-                    tour.writeToDisk();
-                }
+        const tourstop = await quickPickTourstop(tour);
+        if (tourstop) {
+            const editor = vscode.window.activeTextEditor;
+            if (editor) {
+                tourstop.filePath = editor.document.fileName;
+                tourstop.position = {
+                    row: editor.selection.active.line,
+                    col: editor.selection.active.character,
+                };
+                tour.writeToDisk();
             }
-        });
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { Tourstop } from "./tour";
+import { Tour, Tourstop } from "./tour";
 
-export class TourstopQuickPickItem implements vscode.QuickPickItem {
+class TourstopQuickPickItem implements vscode.QuickPickItem {
     public tourstop: Tourstop;
 
     public label: string;
@@ -16,4 +16,10 @@ export class TourstopQuickPickItem implements vscode.QuickPickItem {
         const filename = tourstop.filePath.split(/[/\\]/).pop();
         this.description = `${filename}, line ${tourstop.position.row}`;
     }
+}
+
+export async function quickPickTourstop(tour: Tour): Promise<Tourstop | undefined> {
+    const quickPickItems = tour.tourstops.map((stop) => new TourstopQuickPickItem(stop));
+    const item = await vscode.window.showQuickPick<TourstopQuickPickItem>(quickPickItems, {canPickMany: false});
+    return item ? item.tourstop : undefined;
 }
