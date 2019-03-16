@@ -5,6 +5,16 @@ import { quickPickTourstop } from "./quickPick";
 import { Tour, Tourstop } from "./tour";
 import { TouristWebview } from "./webview";
 
+const activeTourstopDecorationType = vscode.window.createTextEditorDecorationType({
+    backgroundColor: new vscode.ThemeColor("merge.incomingHeaderBackground"),
+    isWholeLine: true,
+});
+
+const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationType({
+    backgroundColor: new vscode.ThemeColor("merge.incomingContentBackground"),
+    isWholeLine: true,
+});
+
 /**
  * Called when a workspace is opened with a .tour file at the top level
  */
@@ -17,6 +27,9 @@ export function activate(context: vscode.ExtensionContext) {
             Tour.parseTour(tourfile).then((tour: Tour) => {
                 context.workspaceState.update("tour", tour);
                 showTour(context, tour);
+                if (vscode.window.activeTextEditor) {
+                    showDecorations(vscode.window.activeTextEditor, tour);
+                }
             }, (error) => {
                 console.error(error);
             });
@@ -130,6 +143,7 @@ function gotoTourStop(context: vscode.ExtensionContext, tourstop: Tourstop) {
             const pos = new vscode.Position(tourstop.position.row, tourstop.position.col);
             editor.selection = new vscode.Selection(pos, pos);
             editor.revealRange(editor.selection, vscode.TextEditorRevealType.Default);
+            showDecorations(editor, tour);
         }).then(() => {
             TouristWebview.showTourstop(tour, tourstop);
         });
@@ -302,6 +316,9 @@ function startTour(context: vscode.ExtensionContext) {
             Tour.parseTour(uris[0]).then((tour: Tour) => {
                 context.workspaceState.update("tour", tour);
                 showTour(context, tour);
+                if (vscode.window.activeTextEditor) {
+                    showDecorations(vscode.window.activeTextEditor, tour);
+                }
             });
         }
     });
@@ -331,4 +348,31 @@ function newTour(context: vscode.ExtensionContext) {
 function showTour(context: vscode.ExtensionContext, tour: Tour) {
     const touristView = vscode.window.createTreeView<Tourstop>("touristView", { treeDataProvider: tour });
     context.workspaceState.update("touristView", touristView);
+}
+
+function showDecorations(editor: vscode.TextEditor, tour: Tour) {
+    const current = tour.getCurrentTourstop();
+    if (current) {
+        editor.setDecorations(activeTourstopDecorationType, [
+          editor.document.lineAt(
+            new vscode.Position(current.position.row, 0),
+          ).range,
+        ]);
+    } else  {
+        editor.setDecorations(activeTourstopDecorationType, []);
+    }
+
+    editor.setDecorations(
+        inactiveTourstopDecorationType,
+        tour.tourstops
+        .filter((stop) => stop !== current)
+        .map((stop) =>
+            editor.document.lineAt(
+            new vscode.Position(
+                stop.position.row,
+                stop.position.col,
+            ),
+            ),
+        ),
+    );
 }
