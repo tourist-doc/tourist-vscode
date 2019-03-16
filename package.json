@@ -17,12 +17,12 @@
     "contributes": {
         "commands": [
             {
-                "command": "extension.gotoTourStop",
+                "command": "extension.gotoTourstop",
                 "title": "Go to tour stop",
                 "category": "Tourist"
             },
             {
-                "command": "extension.addTourStop",
+                "command": "extension.addTourstop",
                 "title": "Add a tour stop",
                 "category": "Tourist"
             },
@@ -37,7 +37,7 @@
                 "category": "Tourist"
             },
             {
-                "command": "extension.deleteTourStop",
+                "command": "extension.deleteTourstop",
                 "title": "Delete a tour stop",
                 "category": "Tourist"
             },
@@ -88,7 +88,7 @@
         "menus": {
             "editor/context": [
                 {
-                    "command": "extension.addTourStop",
+                    "command": "extension.addTourstop",
                     "group": "Tourist"
                 },
                 {
@@ -104,7 +104,7 @@
                     "command": "extension.editMessage"
                 },
                 {
-                    "command": "extension.deleteTourStop"
+                    "command": "extension.deleteTourstop"
                 },
                 {
                     "command": "extension.moveTourstopUp"
@@ -116,7 +116,7 @@
         },
         "keybindings": [
             {
-                "command": "extension.addTourStop",
+                "command": "extension.addTourstop",
                 "key": "Ctrl+Shift+S",
                 "when": "editorTextFocus"
             },

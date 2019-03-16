@@ -8,7 +8,7 @@ export class TourstopTreeItem extends vscode.TreeItem {
         super(tourstop.title);
         this.command = {
             arguments: [tourstop],
-            command: "extension.gotoTourStop",
+            command: "extension.gotoTourstop",
             title: "lol what?", // TODO: what does this option actually do?
         };
         this.tooltip = tourstop.message;

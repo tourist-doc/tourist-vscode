@@ -27,9 +27,6 @@ export function activate(context: vscode.ExtensionContext) {
             Tour.parseTour(tourfile).then((tour: Tour) => {
                 context.workspaceState.update("tour", tour);
                 showTour(context, tour);
-                if (vscode.window.activeTextEditor) {
-                    showDecorations(vscode.window.activeTextEditor, tour);
-                }
             }, (error) => {
                 console.error(error);
             });
@@ -53,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const contextAndTourstop: Array<[string, (ctx: vscode.ExtensionContext, tourstop: Tourstop) => void]> = [
-        ["extension.gotoTourStop", gotoTourStop],
+        ["extension.gotoTourstop", gotoTourStop],
         ["extension.deleteTourstop", deleteTourstop],
         ["extension.moveTourstopUp", moveTourstopUp],
         ["extension.moveTourstopDown", moveTourstopDown],
@@ -78,47 +75,43 @@ export function activate(context: vscode.ExtensionContext) {
     TouristWebview.setContext(context);
 
     const codelensProvider = new class implements vscode.CodeLensProvider {
-      public provideCodeLenses(
-        document: vscode.TextDocument,
-        token: vscode.CancellationToken,
-      ): vscode.ProviderResult<vscode.CodeLens[]> {
-        const tour: Tour | undefined = context.workspaceState.get("tour");
+        public provideCodeLenses(
+            document: vscode.TextDocument,
+            token: vscode.CancellationToken,
+        ): vscode.ProviderResult<vscode.CodeLens[]> {
+            const tour: Tour | undefined = context.workspaceState.get("tour");
 
-        const lenses = [] as vscode.CodeLens[];
-        if (tour) {
-          tour.getTourstops().forEach((tourstop: Tourstop) => {
-            // TODO: don't do this. This is wrong and broken.
-            if (
-              relative("C:", document.fileName) ===
-              relative("C:", tourstop.filePath)
-            ) {
-              const position = new vscode.Position(
-                tourstop.position.row,
-                tourstop.position.col,
-              );
-              lenses.push(
-                new vscode.CodeLens(new vscode.Range(position, position), {
-                  arguments: [tourstop],
-                  command: "extension.gotoTourStop",
-                  title: tourstop.title,
-                }),
-              );
+            const lenses = [] as vscode.CodeLens[];
+            if (tour) {
+                tour.getTourstops().forEach((tourstop: Tourstop) => {
+                    if (pathsEqual(document.fileName, tourstop.filePath)) {
+                        const position = new vscode.Position(
+                            tourstop.position.row,
+                            tourstop.position.col,
+                        );
+                        lenses.push(
+                            new vscode.CodeLens(new vscode.Range(position, position), {
+                                arguments: [tourstop],
+                                command: "extension.gotoTourstop",
+                                title: tourstop.title,
+                            }),
+                        );
+                    }
+                });
             }
-          });
+
+            return lenses;
         }
 
-        return lenses;
-      }
-
-      public resolveCodeLens(
-        codeLens: vscode.CodeLens,
-        token: vscode.CancellationToken,
-      ): vscode.ProviderResult<vscode.CodeLens> {
-        return codeLens;
-      }
+        public resolveCodeLens(
+            codeLens: vscode.CodeLens,
+            token: vscode.CancellationToken,
+        ): vscode.ProviderResult<vscode.CodeLens> {
+            return codeLens;
+        }
     }();
     context.subscriptions.push(
-        vscode.languages.registerCodeLensProvider({scheme: "file"}, codelensProvider));
+        vscode.languages.registerCodeLensProvider({ scheme: "file" }, codelensProvider));
 }
 
 /**
@@ -143,7 +136,7 @@ function gotoTourStop(context: vscode.ExtensionContext, tourstop: Tourstop) {
             const pos = new vscode.Position(tourstop.position.row, tourstop.position.col);
             editor.selection = new vscode.Selection(pos, pos);
             editor.revealRange(editor.selection, vscode.TextEditorRevealType.Default);
-            showDecorations(editor, tour);
+            showDecorations(tour);
         }).then(() => {
             TouristWebview.showTourstop(tour, tourstop);
         });
@@ -296,6 +289,7 @@ async function moveTourstop(context: vscode.ExtensionContext) {
                     row: editor.selection.active.line,
                     col: editor.selection.active.character,
                 };
+                showTour(context, tour);
                 tour.writeToDisk();
             }
         }
@@ -316,9 +310,6 @@ function startTour(context: vscode.ExtensionContext) {
             Tour.parseTour(uris[0]).then((tour: Tour) => {
                 context.workspaceState.update("tour", tour);
                 showTour(context, tour);
-                if (vscode.window.activeTextEditor) {
-                    showDecorations(vscode.window.activeTextEditor, tour);
-                }
             });
         }
     });
@@ -348,31 +339,39 @@ function newTour(context: vscode.ExtensionContext) {
 function showTour(context: vscode.ExtensionContext, tour: Tour) {
     const touristView = vscode.window.createTreeView<Tourstop>("touristView", { treeDataProvider: tour });
     context.workspaceState.update("touristView", touristView);
+    showDecorations(tour);
 }
 
-function showDecorations(editor: vscode.TextEditor, tour: Tour) {
+function showDecorations(tour: Tour) {
     const current = tour.getCurrentTourstop();
-    if (current) {
-        editor.setDecorations(activeTourstopDecorationType, [
-          editor.document.lineAt(
-            new vscode.Position(current.position.row, 0),
-          ).range,
-        ]);
-    } else  {
-        editor.setDecorations(activeTourstopDecorationType, []);
-    }
+    vscode.window.visibleTextEditors.forEach((editor) => {
+        if (current && pathsEqual(current.filePath, editor.document.fileName)) {
+            editor.setDecorations(activeTourstopDecorationType, [
+                editor.document.lineAt(
+                    new vscode.Position(current.position.row, current.position.col),
+                ).range,
+            ]);
+        } else {
+            editor.setDecorations(activeTourstopDecorationType, []);
+        }
 
-    editor.setDecorations(
-        inactiveTourstopDecorationType,
-        tour.tourstops
-        .filter((stop) => stop !== current)
-        .map((stop) =>
-            editor.document.lineAt(
-            new vscode.Position(
-                stop.position.row,
-                stop.position.col,
-            ),
-            ),
-        ),
-    );
+        editor.setDecorations(
+            inactiveTourstopDecorationType,
+            tour.tourstops
+                .filter(
+                    (stop) =>
+                        stop !== current && pathsEqual(stop.filePath, editor.document.fileName)
+                )
+                .map((stop) =>
+                    editor.document.lineAt(
+                        new vscode.Position(stop.position.row, stop.position.col),
+                    ),
+                ),
+        );
+    });
+}
+
+function pathsEqual(path1: string, path2: string) {
+    // TODO: don't do this. This is wrong and broken.
+    return relative("C:", path1) === relative("C:", path2);
 }

@@ -60,9 +60,9 @@ export class Tour implements vscode.TreeDataProvider<Tourstop> {
     }
 
     public getCurrentTourstop(): Tourstop | undefined {
-        return this.currentStopIndex
-          ? this.tourstops[this.currentStopIndex]
-          : undefined;
+        return this.currentStopIndex === undefined
+          ? undefined
+          : this.tourstops[this.currentStopIndex];
     }
 
     public setCurrentTourstop(tourstop: Tourstop) {
