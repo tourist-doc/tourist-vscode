@@ -223,8 +223,8 @@ export function editTitle(context: vscode.ExtensionContext, tourstop: Tourstop) 
             if (title !== undefined) {
                 tourstop.title = title;
                 tour.writeToDisk();
+                TouristWebview.showTourstop(tour, tourstop);
                 // TODO: showTour() is probably overkill here
-                // TODO: if edited tourstop is currently shown in the web view, update it
                 showTour(context, tour);
             }
         });
@@ -242,9 +242,9 @@ export function editMessage(context: vscode.ExtensionContext, tourstop: Tourstop
         vscode.window.showInputBox().then((message) => {
             if (message !== undefined) {
                 tourstop.message = message;
-                // TODO: showTour() is probably overkill here
-                // TODO: if edited tourstop is currently shown in the web view, update it
                 tour.writeToDisk();
+                TouristWebview.showTourstop(tour, tourstop);
+                // TODO: showTour() is probably overkill here
                 showTour(context, tour);
             }
         });
