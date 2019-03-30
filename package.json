@@ -11,7 +11,7 @@
         "Other"
     ],
     "activationEvents": [
-        "workspaceContains:*.tour"
+        "*"
     ],
     "main": "./out/extension",
     "contributes": {
