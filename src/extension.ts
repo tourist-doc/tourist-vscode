@@ -1,6 +1,7 @@
 import { relative } from "path";
 import * as vscode from "vscode";
 
+import * as config from "./config";
 import { quickPickTourstop } from "./quickPick";
 import { Tour, Tourstop } from "./tour";
 import { TouristWebview } from "./webview";
@@ -79,7 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
             document: vscode.TextDocument,
             token: vscode.CancellationToken,
         ): vscode.ProviderResult<vscode.CodeLens[]> {
-            if (!vscode.workspace.getConfiguration().get<boolean>("tourist.useCodeLens")) {
+            if (!config.useCodeLens()) {
                 return [];
             }
 

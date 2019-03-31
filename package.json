@@ -137,6 +137,27 @@
                     "type": "boolean",
                     "description": "Whether a code lens should be placed at each tourstop.",
                     "default": "true"
+                },
+                "tourist.webviewColumn": {
+                    "type": [
+                        "number",
+                        "string"
+                    ],
+                    "description": "The editor column that the webview will occupy. Valid values are 1-9 ",
+                    "default": "Beside",
+                    "enum": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        "Beside",
+                        "Active"
+                    ]
                 }
             }
         }

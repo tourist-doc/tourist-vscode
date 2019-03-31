@@ -2,6 +2,7 @@ import { template } from "dot";
 import * as showdown from "showdown";
 import * as vscode from "vscode";
 
+import * as config from "./config";
 import { editMessage, editTitle, nextTourStop, prevTourStop } from "./extension";
 import { Tour, Tourstop } from "./tour";
 
@@ -47,7 +48,7 @@ export class TouristWebview {
         throw new Error("No tour file!");
       }
 
-      this.panel = vscode.window.createWebviewPanel("tour", "title", vscode.ViewColumn.Beside, { enableScripts: true });
+      this.panel = vscode.window.createWebviewPanel("tour", "title", config.webviewColumn(), { enableScripts: true });
       this.panel.webview.onDidReceiveMessage((message: any) => {
         switch (message.command) {
           case "nextTourstop":
