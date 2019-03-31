@@ -128,7 +128,18 @@
                 "command": "extension.prevTourstop",
                 "key": "Ctrl+Shift+Alt+K"
             }
-        ]
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Tourist Configuration",
+            "properties": {
+                "tourist.useCodeLens": {
+                    "type": "boolean",
+                    "description": "Whether a code lens should be placed at each tourstop.",
+                    "default": "true"
+                }
+            }
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",

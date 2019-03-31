@@ -79,6 +79,10 @@ export function activate(context: vscode.ExtensionContext) {
             document: vscode.TextDocument,
             token: vscode.CancellationToken,
         ): vscode.ProviderResult<vscode.CodeLens[]> {
+            if (!vscode.workspace.getConfiguration().get<boolean>("tourist.useCodeLens")) {
+                return [];
+            }
+
             const tour: Tour | undefined = context.workspaceState.get("tour");
 
             const lenses = [] as vscode.CodeLens[];
