@@ -16,25 +16,29 @@ const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationT
     isWholeLine: true,
 });
 
+// --- Global variables --- //
+let tour: Tour | undefined;
+let tourView: vscode.TreeView<Tourstop> | undefined;
+
 /**
  * Called when a workspace is opened with a .tour file at the top level
  */
 export function activate(context: vscode.ExtensionContext) {
     // If a .tour file exists at the top level of the workspace, parse it
-    vscode.workspace.findFiles("*.tour").then((uris) => {
-        if (uris.length > 0) {
-            // TODO:  decide how to handle multiple .tour files
-            const tourfile = uris[0];
-            Tour.parseTour(tourfile).then((tour: Tour) => {
-                context.workspaceState.update("tour", tour);
-                showTour(context, tour);
-            }, (error) => {
-                console.error(error);
-            });
-        } else {
-            console.log("No .tour file found");
-        }
-    });
+    // vscode.workspace.findFiles("*.tour").then((uris) => {
+    //     if (uris.length > 0) {
+    //         // TODO:  decide how to handle multiple .tour files
+    //         const tourfile = uris[0];
+    //         Tour.parseTour(tourfile).then((t: Tour) => {
+    //             tour = t;
+    //             showTour(context, tour);
+    //         }, (error) => {
+    //             console.error(error);
+    //         });
+    //     } else {
+    //         console.log("No .tour file found");
+    //     }
+    // });
 
     const justContext: Array<[string, (ctx: vscode.ExtensionContext) => void]> = [
         ["extension.nextTourstop", nextTourStop],
@@ -60,7 +64,6 @@ export function activate(context: vscode.ExtensionContext) {
     ];
     contextAndTourstop.forEach((command) => {
         vscode.commands.registerCommand(command[0], async (tourstop?: Tourstop) => {
-            const tour: Tour | undefined = context.workspaceState.get("tour");
             if (tour) {
                 if (tourstop === undefined) {
                     tourstop = await quickPickTourstop(tour);
@@ -84,7 +87,6 @@ export function activate(context: vscode.ExtensionContext) {
                 return [];
             }
 
-            const tour: Tour | undefined = context.workspaceState.get("tour");
 
             const lenses = [] as vscode.CodeLens[];
             if (tour) {
@@ -123,9 +125,6 @@ export function activate(context: vscode.ExtensionContext) {
  * Goes to the given tourstop in the active editor
  */
 function gotoTourStop(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    const tour: Tour | undefined = context.workspaceState.get("tour");
-    const tourView: vscode.TreeView<Tourstop> | undefined = context.workspaceState.get("touristView");
-
     if (tour === undefined || tourView === undefined) {
         return;
     }
@@ -141,9 +140,9 @@ function gotoTourStop(context: vscode.ExtensionContext, tourstop: Tourstop) {
             const pos = new vscode.Position(tourstop.position.row, tourstop.position.col);
             editor.selection = new vscode.Selection(pos, pos);
             editor.revealRange(editor.selection, vscode.TextEditorRevealType.Default);
-            showDecorations(tour);
+            showDecorations(tour!);
         }).then(() => {
-            TouristWebview.showTourstop(tour, tourstop);
+            TouristWebview.showTourstop(tour!, tourstop);
         });
     }, (error: any) => {
         console.error(error);
@@ -155,7 +154,6 @@ function gotoTourStop(context: vscode.ExtensionContext, tourstop: Tourstop) {
  * Goes to the next tourstop in the active editor
  */
 export function nextTourStop(context: vscode.ExtensionContext) {
-    const tour: Tour | undefined = context.workspaceState.get("tour");
     if (tour !== undefined) {
         const next = tour.nextTourStop();
         if (next) {
@@ -170,7 +168,6 @@ export function nextTourStop(context: vscode.ExtensionContext) {
  * Goes to the previous tourstop in the active editor
  */
 export function prevTourStop(context: vscode.ExtensionContext) {
-    const tour: Tour | undefined = context.workspaceState.get("tour");
     if (tour !== undefined) {
         const prev = tour.prevTourStop();
         if (prev) {
@@ -189,8 +186,6 @@ function addTourstop(context: vscode.ExtensionContext) {
     if (editor === undefined) {
         return;
     }
-
-    const tour: Tour | undefined = context.workspaceState.get("tour");
 
     if (tour === undefined) {
         console.error("Uh oh, tour was undefined!");
@@ -213,7 +208,6 @@ function addTourstop(context: vscode.ExtensionContext) {
  * Delete Tourstop from current Tour
  */
 function deleteTourstop(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    const tour: Tour | undefined = context.workspaceState.get("tour");
     if (tour === undefined) {
         console.warn("tour is undefined. Ignoring add tourstop command");
     } else {
@@ -227,12 +221,11 @@ function deleteTourstop(context: vscode.ExtensionContext, tourstop: Tourstop) {
  * Edits the title of a Tourstop in the current Tour
  */
 export function editTitle(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    const tour: Tour | undefined = context.workspaceState.get("tour");
     if (tour === undefined) {
         console.warn("tour is undefined. Ignoring edit tourstop command");
     } else {
         vscode.window.showInputBox().then((title) => {
-            if (title !== undefined) {
+            if (tour !== undefined && title !== undefined) {
                 tourstop.title = title;
                 tour.writeToDisk();
                 TouristWebview.showTourstop(tour, tourstop);
@@ -247,12 +240,11 @@ export function editTitle(context: vscode.ExtensionContext, tourstop: Tourstop) 
  * Edits the message of a Tourstop in the current Tour
  */
 export function editMessage(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    const tour: Tour | undefined = context.workspaceState.get("tour");
     if (tour === undefined) {
         console.warn("tour is undefined. Ignoring edit tourstop command");
     } else {
         vscode.window.showInputBox().then((message) => {
-            if (message !== undefined) {
+            if (tour !== undefined && message !== undefined) {
                 tourstop.message = message;
                 tour.writeToDisk();
                 TouristWebview.showTourstop(tour, tourstop);
@@ -264,7 +256,6 @@ export function editMessage(context: vscode.ExtensionContext, tourstop: Tourstop
 }
 
 function moveTourstopUp(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    const tour: Tour | undefined = context.workspaceState.get("tour");
     if (tour) {
         tour.moveTourstopUp(tourstop);
         tour.writeToDisk();
@@ -273,7 +264,6 @@ function moveTourstopUp(context: vscode.ExtensionContext, tourstop: Tourstop) {
 }
 
 function moveTourstopDown(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    const tour: Tour | undefined = context.workspaceState.get("tour");
     if (tour) {
         tour.moveTourstopDown(tourstop);
         tour.writeToDisk();
@@ -283,7 +273,6 @@ function moveTourstopDown(context: vscode.ExtensionContext, tourstop: Tourstop) 
 
 // TODO: this should probably be renamed, since it has nothing to do with moveTourstopUp/Down
 async function moveTourstop(context: vscode.ExtensionContext) {
-    const tour: Tour | undefined = context.workspaceState.get("tour");
     if (tour) {
         const tourstop = await quickPickTourstop(tour);
         if (tourstop) {
@@ -312,8 +301,8 @@ function startTour(context: vscode.ExtensionContext) {
         },
     }).then((uris: vscode.Uri[] | undefined) => {
         if (uris) {
-            Tour.parseTour(uris[0]).then((tour: Tour) => {
-                context.workspaceState.update("tour", tour);
+            Tour.parseTour(uris[0]).then((t: Tour) => {
+                tour = t;
                 showTour(context, tour);
             });
         }
@@ -330,9 +319,8 @@ function newTour(context: vscode.ExtensionContext) {
     vscode.window.showInputBox({ value: folderName, prompt: "Tour name:" }).then((tourName) => {
         if (tourName !== undefined) {
             const filepath = vscode.workspace.rootPath + tourName.replace(" ", "_").toLowerCase() + ".tour";
-            const tour: Tour = new Tour([], filepath);
+            tour = new Tour([], filepath);
 
-            context.workspaceState.update("tour", tour);
             showTour(context, tour);
         }
     });
@@ -341,10 +329,9 @@ function newTour(context: vscode.ExtensionContext) {
 /**
  * Show the given tour in the sidebar
  */
-function showTour(context: vscode.ExtensionContext, tour: Tour) {
-    const touristView = vscode.window.createTreeView<Tourstop>("touristView", { treeDataProvider: tour });
-    context.workspaceState.update("touristView", touristView);
-    showDecorations(tour);
+function showTour(context: vscode.ExtensionContext, t: Tour) {
+    tourView = vscode.window.createTreeView<Tourstop>("touristView", { treeDataProvider: t });
+    showDecorations(t);
 }
 
 function showDecorations(tour: Tour) {
