@@ -5,11 +5,7 @@
 	"defaultSeverity": "warning",
 	"indent": [true, "spaces", 2],
 	"rules": {
-		"object-literal-sort-keys": {
-			"options": [
-				"match-declaration-order"
-			]
-		},
+		"object-literal-sort-keys": false,
 		"no-console": false,
 		"interface-name": false
 	}
