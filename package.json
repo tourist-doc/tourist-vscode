@@ -80,6 +80,11 @@
         "command": "extension.mapRepo",
         "title": "Map a name to a repository",
         "category": "Tourist"
+      },
+      {
+        "command": "extension.addBreakpoints",
+        "title": "Add a breakpoint for all tourstops",
+        "category": "Tourist"
       }
     ],
     "views": {

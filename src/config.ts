@@ -4,6 +4,12 @@ export function useCodeLens(): boolean {
   return workspace.getConfiguration().get<boolean>("tourist.useCodeLens", true);
 }
 
+export function breakpointsActive() {
+  return workspace
+    .getConfiguration()
+    .get<boolean>("tourist.breakpointsActive", true);
+}
+
 export function webviewColumn(): ViewColumn {
   switch (
     workspace

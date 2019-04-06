@@ -29,7 +29,7 @@ const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationT
 );
 
 // --- Global variables --- //
-const tourist = new Tourist();
+let tourist = new Tourist();
 let tourState: TourState | undefined;
 
 /**
@@ -52,6 +52,11 @@ export function activate(context: vscode.ExtensionContext) {
   //     }
   // });
 
+  const touristJSON = context.globalState.get<string>("touristInstance");
+  if (touristJSON) {
+    tourist = Tourist.deserialize(touristJSON);
+  }
+
   // TODO: Refactor to only pass context when needed
   const justContext: Array<[string, (ctx: vscode.ExtensionContext) => void]> = [
     ["extension.nextTourstop", nextTourStop],
@@ -61,6 +66,7 @@ export function activate(context: vscode.ExtensionContext) {
     ["extension.newTour", newTour],
     ["extension.moveTourstop", moveTourstop],
     ["extension.mapRepo", mapRepo],
+    ["extension.addBreakpoints", addBreakpoints],
   ];
   justContext.forEach((command) => {
     vscode.commands.registerCommand(command[0], async () => {
@@ -454,7 +460,7 @@ async function startTour(context: vscode.ExtensionContext): Promise<void> {
     });
 }
 
-async function mapRepo(_: vscode.ExtensionContext): Promise<void> {
+async function mapRepo(ctx: vscode.ExtensionContext): Promise<void> {
   const repoName = await vscode.window.showInputBox({
     prompt: "What's the name of the repository?",
   });
@@ -466,6 +472,7 @@ async function mapRepo(_: vscode.ExtensionContext): Promise<void> {
     });
     if (path) {
       await tourist.mapConfig(repoName, path[0].fsPath);
+      ctx.globalState.update("touristInstance", tourist.serialize());
     }
   }
 }
@@ -499,6 +506,28 @@ async function newTour(context: vscode.ExtensionContext): Promise<void> {
     await saveTour();
     showTour(tour);
   }
+}
+
+async function addBreakpoints(_: vscode.ExtensionContext): Promise<void> {
+  if (!tourState) {
+    return;
+  }
+
+  const breakpoints = [] as vscode.SourceBreakpoint[];
+  for (const stop of tourState.tour.stops) {
+    if (isNotBroken(stop)) {
+      breakpoints.push(
+        new vscode.SourceBreakpoint(
+          new vscode.Location(
+            vscode.Uri.file(stop.absPath),
+            new vscode.Position(stop.line, 0),
+          ),
+        ),
+      );
+    }
+  }
+
+  vscode.debug.addBreakpoints(breakpoints);
 }
 
 /**
