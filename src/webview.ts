@@ -1,10 +1,16 @@
 import { template } from "dot";
 import * as showdown from "showdown";
+import { AbsoluteTourStop, BrokenTourStop, Tour } from "tourist";
 import * as vscode from "vscode";
 
 import * as config from "./config";
-import { editMessage, editTitle, nextTourStop, prevTourStop } from "./extension";
-import { Tour, Tourstop } from "./tour";
+import {
+  editMessage,
+  editTitle,
+  nextTourStop,
+  prevTourStop,
+} from "./extension";
+import { TourState } from "./tourState";
 
 interface TemplateArgs {
   title: string;
@@ -14,41 +20,50 @@ interface TemplateArgs {
 export class TouristWebview {
   public static setContext(ctx: vscode.ExtensionContext) {
     this.context = ctx;
-    vscode.workspace.openTextDocument(this.context.asAbsolutePath("src/webview.html")).then(((templateDoc) => {
-      this.htmlTemplate = template(templateDoc.getText());
-    }));
+    vscode.workspace
+      .openTextDocument(this.context.asAbsolutePath("src/webview.html"))
+      .then((templateDoc) => {
+        this.htmlTemplate = template(templateDoc.getText());
+      });
   }
 
-  public static showTourstop(tour: Tour, tourstop: Tourstop) {
+  public static showTourStop(
+    tourState: TourState,
+    stop: AbsoluteTourStop | BrokenTourStop,
+  ) {
     if (this.htmlTemplate === undefined) {
       console.error("htmlTemplate is undefined in showTourstop()");
       return;
     }
 
-    this.tourstop = tourstop;
-    this.getPanel().title = tourstop.title;
-    this.getPanel().webview.html = this.htmlTemplate({
-      title: tourstop.title,
-      message: this.mdConverter.makeHtml(tourstop.message),
+    this.tourStop = stop;
+    this.getPanel(tourState).title = stop.title;
+    this.getPanel(tourState).webview.html = this.htmlTemplate({
+      title: stop.title,
+      message: this.mdConverter.makeHtml(stop.body || ""),
     });
   }
 
   private static panel?: vscode.WebviewPanel;
   private static mdConverter = new showdown.Converter();
   private static htmlTemplate?: (args: TemplateArgs) => string;
-  private static tourstop?: Tourstop;
+  private static tourStop?: AbsoluteTourStop | BrokenTourStop;
 
   // TODO: Don't use this context bullshit
   private static context: vscode.ExtensionContext;
 
-  private static getPanel(): vscode.WebviewPanel {
+  private static getPanel(tourState: TourState): vscode.WebviewPanel {
     if (this.panel === undefined) {
-      const tour: Tour | undefined = this.context.workspaceState.get("tour");
-      if (tour === undefined) {
+      if (tourState.tour === undefined) {
         throw new Error("No tour file!");
       }
 
-      this.panel = vscode.window.createWebviewPanel("tour", "title", config.webviewColumn(), { enableScripts: true });
+      this.panel = vscode.window.createWebviewPanel(
+        "tour",
+        "title",
+        config.webviewColumn(),
+        { enableScripts: true },
+      );
       this.panel.webview.onDidReceiveMessage((message: any) => {
         switch (message.command) {
           case "nextTourstop":
@@ -58,11 +73,11 @@ export class TouristWebview {
             prevTourStop(this.context);
             break;
           case "editTitle":
-              editTitle(this.context, this.tourstop!);
-              break;
+            editTitle(this.context, this.tourStop!);
+            break;
           case "editMessage":
-              editMessage(this.context, this.tourstop!);
-              break;
+            editMessage(this.context, this.tourStop!);
+            break;
         }
       });
       this.panel.onDidDispose((event) => {
@@ -71,5 +86,4 @@ export class TouristWebview {
     }
     return this.panel!;
   }
-
 }

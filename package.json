@@ -1,188 +1,195 @@
 {
-    "name": "tourist",
-    "displayName": "Tourist",
-    "description": "A tool for making and viewing guided tours of code bases.",
-    "version": "0.0.1",
-    "publisher": "hgoldstein95",
-    "engines": {
-        "vscode": "^1.25.0"
-    },
-    "categories": [
-        "Other"
+  "name": "tourist-vscode",
+  "displayName": "Tourist for VSCode",
+  "description": "A tool for making and viewing guided tours of code bases.",
+  "version": "0.0.1",
+  "publisher": "hgoldstein95",
+  "engines": {
+    "vscode": "^1.25.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.gotoTourstop",
+        "title": "Go to tour stop",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.addTourstop",
+        "title": "Add a tour stop",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.nextTourstop",
+        "title": "Go to next tour stop",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.prevTourstop",
+        "title": "Go to previous tour stop",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.deleteTourstop",
+        "title": "Delete a tour stop",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.moveTourstopUp",
+        "title": "Move a tour stop up",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.moveTourstopDown",
+        "title": "Move a tour stop down",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.moveTourstop",
+        "title": "Move a tour stop to a different location in a file",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.editTitle",
+        "title": "Edit a tour stop's title",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.editMessage",
+        "title": "Edit a tour stop's message",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.startTour",
+        "title": "Start a tour",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.newTour",
+        "title": "Create a new tour",
+        "category": "Tourist"
+      }
     ],
-    "activationEvents": [
-        "*"
-    ],
-    "main": "./out/extension",
-    "contributes": {
-        "commands": [
-            {
-                "command": "extension.gotoTourstop",
-                "title": "Go to tour stop",
-                "category": "Tourist"
-            },
-            {
-                "command": "extension.addTourstop",
-                "title": "Add a tour stop",
-                "category": "Tourist"
-            },
-            {
-                "command": "extension.nextTourstop",
-                "title": "Go to next tour stop",
-                "category": "Tourist"
-            },
-            {
-                "command": "extension.prevTourstop",
-                "title": "Go to previous tour stop",
-                "category": "Tourist"
-            },
-            {
-                "command": "extension.deleteTourstop",
-                "title": "Delete a tour stop",
-                "category": "Tourist"
-            },
-            {
-                "command": "extension.moveTourstopUp",
-                "title": "Move a tour stop up",
-                "category": "Tourist"
-            },
-            {
-                "command": "extension.moveTourstopDown",
-                "title": "Move a tour stop down",
-                "category": "Tourist"
-            },
-            {
-                "command": "extension.moveTourstop",
-                "title": "Move a tour stop to a different location in a file",
-                "category": "Tourist"
-            },
-            {
-                "command": "extension.editTitle",
-                "title": "Edit a tour stop's title",
-                "category": "Tourist"
-            },
-            {
-                "command": "extension.editMessage",
-                "title": "Edit a tour stop's message",
-                "category": "Tourist"
-            },
-            {
-                "command": "extension.startTour",
-                "title": "Start a tour",
-                "category": "Tourist"
-            },
-            {
-                "command": "extension.newTour",
-                "title": "Create a new tour",
-                "category": "Tourist"
-            }
-        ],
-        "views": {
-            "explorer": [
-                {
-                    "id": "touristView",
-                    "name": "Tourist"
-                }
-            ]
-        },
-        "menus": {
-            "editor/context": [
-                {
-                    "command": "extension.addTourstop",
-                    "group": "Tourist"
-                },
-                {
-                    "command": "extension.moveTourstop",
-                    "group": "Tourist"
-                }
-            ],
-            "view/item/context": [
-                {
-                    "command": "extension.editTitle"
-                },
-                {
-                    "command": "extension.editMessage"
-                },
-                {
-                    "command": "extension.deleteTourstop"
-                },
-                {
-                    "command": "extension.moveTourstopUp"
-                },
-                {
-                    "command": "extension.moveTourstopDown"
-                }
-            ]
-        },
-        "keybindings": [
-            {
-                "command": "extension.addTourstop",
-                "key": "Ctrl+Shift+S",
-                "when": "editorTextFocus"
-            },
-            {
-                "command": "extension.nextTourstop",
-                "key": "Ctrl+Shift+Alt+J"
-            },
-            {
-                "command": "extension.prevTourstop",
-                "key": "Ctrl+Shift+Alt+K"
-            }
-        ],
-        "configuration": {
-            "type": "object",
-            "title": "Tourist Configuration",
-            "properties": {
-                "tourist.useCodeLens": {
-                    "type": "boolean",
-                    "description": "Whether a code lens should be placed at each tourstop.",
-                    "default": "true"
-                },
-                "tourist.webviewColumn": {
-                    "type": [
-                        "number",
-                        "string"
-                    ],
-                    "description": "The editor column that the webview will occupy. Valid values are 1-9 ",
-                    "default": "Beside",
-                    "enum": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
-                        9,
-                        "Beside",
-                        "Active"
-                    ]
-                }
-            }
+    "views": {
+      "explorer": [
+        {
+          "id": "touristView",
+          "name": "Tourist"
         }
+      ]
     },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    "menus": {
+      "editor/context": [
+        {
+          "command": "extension.addTourstop",
+          "group": "Tourist"
+        },
+        {
+          "command": "extension.moveTourstop",
+          "group": "Tourist"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "extension.editTitle"
+        },
+        {
+          "command": "extension.editMessage"
+        },
+        {
+          "command": "extension.deleteTourstop"
+        },
+        {
+          "command": "extension.moveTourstopUp"
+        },
+        {
+          "command": "extension.moveTourstopDown"
+        }
+      ]
     },
-    "devDependencies": {
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.6",
-        "tslint": "^5.8.0",
-        "@types/node": "^7.0.43",
-        "@types/mocha": "^2.2.42"
-    },
-    "dependencies": {
-        "@types/chai": "^4.1.7",
-        "@types/dot": "^1.1.3",
-        "@types/showdown": "^1.9.2",
-        "chai": "^4.2.0",
-        "dot": "^1.1.2",
-        "showdown": "^1.9.0",
-        "vscode": "1.1.30"
+    "keybindings": [
+      {
+        "command": "extension.addTourstop",
+        "key": "Ctrl+Shift+S",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "extension.nextTourstop",
+        "key": "Ctrl+Shift+Alt+J"
+      },
+      {
+        "command": "extension.prevTourstop",
+        "key": "Ctrl+Shift+Alt+K"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Tourist Configuration",
+      "properties": {
+        "tourist.useCodeLens": {
+          "type": "boolean",
+          "description": "Whether a code lens should be placed at each tourstop.",
+          "default": "true"
+        },
+        "tourist.webviewColumn": {
+          "type": [
+            "number",
+            "string"
+          ],
+          "description": "The editor column that the webview will occupy. Valid values are 1-9 ",
+          "default": "Beside",
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            "Beside",
+            "Active"
+          ]
+        }
+      }
     }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.42",
+    "@types/node": "^7.10.5",
+    "tslint": "^5.15.0",
+    "typescript": "^2.6.1",
+    "vscode": "^1.1.6"
+  },
+  "dependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/dot": "^1.1.3",
+    "@types/showdown": "^1.9.2",
+    "chai": "^4.2.0",
+    "dot": "^1.1.2",
+    "electron-rebuild": "^1.8.4",
+    "nodegit": "^0.24.1",
+    "showdown": "^1.9.0",
+    "tourist": "file:../tourist",
+    "vscode": "1.1.30"
+  },
+  "prettier": {
+    "arrowParens": "always",
+    "trailingComma": "all"
+  }
 }

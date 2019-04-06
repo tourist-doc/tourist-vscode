@@ -1,12 +1,10 @@
 {
-	"extends": [
-		"tslint:latest"
-    ],
-	"defaultSeverity": "warning",
-	"indent": [true, "spaces", 2],
-	"rules": {
-		"object-literal-sort-keys": false,
-		"no-console": false,
-		"interface-name": false
-	}
+  "extends": ["tslint:latest"],
+  "defaultSeverity": "warning",
+  "indent": [true, "spaces", 2],
+  "rules": {
+    "object-literal-sort-keys": false,
+    "no-console": false,
+    "interface-name": false
+  }
 }

@@ -1,369 +1,562 @@
+import * as fs from "fs";
 import { relative } from "path";
+import {
+  AbsoluteTourStop,
+  BrokenTourStop,
+  isNotBroken,
+  Tour,
+  Tourist,
+} from "tourist";
 import * as vscode from "vscode";
 
 import * as config from "./config";
 import { quickPickTourstop } from "./quickPick";
-import { Tour, Tourstop } from "./tour";
+import { TourState } from "./tourState";
 import { TouristWebview } from "./webview";
 
-const activeTourstopDecorationType = vscode.window.createTextEditorDecorationType({
+const activeTourstopDecorationType = vscode.window.createTextEditorDecorationType(
+  {
     backgroundColor: new vscode.ThemeColor("merge.incomingHeaderBackground"),
     isWholeLine: true,
-});
+  },
+);
 
-const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationType({
+const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationType(
+  {
     backgroundColor: new vscode.ThemeColor("merge.incomingContentBackground"),
     isWholeLine: true,
-});
+  },
+);
 
 // --- Global variables --- //
-let tour: Tour | undefined;
-let tourView: vscode.TreeView<Tourstop> | undefined;
+const tourist = new Tourist();
+let tourState: TourState | undefined;
 
 /**
  * Called when a workspace is opened with a .tour file at the top level
  */
 export function activate(context: vscode.ExtensionContext) {
-    // If a .tour file exists at the top level of the workspace, parse it
-    // vscode.workspace.findFiles("*.tour").then((uris) => {
-    //     if (uris.length > 0) {
-    //         // TODO:  decide how to handle multiple .tour files
-    //         const tourfile = uris[0];
-    //         Tour.parseTour(tourfile).then((t: Tour) => {
-    //             tour = t;
-    //             showTour(context, tour);
-    //         }, (error) => {
-    //             console.error(error);
-    //         });
-    //     } else {
-    //         console.log("No .tour file found");
-    //     }
-    // });
+  // If a .tour file exists at the top level of the workspace, parse it
+  // vscode.workspace.findFiles("*.tour").then((uris) => {
+  //     if (uris.length > 0) {
+  //         // TODO:  decide how to handle multiple .tour files
+  //         const tourfile = uris[0];
+  //         Tour.parseTour(tourfile).then((t: Tour) => {
+  //             tour = t;
+  //             showTour(tour);
+  //         }, (error) => {
+  //             console.error(error);
+  //         });
+  //     } else {
+  //         console.log("No .tour file found");
+  //     }
+  // });
+  tourist.mapConfig("tourst-vscode", "c:\\Users\\jfields\\Desktop\\tourist-vscode");
 
-    const justContext: Array<[string, (ctx: vscode.ExtensionContext) => void]> = [
-        ["extension.nextTourstop", nextTourStop],
-        ["extension.prevTourstop", prevTourStop],
-        ["extension.addTourstop", addTourstop],
-        ["extension.startTour", startTour],
-        ["extension.newTour", newTour],
-        ["extension.moveTourstop", moveTourstop],
-    ];
-    justContext.forEach((command) => {
-        vscode.commands.registerCommand(command[0], () => {
-            command[1](context);
-        });
+  // TODO: Refactor to only pass context when needed
+  const justContext: Array<[string, (ctx: vscode.ExtensionContext) => void]> = [
+    ["extension.nextTourstop", nextTourStop],
+    ["extension.prevTourstop", prevTourStop],
+    ["extension.addTourstop", addTourStop],
+    ["extension.startTour", startTour],
+    ["extension.newTour", newTour],
+    ["extension.moveTourstop", moveTourstop],
+  ];
+  justContext.forEach((command) => {
+    vscode.commands.registerCommand(command[0], async () => {
+      await command[1](context);
     });
+  });
 
-    const contextAndTourstop: Array<[string, (ctx: vscode.ExtensionContext, tourstop: Tourstop) => void]> = [
-        ["extension.gotoTourstop", gotoTourStop],
-        ["extension.deleteTourstop", deleteTourstop],
-        ["extension.moveTourstopUp", moveTourstopUp],
-        ["extension.moveTourstopDown", moveTourstopDown],
-        ["extension.editTitle", editTitle],
-        ["extension.editMessage", editMessage],
-    ];
-    contextAndTourstop.forEach((command) => {
-        vscode.commands.registerCommand(command[0], async (tourstop?: Tourstop) => {
-            if (tour) {
-                if (tourstop === undefined) {
-                    tourstop = await quickPickTourstop(tour);
-                }
+  const contextAndTourstop: Array<
+    [
+      string,
+      (
+        ctx: vscode.ExtensionContext,
+        tourstop: AbsoluteTourStop | BrokenTourStop,
+      ) => void
+    ]
+  > = [
+    ["extension.gotoTourstop", gotoTourStop],
+    ["extension.deleteTourstop", deleteTourStop],
+    ["extension.moveTourstopUp", moveTourstopUp],
+    ["extension.moveTourstopDown", moveTourstopDown],
+    ["extension.editTitle", editTitle],
+    ["extension.editMessage", editMessage],
+  ];
+  contextAndTourstop.forEach((command) => {
+    vscode.commands.registerCommand(
+      command[0],
+      async (stop?: AbsoluteTourStop | BrokenTourStop) => {
+        if (tourState && tourState.tour) {
+          if (stop === undefined) {
+            stop = await quickPickTourstop(tourState.tour);
+          }
 
-                if (tourstop) {
-                    command[1](context, tourstop);
-                }
-            }
-        });
-    });
-
-    TouristWebview.setContext(context);
-
-    const codelensProvider = new class implements vscode.CodeLensProvider {
-        public provideCodeLenses(
-            document: vscode.TextDocument,
-            token: vscode.CancellationToken,
-        ): vscode.ProviderResult<vscode.CodeLens[]> {
-            if (!config.useCodeLens()) {
-                return [];
-            }
-
-
-            const lenses = [] as vscode.CodeLens[];
-            if (tour) {
-                tour.getTourstops().forEach((tourstop: Tourstop) => {
-                    if (pathsEqual(document.fileName, tourstop.filePath)) {
-                        const position = new vscode.Position(
-                            tourstop.position.row,
-                            tourstop.position.col,
-                        );
-                        lenses.push(
-                            new vscode.CodeLens(new vscode.Range(position, position), {
-                                arguments: [tourstop],
-                                command: "extension.gotoTourstop",
-                                title: tourstop.title,
-                            }),
-                        );
-                    }
-                });
-            }
-
-            return lenses;
+          if (stop) {
+            await command[1](context, stop);
+          }
         }
+      },
+    );
+  });
 
-        public resolveCodeLens(
-            codeLens: vscode.CodeLens,
-            token: vscode.CancellationToken,
-        ): vscode.ProviderResult<vscode.CodeLens> {
-            return codeLens;
-        }
-    }();
-    context.subscriptions.push(
-        vscode.languages.registerCodeLensProvider({ scheme: "file" }, codelensProvider));
+  TouristWebview.setContext(context);
+
+  const codelensProvider = new class implements vscode.CodeLensProvider {
+    public provideCodeLenses(
+      document: vscode.TextDocument,
+      token: vscode.CancellationToken,
+    ): vscode.ProviderResult<vscode.CodeLens[]> {
+      if (!config.useCodeLens()) {
+        return [];
+      }
+
+      const lenses = [] as vscode.CodeLens[];
+      if (tourState && tourState.tour) {
+        tourState.tour.stops.forEach(
+          (stop: AbsoluteTourStop | BrokenTourStop) => {
+            if (isNotBroken(stop)) {
+              if (pathsEqual(document.fileName, stop.absPath)) {
+                const position = new vscode.Position(stop.line, 0);
+                lenses.push(
+                  new vscode.CodeLens(new vscode.Range(position, position), {
+                    arguments: [stop],
+                    command: "extension.gotoTourstop",
+                    title: stop.title,
+                  }),
+                );
+              }
+            } else {
+              // TODO: handle broken stop
+              vscode.window.showErrorMessage("Your tour is broken! =(");
+            }
+          },
+        );
+      }
+
+      return lenses;
+    }
+
+    public resolveCodeLens(
+      codeLens: vscode.CodeLens,
+      token: vscode.CancellationToken,
+    ): vscode.ProviderResult<vscode.CodeLens> {
+      return codeLens;
+    }
+  }();
+  context.subscriptions.push(
+    vscode.languages.registerCodeLensProvider(
+      { scheme: "file" },
+      codelensProvider,
+    ),
+  );
 }
 
 /**
  * Goes to the given tourstop in the active editor
  */
-function gotoTourStop(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    if (tour === undefined || tourView === undefined) {
-        return;
-    }
+function gotoTourStop(
+  context: vscode.ExtensionContext,
+  stop: AbsoluteTourStop | BrokenTourStop,
+) {
+  if (!tourState || !isNotBroken(stop)) {
+    return;
+  }
 
-    tour.setCurrentTourstop(tourstop);
+  tourState.setCurrentTourStop(stop);
 
-    // In the TreeView, select the new tourstop
-    tourView.reveal(tourstop);
+  // In the TreeView, select the new tourstop
+  if (tourState.treeView) {
+    tourState.treeView.reveal(stop);
+  }
 
-    const file = vscode.Uri.file(tourstop.filePath);
-    vscode.workspace.openTextDocument(file).then((doc) => {
-        vscode.window.showTextDocument(doc, vscode.ViewColumn.One).then((editor) => {
-            const pos = new vscode.Position(tourstop.position.row, tourstop.position.col);
-            editor.selection = new vscode.Selection(pos, pos);
-            editor.revealRange(editor.selection, vscode.TextEditorRevealType.Default);
-            showDecorations(tour!);
-        }).then(() => {
-            TouristWebview.showTourstop(tour!, tourstop);
+  const file = vscode.Uri.file(stop.absPath);
+  vscode.workspace.openTextDocument(file).then(
+    (doc) => {
+      vscode.window
+        .showTextDocument(doc, vscode.ViewColumn.One)
+        .then((editor) => {
+          const pos = new vscode.Position(stop.line, 0);
+          editor.selection = new vscode.Selection(pos, pos);
+          editor.revealRange(
+            editor.selection,
+            vscode.TextEditorRevealType.Default,
+          );
+          if (tourState) {
+            showDecorations(tourState.tour);
+          }
+        })
+        .then(() => {
+          if (tourState) {
+            TouristWebview.showTourStop(tourState, stop);
+          }
         });
-    }, (error: any) => {
-        console.error(error);
-        vscode.window.showErrorMessage(`Unable to open ${file.fsPath}`);
-    });
+    },
+    (error: any) => {
+      console.error(error);
+      vscode.window.showErrorMessage(`Unable to open ${file.fsPath}`);
+    },
+  );
 }
 
 /**
  * Goes to the next tourstop in the active editor
  */
 export function nextTourStop(context: vscode.ExtensionContext) {
-    if (tour !== undefined) {
-        const next = tour.nextTourStop();
-        if (next) {
-            gotoTourStop(context, next);
-        } else {
-            vscode.window.showInformationMessage("No more tourstops!");
-        }
-    }
+  if (!tourState) {
+    return;
+  }
+
+  const next = tourState.nextTourStop();
+  if (next) {
+    gotoTourStop(context, next);
+  } else {
+    vscode.window.showInformationMessage("No more tourstops!");
+  }
 }
 
 /**
  * Goes to the previous tourstop in the active editor
  */
 export function prevTourStop(context: vscode.ExtensionContext) {
-    if (tour !== undefined) {
-        const prev = tour.prevTourStop();
-        if (prev) {
-            gotoTourStop(context, prev);
+  if (!tourState) {
+    return;
+  }
+
+  const prev = tourState.prevTourStop();
+  if (prev) {
+    gotoTourStop(context, prev);
+  } else {
+    vscode.window.showInformationMessage("No more tourstops!");
+  }
+}
+
+/**
+ * Adds a TourStop to the current Tour
+ */
+async function addTourStop(context: vscode.ExtensionContext) {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || !tourState) {
+    return;
+  }
+
+  const title =
+    (await vscode.window.showInputBox({ prompt: "Stop title:" })) || "";
+  try {
+    await tourist.add(tourState.tourFile, {
+      title,
+      absPath: editor.document.fileName,
+      line: editor.selection.active.line,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+  const tour = await tourist.resolve(tourState.tourFile);
+  tourState = new TourState(tourState.tourFile, tour, tourState.path);
+  await saveTour();
+  showTour(tourState.tour);
+}
+
+/**
+ * Delete TourStop from current Tour
+ */
+async function deleteTourStop(
+  context: vscode.ExtensionContext,
+  stop: AbsoluteTourStop | BrokenTourStop,
+) {
+  if (!tourState) {
+    return;
+  }
+
+  const idx = tourState.tour.stops.indexOf(stop);
+  if (idx !== -1) {
+    try {
+      await tourist.remove(tourState.tourFile, idx);
+    } catch (error) {
+      console.error(error);
+    }
+    const tour = await tourist.resolve(tourState.tourFile);
+    tourState = new TourState(tourState.tourFile, tour, tourState.path);
+    await saveTour();
+    showTour(tourState.tour);
+  }
+}
+
+/**
+ * Edits the title of a TourStop in the current Tour
+ */
+export async function editTitle(
+  context: vscode.ExtensionContext,
+  stop: AbsoluteTourStop | BrokenTourStop,
+): Promise<void> {
+  if (!tourState) {
+    return;
+  }
+
+  vscode.window.showInputBox().then(async (title) => {
+    if (tourState && title !== undefined) {
+      const idx = tourState.tour.stops.indexOf(stop);
+      if (idx !== -1) {
+        await tourist.edit(tourState.tourFile, idx, { title });
+        const tour = await tourist.resolve(tourState.tourFile);
+        tourState = new TourState(tourState.tourFile, tour, tourState.path);
+        await saveTour();
+        TouristWebview.showTourStop(tourState, tourState.tour.stops[idx]);
+        showTour(tourState.tour);
+      }
+    }
+  });
+}
+
+/**
+ * Edits the message of a TourStop in the current Tour
+ */
+export async function editMessage(
+  context: vscode.ExtensionContext,
+  stop: AbsoluteTourStop | BrokenTourStop,
+): Promise<void> {
+  if (!tourState) {
+    return;
+  }
+
+  vscode.window.showInputBox().then(async (body) => {
+    if (tourState && body !== undefined) {
+      const idx = tourState.tour.stops.indexOf(stop);
+      if (idx !== -1) {
+        await tourist.edit(tourState.tourFile, idx, { body });
+        const tour = await tourist.resolve(tourState.tourFile);
+        tourState = new TourState(tourState.tourFile, tour, tourState.path);
+        await saveTour();
+        TouristWebview.showTourStop(tourState, tourState.tour.stops[idx]);
+        showTour(tourState.tour);
+      }
+    }
+  });
+}
+
+async function moveTourstopUp(
+  context: vscode.ExtensionContext,
+  stop: AbsoluteTourStop | BrokenTourStop,
+) {
+  if (!tourState) {
+    return;
+  }
+
+  if (tourState.tour) {
+    const idx = tourState.tour.stops.indexOf(stop);
+    if (idx > 0) {
+      const otherIdx = idx - 1;
+      const newIndices = Array.from(
+        Array(tourState.tour.stops.length).keys(),
+      ).map((i) => {
+        if (i === idx) {
+          return otherIdx;
+        } else if (i === otherIdx) {
+          return idx;
         } else {
-            vscode.window.showInformationMessage("No more tourstops!");
+          return i;
         }
+      });
+      await tourist.scramble(tourState.tourFile, newIndices);
     }
+
+    const tour = await tourist.resolve(tourState.tourFile);
+    tourState = new TourState(tourState.tourFile, tour, tourState.path);
+    await saveTour();
+    showTour(tourState.tour);
+  }
 }
 
 /**
- * Adds a Tourstop to the current Tour
+ * Swaps the given tourstop with the one below it
  */
-function addTourstop(context: vscode.ExtensionContext) {
-    const editor = vscode.window.activeTextEditor;
-    if (editor === undefined) {
-        return;
+async function moveTourstopDown(
+  context: vscode.ExtensionContext,
+  stop: AbsoluteTourStop | BrokenTourStop,
+) {
+  if (!tourState) {
+    return;
+  }
+
+  if (tourState.tour) {
+    const idx = tourState.tour.stops.indexOf(stop);
+    if (idx < tourState.tour.stops.length && idx !== -1) {
+      const otherIdx = idx + 1;
+      const newIndices = Array.from(
+        Array(tourState.tour.stops.length).keys(),
+      ).map((i) => {
+        if (i === idx) {
+          return otherIdx;
+        } else if (i === otherIdx) {
+          return idx;
+        } else {
+          return i;
+        }
+      });
+      await tourist.scramble(tourState.tourFile, newIndices);
     }
 
-    if (tour === undefined) {
-        console.error("Uh oh, tour was undefined!");
-    } else {
-        tour.addTourStop({
-            title: "Shiny new tourstop",
-            message: "Please explain here, oh wise one",
-            filePath: editor.document.fileName,
-            position: {
-                row: editor.selection.active.line,
-                col: editor.selection.active.character,
-            },
-        });
-        tour.writeToDisk();
-        showTour(context, tour);
-    }
-}
-
-/**
- * Delete Tourstop from current Tour
- */
-function deleteTourstop(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    if (tour === undefined) {
-        console.warn("tour is undefined. Ignoring add tourstop command");
-    } else {
-        tour.deleteTourStop(tourstop);
-        tour.writeToDisk();
-        showTour(context, tour);
-    }
-}
-
-/**
- * Edits the title of a Tourstop in the current Tour
- */
-export function editTitle(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    if (tour === undefined) {
-        console.warn("tour is undefined. Ignoring edit tourstop command");
-    } else {
-        vscode.window.showInputBox().then((title) => {
-            if (tour !== undefined && title !== undefined) {
-                tourstop.title = title;
-                tour.writeToDisk();
-                TouristWebview.showTourstop(tour, tourstop);
-                // TODO: showTour() is probably overkill here
-                showTour(context, tour);
-            }
-        });
-    }
-}
-
-/**
- * Edits the message of a Tourstop in the current Tour
- */
-export function editMessage(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    if (tour === undefined) {
-        console.warn("tour is undefined. Ignoring edit tourstop command");
-    } else {
-        vscode.window.showInputBox().then((message) => {
-            if (tour !== undefined && message !== undefined) {
-                tourstop.message = message;
-                tour.writeToDisk();
-                TouristWebview.showTourstop(tour, tourstop);
-                // TODO: showTour() is probably overkill here
-                showTour(context, tour);
-            }
-        });
-    }
-}
-
-function moveTourstopUp(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    if (tour) {
-        tour.moveTourstopUp(tourstop);
-        tour.writeToDisk();
-        showTour(context, tour);
-    }
-}
-
-function moveTourstopDown(context: vscode.ExtensionContext, tourstop: Tourstop) {
-    if (tour) {
-        tour.moveTourstopDown(tourstop);
-        tour.writeToDisk();
-        showTour(context, tour);
-    }
+    const tour = await tourist.resolve(tourState.tourFile);
+    tourState = new TourState(tourState.tourFile, tour, tourState.path);
+    await saveTour();
+    showTour(tourState.tour);
+  }
 }
 
 // TODO: this should probably be renamed, since it has nothing to do with moveTourstopUp/Down
 async function moveTourstop(context: vscode.ExtensionContext) {
-    if (tour) {
-        const tourstop = await quickPickTourstop(tour);
-        if (tourstop) {
-            const editor = vscode.window.activeTextEditor;
-            if (editor) {
-                tourstop.filePath = editor.document.fileName;
-                tourstop.position = {
-                    row: editor.selection.active.line,
-                    col: editor.selection.active.character,
-                };
-                showTour(context, tour);
-                tour.writeToDisk();
-            }
-        }
+  if (!tourState) {
+    return;
+  }
+
+  const stop = await quickPickTourstop(tourState.tour);
+  if (stop) {
+    const editor = vscode.window.activeTextEditor;
+    if (editor) {
+      try {
+        await tourist.move(tourState.tourFile, tourState.tour.stops.indexOf(stop), {
+          absPath: editor.document.fileName,
+          line: editor.selection.active.line,
+        });
+      } catch (error) {
+        console.error(error);
+      }
+      const tour = await tourist.resolve(tourState.tourFile);
+      tourState = new TourState(tourState.tourFile, tour, tourState.path);
+      showTour(tourState.tour);
+      await saveTour();
     }
+  }
 }
 
 /**
  * Starts a Tour from a .tour file
  */
-function startTour(context: vscode.ExtensionContext) {
-    vscode.window.showOpenDialog({
-        openLabel: "Start tour",
-        filters: {
-            Tours: ["tour"],
-        },
-    }).then((uris: vscode.Uri[] | undefined) => {
-        if (uris) {
-            Tour.parseTour(uris[0]).then((t: Tour) => {
-                tour = t;
-                showTour(context, tour);
-            });
-        }
+async function startTour(context: vscode.ExtensionContext): Promise<void> {
+  vscode.window
+    .showOpenDialog({
+      openLabel: "Start tour",
+      canSelectMany: false,
+      filters: {
+        Tours: ["tour"],
+      },
+    })
+    .then(async (uris: vscode.Uri[] | undefined) => {
+      if (uris) {
+        tourState = await parseTourFile(uris[0].fsPath);
+        showTour(tourState.tour);
+      }
     });
 }
 
 /**
- * Creates a new Tour. Currently, a .tour file is not actually created until a Tourstop is added
+ * Creates a new Tour.
  */
-function newTour(context: vscode.ExtensionContext) {
-    const folderName = vscode.workspace.rootPath ?
-        vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
-        : "My Tour";
-    vscode.window.showInputBox({ value: folderName, prompt: "Tour name:" }).then((tourName) => {
-        if (tourName !== undefined) {
-            const filepath = vscode.workspace.rootPath + tourName.replace(" ", "_").toLowerCase() + ".tour";
-            tour = new Tour([], filepath);
+async function newTour(context: vscode.ExtensionContext): Promise<void> {
+  const folderName = vscode.workspace.rootPath
+    ? vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
+    : "My Tour";
+  const title = await vscode.window.showInputBox({
+    value: folderName,
+    prompt: "Tour name:",
+  });
+  // TODO: preferably let them pick a save location
+  // TODO: this is pretty brittle...
+  const path =
+    (vscode.workspace.workspaceFolders
+      ? vscode.workspace.workspaceFolders[0].uri.fsPath
+      : "") +
+    "/" +
+    title +
+    ".tour";
+  if (title !== undefined) {
+    const tf = await tourist.init(title);
+    const tour = await tourist.resolve(tf);
 
-            showTour(context, tour);
-        }
-    });
+    tourState = new TourState(tf, tour, path);
+
+    await saveTour();
+    showTour(tour);
+  }
 }
 
 /**
  * Show the given tour in the sidebar
  */
-function showTour(context: vscode.ExtensionContext, t: Tour) {
-    tourView = vscode.window.createTreeView<Tourstop>("touristView", { treeDataProvider: t });
-    showDecorations(t);
+function showTour(t: Tour) {
+  if (!tourState) {
+    return;
+  }
+
+  showDecorations(t);
 }
 
 function showDecorations(tour: Tour) {
-    const current = tour.getCurrentTourstop();
-    vscode.window.visibleTextEditors.forEach((editor) => {
-        if (current && pathsEqual(current.filePath, editor.document.fileName)) {
-            editor.setDecorations(activeTourstopDecorationType, [
-                editor.document.lineAt(
-                    new vscode.Position(current.position.row, current.position.col),
-                ).range,
-            ]);
-        } else {
-            editor.setDecorations(activeTourstopDecorationType, []);
-        }
+  if (!tourState) {
+    return;
+  }
+  const current = tourState.getCurrentTourStop();
+  vscode.window.visibleTextEditors.forEach((editor) => {
+    if (
+      current &&
+      isNotBroken(current) &&
+      pathsEqual(current.absPath, editor.document.fileName)
+    ) {
+      editor.setDecorations(activeTourstopDecorationType, [
+        editor.document.lineAt(new vscode.Position(current.line, 0)).range,
+      ]);
+    } else {
+      editor.setDecorations(activeTourstopDecorationType, []);
+    }
 
-        editor.setDecorations(
-            inactiveTourstopDecorationType,
-            tour.tourstops
-                .filter(
-                    (stop) =>
-                        stop !== current && pathsEqual(stop.filePath, editor.document.fileName)
-                )
-                .map((stop) =>
-                    editor.document.lineAt(
-                        new vscode.Position(stop.position.row, stop.position.col),
-                    ),
-                ),
-        );
-    });
+    editor.setDecorations(
+      inactiveTourstopDecorationType,
+      tour.stops
+        .filter(
+          (stop) =>
+            stop !== current &&
+            isNotBroken(stop) &&
+            pathsEqual(stop.absPath, editor.document.fileName),
+        )
+        .map((stop) =>
+          editor.document.lineAt(
+            new vscode.Position(isNotBroken(stop) ? stop.line : 0, 0),
+          ),
+        ),
+    );
+  });
 }
 
 function pathsEqual(path1: string, path2: string) {
-    // TODO: don't do this. This is wrong and broken.
-    return relative("C:", path1) === relative("C:", path2);
+  // TODO: don't do this. This is wrong and broken.
+  return relative("C:", path1) === relative("C:", path2);
+}
+
+async function saveTour() {
+  if (!tourState) {
+    return;
+  }
+
+  console.log(`Attempting to save ${tourState.path}`);
+  fs.writeFile(
+    tourState.path,
+    await tourist.serializeTourFile(tourState.tourFile),
+    (err) => {
+      if (err) {
+        console.log(err);
+        throw err;
+      }
+      console.log("The file has been saved!");
+    },
+  );
+}
+
+async function parseTourFile(path: string): Promise<TourState> {
+  const doc = await vscode.workspace.openTextDocument(path);
+
+  const tf = await tourist.deserializeTourFile(doc.getText());
+  const tour = await tourist.resolve(tf);
+
+  return new TourState(tf, tour, path);
 }
