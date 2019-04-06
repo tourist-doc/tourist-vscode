@@ -1,6 +1,6 @@
 import { template } from "dot";
 import * as showdown from "showdown";
-import { AbsoluteTourStop, BrokenTourStop, Tour } from "tourist";
+import { AbsoluteTourStop, BrokenTourStop } from "tourist";
 import * as vscode from "vscode";
 
 import * as config from "./config";

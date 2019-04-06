@@ -75,6 +75,11 @@
         "command": "extension.newTour",
         "title": "Create a new tour",
         "category": "Tourist"
+      },
+      {
+        "command": "extension.mapRepo",
+        "title": "Map a name to a repository",
+        "category": "Tourist"
       }
     ],
     "views": {

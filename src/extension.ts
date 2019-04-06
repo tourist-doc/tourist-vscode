@@ -51,7 +51,6 @@ export function activate(context: vscode.ExtensionContext) {
   //         console.log("No .tour file found");
   //     }
   // });
-  tourist.mapConfig("tourst-vscode", "c:\\Users\\jfields\\Desktop\\tourist-vscode");
 
   // TODO: Refactor to only pass context when needed
   const justContext: Array<[string, (ctx: vscode.ExtensionContext) => void]> = [
@@ -61,6 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
     ["extension.startTour", startTour],
     ["extension.newTour", newTour],
     ["extension.moveTourstop", moveTourstop],
+    ["extension.mapRepo", mapRepo],
   ];
   justContext.forEach((command) => {
     vscode.commands.registerCommand(command[0], async () => {
@@ -415,10 +415,14 @@ async function moveTourstop(context: vscode.ExtensionContext) {
     const editor = vscode.window.activeTextEditor;
     if (editor) {
       try {
-        await tourist.move(tourState.tourFile, tourState.tour.stops.indexOf(stop), {
-          absPath: editor.document.fileName,
-          line: editor.selection.active.line,
-        });
+        await tourist.move(
+          tourState.tourFile,
+          tourState.tour.stops.indexOf(stop),
+          {
+            absPath: editor.document.fileName,
+            line: editor.selection.active.line,
+          },
+        );
       } catch (error) {
         console.error(error);
       }
@@ -448,6 +452,22 @@ async function startTour(context: vscode.ExtensionContext): Promise<void> {
         showTour(tourState.tour);
       }
     });
+}
+
+async function mapRepo(_: vscode.ExtensionContext): Promise<void> {
+  const repoName = await vscode.window.showInputBox({
+    prompt: "What's the name of the repository?",
+  });
+  if (repoName) {
+    const path = await vscode.window.showOpenDialog({
+      canSelectFiles: false,
+      canSelectFolders: true,
+      canSelectMany: false,
+    });
+    if (path) {
+      await tourist.mapConfig(repoName, path[0].fsPath);
+    }
+  }
 }
 
 /**
