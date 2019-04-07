@@ -188,7 +188,7 @@ function gotoTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
           editor.selection = new vscode.Selection(pos, pos);
           editor.revealRange(
             editor.selection,
-            vscode.TextEditorRevealType.Default,
+            config.tourstopRevealLocation(),
           );
           if (tourState) {
             showDecorations(tourState.tour);
@@ -340,6 +340,9 @@ export async function editMessage(
   }
 }
 
+/**
+ * Swaps the given tourstop with the one above it
+ */
 async function moveTourstopUp(stop: AbsoluteTourStop | BrokenTourStop) {
   if (!tourState) {
     return;

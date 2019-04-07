@@ -153,6 +153,12 @@
           "description": "Whether a text decoration should be placed at each tourstop.",
           "default": "true"
         },
+        "tourist.tourstopRevealLocation": {
+          "type": "string",
+          "description": "Whether a text decoration should be placed at each tourstop.",
+          "default": "Center",
+          "enum": ["Center", "Top"]
+        },
         "tourist.webviewColumn": {
           "type": [
             "number",

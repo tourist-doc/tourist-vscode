@@ -1,17 +1,32 @@
-import { ViewColumn, workspace } from "vscode";
+import { ViewColumn, workspace, TextEditorRevealType } from "vscode";
 
 export function useCodeLens(): boolean {
   return workspace.getConfiguration().get<boolean>("tourist.useCodeLens", true);
 }
 
 export function showDecorations(): boolean {
-  return workspace.getConfiguration().get<boolean>("tourist.showDecorations", true);
+  return workspace
+    .getConfiguration()
+    .get<boolean>("tourist.showDecorations", true);
 }
 
-export function breakpointsActive() {
+export function breakpointsActive(): boolean {
   return workspace
     .getConfiguration()
     .get<boolean>("tourist.breakpointsActive", true);
+}
+
+export function tourstopRevealLocation(): TextEditorRevealType {
+  switch (
+    workspace
+      .getConfiguration()
+      .get<"Center" | "Top">("tourist.tourstopRevealLocation", "Center")
+  ) {
+    case "Center":
+      return TextEditorRevealType.InCenter;
+    case "Top":
+      return TextEditorRevealType.AtTop;
+  }
 }
 
 export function webviewColumn(): ViewColumn {
