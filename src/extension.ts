@@ -174,7 +174,7 @@ function gotoTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
   tourState.setCurrentTourStop(stop);
 
   // In the TreeView, select the new tourstop
-  if (tourState.treeView) {
+  if (tourState.treeView && tourState.treeView.visible) {
     tourState.treeView.reveal(stop);
   }
 
