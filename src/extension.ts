@@ -54,6 +54,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
   TouristWebview.init(context);
 
+  // Here we group all the commands listed in package.json by inputs.
+  // Each is registered with a function that first gets any arguments
+  // it is not passed from the user directly (with QuickPick, etc.)
+
   const noArgsCommands: Array<[string, () => void]> = [
     ["extension.nextTourstop", nextTourStop],
     ["extension.prevTourstop", prevTourStop],
@@ -68,12 +72,30 @@ export async function activate(context: vscode.ExtensionContext) {
     });
   });
 
-  const uriCommands: Array<[string, (uri?: vscode.Uri) => void]> = [
+  const uriCommands: Array<[string, (uri: vscode.Uri) => void]> = [
     ["extension.startTour", startTour],
   ];
   uriCommands.forEach((command) => {
     vscode.commands.registerCommand(command[0], async (uri?: vscode.Uri) => {
-      await command[1](uri);
+      if (uri === undefined) {
+        vscode.window
+          .showOpenDialog({
+            openLabel: "Start tour",
+            canSelectMany: false,
+            filters: {
+              Tours: ["tour"],
+            },
+          })
+          .then(async (uris: vscode.Uri[] | undefined) => {
+            if (uris) {
+              uri = uris[0];
+            }
+          });
+      }
+
+      if (uri) {
+        await command[1](uri);
+      }
     });
   });
 
@@ -100,14 +122,11 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       command[0],
       async (stop?: AbsoluteTourStop | BrokenTourStop) => {
-        if (tourState && tourState.tour) {
-          if (stop === undefined) {
-            stop = await quickPickTourstop(tourState.tour);
-          }
-
-          if (stop) {
-            await command[1](stop);
-          }
+        if (tourState && stop === undefined) {
+          stop = await quickPickTourstop(tourState.tour);
+        }
+        if (stop) {
+          await command[1](stop);
         }
       },
     );
@@ -186,10 +205,7 @@ function gotoTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
         .then((editor) => {
           const pos = new vscode.Position(stop.line, 0);
           editor.selection = new vscode.Selection(pos, pos);
-          editor.revealRange(
-            editor.selection,
-            config.tourstopRevealLocation(),
-          );
+          editor.revealRange(editor.selection, config.tourstopRevealLocation());
           if (tourState) {
             showDecorations(tourState.tour);
           }
@@ -439,28 +455,10 @@ async function moveTourstop() {
 /**
  * Starts a Tour from a .tour file
  */
-async function startTour(uri?: vscode.Uri): Promise<void> {
-  if (uri === undefined) {
-    vscode.window
-      .showOpenDialog({
-        openLabel: "Start tour",
-        canSelectMany: false,
-        filters: {
-          Tours: ["tour"],
-        },
-      })
-      .then(async (uris: vscode.Uri[] | undefined) => {
-        if (uris) {
-          uri = uris[0];
-        }
-      });
-  }
-
-  if (uri) {
-    tourState = await parseTourFile(uri.fsPath);
-    if (tourState.tour.stops) {
-      gotoTourStop(tourState.tour.stops[0]);
-    }
+async function startTour(uri: vscode.Uri): Promise<void> {
+  tourState = await parseTourFile(uri.fsPath);
+  if (tourState.tour.stops) {
+    gotoTourStop(tourState.tour.stops[0]);
   }
 }
 
@@ -545,6 +543,9 @@ function showTour(t: Tour) {
   showDecorations(t);
 }
 
+/**
+ * Shows the decorations for the given tour
+ */
 function showDecorations(tour: Tour) {
   if (!tourState || !config.showDecorations()) {
     return;
@@ -586,6 +587,9 @@ function pathsEqual(path1: string, path2: string) {
   return relative("C:", path1) === relative("C:", path2);
 }
 
+/**
+ * Writes active TourFile to disk
+ */
 async function saveTour() {
   if (!tourState) {
     return;
@@ -605,6 +609,10 @@ async function saveTour() {
   );
 }
 
+/**
+ * Parses a TourFile, returning the TourState that results from starting this tour.
+ * // TODO: refactor
+ */
 async function parseTourFile(path: string): Promise<TourState> {
   const doc = await vscode.workspace.openTextDocument(path);
 
