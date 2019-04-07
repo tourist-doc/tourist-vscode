@@ -6,6 +6,7 @@ import {
   isNotBroken,
   Tour,
   Tourist,
+  TourFile,
 } from "tourist";
 import * as vscode from "vscode";
 
@@ -13,6 +14,7 @@ import * as config from "./config";
 import { quickPickTourstop } from "./quickPick";
 import { TourState } from "./tourState";
 import { TouristWebview } from "./webview";
+import { TourFileTreeView } from "./treeViews";
 
 const activeTourstopDecorationType = vscode.window.createTextEditorDecorationType(
   {
@@ -35,22 +37,15 @@ let tourState: TourState | undefined;
 /**
  * Called when a workspace is opened with a .tour file at the top level
  */
-export function activate(context: vscode.ExtensionContext) {
-  // If a .tour file exists at the top level of the workspace, parse it
-  // vscode.workspace.findFiles("*.tour").then((uris) => {
-  //     if (uris.length > 0) {
-  //         // TODO:  decide how to handle multiple .tour files
-  //         const tourfile = uris[0];
-  //         Tour.parseTour(tourfile).then((t: Tour) => {
-  //             tour = t;
-  //             showTour(tour);
-  //         }, (error) => {
-  //             console.error(error);
-  //         });
-  //     } else {
-  //         console.log("No .tour file found");
-  //     }
-  // });
+export async function activate(context: vscode.ExtensionContext) {
+  showTourList();
+  vscode.workspace.onDidChangeConfiguration(
+    (evt: vscode.ConfigurationChangeEvent) => {
+      if (tourState === undefined) {
+        showTourList();
+      }
+    },
+  );
 
   const touristJSON = context.globalState.get<string>("touristInstance");
   if (touristJSON) {
@@ -63,7 +58,6 @@ export function activate(context: vscode.ExtensionContext) {
     ["extension.nextTourstop", nextTourStop],
     ["extension.prevTourstop", prevTourStop],
     ["extension.addTourstop", addTourStop],
-    ["extension.startTour", startTour],
     ["extension.newTour", newTour],
     ["extension.moveTourstop", moveTourstop],
     ["extension.addBreakpoints", addBreakpoints],
@@ -71,6 +65,15 @@ export function activate(context: vscode.ExtensionContext) {
   noArgsCommands.forEach((command) => {
     vscode.commands.registerCommand(command[0], async () => {
       await command[1]();
+    });
+  });
+
+  const uriCommands: Array<[string, (uri?: vscode.Uri) => void]> = [
+    ["extension.startTour", startTour],
+  ];
+  uriCommands.forEach((command) => {
+    vscode.commands.registerCommand(command[0], async (uri?: vscode.Uri) => {
+      await command[1](uri);
     });
   });
 
@@ -433,21 +436,29 @@ async function moveTourstop() {
 /**
  * Starts a Tour from a .tour file
  */
-async function startTour(): Promise<void> {
-  vscode.window
-    .showOpenDialog({
-      openLabel: "Start tour",
-      canSelectMany: false,
-      filters: {
-        Tours: ["tour"],
-      },
-    })
-    .then(async (uris: vscode.Uri[] | undefined) => {
-      if (uris) {
-        tourState = await parseTourFile(uris[0].fsPath);
-        showTour(tourState.tour);
-      }
-    });
+async function startTour(uri?: vscode.Uri): Promise<void> {
+  if (uri === undefined) {
+    vscode.window
+      .showOpenDialog({
+        openLabel: "Start tour",
+        canSelectMany: false,
+        filters: {
+          Tours: ["tour"],
+        },
+      })
+      .then(async (uris: vscode.Uri[] | undefined) => {
+        if (uris) {
+          uri = uris[0];
+        }
+      });
+  }
+
+  if (uri) {
+    tourState = await parseTourFile(uri.fsPath);
+    if (tourState.tour.stops) {
+      gotoTourStop(tourState.tour.stops[0]);
+    }
+  }
 }
 
 async function mapRepo(ctx: vscode.ExtensionContext): Promise<void> {
@@ -598,4 +609,20 @@ async function parseTourFile(path: string): Promise<TourState> {
   const tour = await tourist.resolve(tf);
 
   return new TourState(tf, tour, path);
+}
+
+async function showTourList() {
+  tourState = undefined;
+  const uris = await vscode.workspace.findFiles("**/*.tour");
+  let tourFiles: TourFile[] = [];
+
+  for (const uri of uris) {
+    const doc = await vscode.workspace.openTextDocument(uri);
+    const tf = tourist.deserializeTourFile(doc.getText());
+    tourFiles.push(tf);
+  }
+
+  vscode.window.createTreeView<TourFile>("touristView", {
+    treeDataProvider: new TourFileTreeView(uris, tourFiles),
+  });
 }

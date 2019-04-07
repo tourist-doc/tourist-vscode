@@ -1,6 +1,6 @@
 import { AbsoluteTourStop, BrokenTourStop, Tour, TourFile } from "tourist";
 import * as vscode from "vscode";
-import { TourTreeView } from "./treeView";
+import { TourStopTreeView } from "./treeViews";
 
 /**
  * Represents the state of the active Tour
@@ -12,6 +12,7 @@ export class TourState {
   public readonly path: string;
   public readonly treeView:
     | vscode.TreeView<AbsoluteTourStop | BrokenTourStop>
+    | vscode.TreeView<AbsoluteTourStop | BrokenTourStop>
     | undefined;
   private currentStopIdx: number | undefined;
 
@@ -19,9 +20,10 @@ export class TourState {
     this.tour = tour;
     this.tourFile = tf;
     this.path = path;
+    // TODO: this is not the right place for this.
     this.treeView = vscode.window.createTreeView<
       AbsoluteTourStop | BrokenTourStop
-    >("touristView", { treeDataProvider: new TourTreeView(tour.stops) });
+    >("touristView", { treeDataProvider: new TourStopTreeView(tour.stops) });
   }
 
   public setCurrentTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
