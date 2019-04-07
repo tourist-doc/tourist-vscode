@@ -1,6 +1,6 @@
 import { template } from "dot";
 import * as showdown from "showdown";
-import { AbsoluteTourStop, BrokenTourStop } from "tourist";
+import { AbsoluteTourStop, BrokenTourStop, Tour } from "tourist";
 import * as vscode from "vscode";
 
 import * as config from "./config";
@@ -15,6 +15,7 @@ import { TourState } from "./tourState";
 interface TemplateArgs {
   title: string;
   message: string;
+  editingMessage: boolean;
 }
 
 export class TouristWebview {
@@ -27,8 +28,8 @@ export class TouristWebview {
       });
   }
 
-  public static showTourStop(
-    tourState: TourState,
+  public static setTourStop(
+    tour: Tour,
     stop: AbsoluteTourStop | BrokenTourStop,
   ) {
     if (this.htmlTemplate === undefined) {
@@ -36,26 +37,47 @@ export class TouristWebview {
       return;
     }
 
-    this.tourStop = stop;
-    this.getPanel(tourState).title = stop.title;
-    this.getPanel(tourState).webview.html = this.htmlTemplate({
-      title: stop.title,
-      message: this.mdConverter.makeHtml(stop.body || ""),
-    });
+    this.tour = tour;
+    this.stop = stop;
+
+    this.refresh();
   }
 
   private static panel?: vscode.WebviewPanel;
   private static mdConverter = new showdown.Converter();
   private static htmlTemplate?: (args: TemplateArgs) => string;
-  private static tourStop?: AbsoluteTourStop | BrokenTourStop;
+  private static tour?: Tour;
+  private static stop?: AbsoluteTourStop | BrokenTourStop;
+  private static editingMessage: boolean = false;
 
   // TODO: Don't use this context bullshit
   private static context: vscode.ExtensionContext;
 
-  private static getPanel(tourState: TourState): vscode.WebviewPanel {
+  private static refresh() {
+    if (
+      this.htmlTemplate === undefined ||
+      this.tour === undefined ||
+      this.stop === undefined
+    ) {
+      this.getPanel().title = "";
+      this.getPanel().webview.html = "";
+      return;
+    }
+
+    this.getPanel().title = this.stop.title;
+    this.getPanel().webview.html = this.htmlTemplate({
+      title: this.stop.title,
+      message: this.editingMessage
+        ? this.stop.body || ""
+        : this.mdConverter.makeHtml(this.stop.body || ""),
+      editingMessage: this.editingMessage,
+    });
+  }
+
+  private static getPanel(): vscode.WebviewPanel {
     if (this.panel === undefined) {
-      if (tourState.tour === undefined) {
-        throw new Error("No tour file!");
+      if (this.tour === undefined) {
+        throw new Error("No tour!");
       }
 
       this.panel = vscode.window.createWebviewPanel(
@@ -64,7 +86,7 @@ export class TouristWebview {
         config.webviewColumn(),
         { enableScripts: true },
       );
-      this.panel.webview.onDidReceiveMessage((message: any) => {
+      this.panel.webview.onDidReceiveMessage(async (message: any) => {
         switch (message.command) {
           case "nextTourstop":
             nextTourStop(this.context);
@@ -73,10 +95,24 @@ export class TouristWebview {
             prevTourStop(this.context);
             break;
           case "editTitle":
-            editTitle(this.context, this.tourStop!);
+            editTitle(this.context, this.stop!);
             break;
           case "editMessage":
-            editMessage(this.context, this.tourStop!);
+            this.editingMessage = true;
+            this.refresh();
+            break;
+          case "editMessageCancel":
+            this.editingMessage = false;
+            this.refresh();
+            break;
+          case "editMessageSave":
+            this.editingMessage = false;
+            if (
+              this.stop !== undefined &&
+              message.newMessage !== undefined
+            ) {
+              await editMessage(this.context, this.stop, message.newMessage);
+            }
             break;
         }
       });

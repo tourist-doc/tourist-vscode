@@ -7,6 +7,11 @@
       #footer {
         user-select: none;
       }
+      #message {
+        width: 80%;
+        height: 200px;
+        align-content: center;
+      }
     </style>
 
     <script>
@@ -15,19 +20,50 @@
   </head>
 
   <body>
-    <b>{{=it.title}}</b>
+    <h1>{{=it.title}}</h1>
+    {{?it.editingMessage}}
+    <textarea id="message">{{=it.message}}</textarea>
+    <br />
+    <a
+      title="Save"
+      onclick='vscode.postMessage({command: "editMessageSave", newMessage: document.getElementById("message").value})'
+      >Save</a
+    >
+    |
+    <a title="Cancel" onclick='vscode.postMessage({command: "editMessageCancel"})'
+      >Cancel</a
+    >
+
+    {{??}}
     {{=it.message}}
-
-    <hr>
+    <hr />
     <div id="footer">
-      <a title="Previous tourstop" onclick='vscode.postMessage({command: "prevTourstop"});'>Previous tourstop</a> |
-      <a title="Next tourstop" onclick='vscode.postMessage({command: "nextTourstop"});'>Next tourstop</a>
+      <a
+        title="Previous tourstop"
+        onclick='vscode.postMessage({command: "prevTourstop"});'
+        >Previous tourstop</a
+      >
+      |
+      <a
+        title="Next tourstop"
+        onclick='vscode.postMessage({command: "nextTourstop"});'
+        >Next tourstop</a
+      >
 
-      <br>
-      <a title="Edit title" onclick='vscode.postMessage({command: "editTitle"});'>Edit title</a>
+      <br />
+      <a
+        title="Edit title"
+        onclick='vscode.postMessage({command: "editTitle"});'
+        >Edit title</a
+      >
 
-      <br>
-      <a title="Edit message" onclick='vscode.postMessage({command: "editMessage"});'>Edit message</a>
+      <br />
+      <a
+        title="Edit message"
+        onclick='vscode.postMessage({command: "editMessage"});'
+        >Edit message</a
+      >
     </div>
+    {{?}}
   </body>
 </html>

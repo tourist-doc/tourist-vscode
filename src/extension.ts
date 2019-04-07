@@ -195,7 +195,7 @@ function gotoTourStop(
         })
         .then(() => {
           if (tourState) {
-            TouristWebview.showTourStop(tourState, stop);
+            TouristWebview.setTourStop(tourState.tour, stop);
           }
         });
     },
@@ -308,7 +308,7 @@ export async function editTitle(
         const tour = await tourist.resolve(tourState.tourFile);
         tourState = new TourState(tourState.tourFile, tour, tourState.path);
         await saveTour();
-        TouristWebview.showTourStop(tourState, tourState.tour.stops[idx]);
+        TouristWebview.setTourStop(tourState.tour, tourState.tour.stops[idx]);
         showTour(tourState.tour);
       }
     }
@@ -321,24 +321,27 @@ export async function editTitle(
 export async function editMessage(
   context: vscode.ExtensionContext,
   stop: AbsoluteTourStop | BrokenTourStop,
+  message?: string,
 ): Promise<void> {
   if (!tourState) {
     return;
   }
 
-  vscode.window.showInputBox().then(async (body) => {
-    if (tourState && body !== undefined) {
-      const idx = tourState.tour.stops.indexOf(stop);
-      if (idx !== -1) {
-        await tourist.edit(tourState.tourFile, idx, { body });
-        const tour = await tourist.resolve(tourState.tourFile);
-        tourState = new TourState(tourState.tourFile, tour, tourState.path);
-        await saveTour();
-        TouristWebview.showTourStop(tourState, tourState.tour.stops[idx]);
-        showTour(tourState.tour);
-      }
+  if (message === undefined) {
+    message = await vscode.window.showInputBox();
+  }
+
+  if (message !== undefined) {
+    const idx = tourState.tour.stops.indexOf(stop);
+    if (idx !== -1) {
+      await tourist.edit(tourState.tourFile, idx, { body: message });
+      const tour = await tourist.resolve(tourState.tourFile);
+      tourState = new TourState(tourState.tourFile, tour, tourState.path);
+      await saveTour();
+      TouristWebview.setTourStop(tourState.tour, tourState.tour.stops[idx]);
+      showTour(tourState.tour);
     }
-  });
+  }
 }
 
 async function moveTourstopUp(
