@@ -57,31 +57,34 @@ export function activate(context: vscode.ExtensionContext) {
     tourist = Tourist.deserialize(touristJSON);
   }
 
-  // TODO: Refactor to only pass context when needed
-  const justContext: Array<[string, (ctx: vscode.ExtensionContext) => void]> = [
+  TouristWebview.init(context);
+
+  const noArgsCommands: Array<[string, () => void]> = [
     ["extension.nextTourstop", nextTourStop],
     ["extension.prevTourstop", prevTourStop],
     ["extension.addTourstop", addTourStop],
     ["extension.startTour", startTour],
     ["extension.newTour", newTour],
     ["extension.moveTourstop", moveTourstop],
-    ["extension.mapRepo", mapRepo],
     ["extension.addBreakpoints", addBreakpoints],
   ];
-  justContext.forEach((command) => {
+  noArgsCommands.forEach((command) => {
+    vscode.commands.registerCommand(command[0], async () => {
+      await command[1]();
+    });
+  });
+
+  const contextCommands: Array<
+    [string, (ctx: vscode.ExtensionContext) => void]
+  > = [["extension.mapRepo", mapRepo]];
+  contextCommands.forEach((command) => {
     vscode.commands.registerCommand(command[0], async () => {
       await command[1](context);
     });
   });
 
-  const contextAndTourstop: Array<
-    [
-      string,
-      (
-        ctx: vscode.ExtensionContext,
-        tourstop: AbsoluteTourStop | BrokenTourStop,
-      ) => void
-    ]
+  const tourstopCommands: Array<
+    [string, (tourstop: AbsoluteTourStop | BrokenTourStop) => void]
   > = [
     ["extension.gotoTourstop", gotoTourStop],
     ["extension.deleteTourstop", deleteTourStop],
@@ -90,7 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
     ["extension.editTitle", editTitle],
     ["extension.editMessage", editMessage],
   ];
-  contextAndTourstop.forEach((command) => {
+  tourstopCommands.forEach((command) => {
     vscode.commands.registerCommand(
       command[0],
       async (stop?: AbsoluteTourStop | BrokenTourStop) => {
@@ -100,14 +103,12 @@ export function activate(context: vscode.ExtensionContext) {
           }
 
           if (stop) {
-            await command[1](context, stop);
+            await command[1](stop);
           }
         }
       },
     );
   });
-
-  TouristWebview.setContext(context);
 
   const codelensProvider = new class implements vscode.CodeLensProvider {
     public provideCodeLenses(
@@ -162,10 +163,7 @@ export function activate(context: vscode.ExtensionContext) {
 /**
  * Goes to the given tourstop in the active editor
  */
-function gotoTourStop(
-  context: vscode.ExtensionContext,
-  stop: AbsoluteTourStop | BrokenTourStop,
-) {
+function gotoTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
   if (!tourState || !isNotBroken(stop)) {
     return;
   }
@@ -209,14 +207,14 @@ function gotoTourStop(
 /**
  * Goes to the next tourstop in the active editor
  */
-export function nextTourStop(context: vscode.ExtensionContext) {
+export function nextTourStop() {
   if (!tourState) {
     return;
   }
 
   const next = tourState.nextTourStop();
   if (next) {
-    gotoTourStop(context, next);
+    gotoTourStop(next);
   } else {
     vscode.window.showInformationMessage("No more tourstops!");
   }
@@ -225,14 +223,14 @@ export function nextTourStop(context: vscode.ExtensionContext) {
 /**
  * Goes to the previous tourstop in the active editor
  */
-export function prevTourStop(context: vscode.ExtensionContext) {
+export function prevTourStop() {
   if (!tourState) {
     return;
   }
 
   const prev = tourState.prevTourStop();
   if (prev) {
-    gotoTourStop(context, prev);
+    gotoTourStop(prev);
   } else {
     vscode.window.showInformationMessage("No more tourstops!");
   }
@@ -241,7 +239,7 @@ export function prevTourStop(context: vscode.ExtensionContext) {
 /**
  * Adds a TourStop to the current Tour
  */
-async function addTourStop(context: vscode.ExtensionContext) {
+async function addTourStop() {
   const editor = vscode.window.activeTextEditor;
   if (!editor || !tourState) {
     return;
@@ -267,10 +265,7 @@ async function addTourStop(context: vscode.ExtensionContext) {
 /**
  * Delete TourStop from current Tour
  */
-async function deleteTourStop(
-  context: vscode.ExtensionContext,
-  stop: AbsoluteTourStop | BrokenTourStop,
-) {
+async function deleteTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
   if (!tourState) {
     return;
   }
@@ -293,7 +288,6 @@ async function deleteTourStop(
  * Edits the title of a TourStop in the current Tour
  */
 export async function editTitle(
-  context: vscode.ExtensionContext,
   stop: AbsoluteTourStop | BrokenTourStop,
 ): Promise<void> {
   if (!tourState) {
@@ -319,7 +313,6 @@ export async function editTitle(
  * Edits the message of a TourStop in the current Tour
  */
 export async function editMessage(
-  context: vscode.ExtensionContext,
   stop: AbsoluteTourStop | BrokenTourStop,
   message?: string,
 ): Promise<void> {
@@ -344,10 +337,7 @@ export async function editMessage(
   }
 }
 
-async function moveTourstopUp(
-  context: vscode.ExtensionContext,
-  stop: AbsoluteTourStop | BrokenTourStop,
-) {
+async function moveTourstopUp(stop: AbsoluteTourStop | BrokenTourStop) {
   if (!tourState) {
     return;
   }
@@ -380,10 +370,7 @@ async function moveTourstopUp(
 /**
  * Swaps the given tourstop with the one below it
  */
-async function moveTourstopDown(
-  context: vscode.ExtensionContext,
-  stop: AbsoluteTourStop | BrokenTourStop,
-) {
+async function moveTourstopDown(stop: AbsoluteTourStop | BrokenTourStop) {
   if (!tourState) {
     return;
   }
@@ -414,7 +401,7 @@ async function moveTourstopDown(
 }
 
 // TODO: this should probably be renamed, since it has nothing to do with moveTourstopUp/Down
-async function moveTourstop(context: vscode.ExtensionContext) {
+async function moveTourstop() {
   if (!tourState) {
     return;
   }
@@ -446,7 +433,7 @@ async function moveTourstop(context: vscode.ExtensionContext) {
 /**
  * Starts a Tour from a .tour file
  */
-async function startTour(context: vscode.ExtensionContext): Promise<void> {
+async function startTour(): Promise<void> {
   vscode.window
     .showOpenDialog({
       openLabel: "Start tour",
@@ -483,7 +470,7 @@ async function mapRepo(ctx: vscode.ExtensionContext): Promise<void> {
 /**
  * Creates a new Tour.
  */
-async function newTour(context: vscode.ExtensionContext): Promise<void> {
+async function newTour(): Promise<void> {
   const folderName = vscode.workspace.rootPath
     ? vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
     : "My Tour";
@@ -511,7 +498,7 @@ async function newTour(context: vscode.ExtensionContext): Promise<void> {
   }
 }
 
-async function addBreakpoints(_: vscode.ExtensionContext): Promise<void> {
+async function addBreakpoints(): Promise<void> {
   if (!tourState) {
     return;
   }

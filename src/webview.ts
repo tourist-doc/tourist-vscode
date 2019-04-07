@@ -10,7 +10,6 @@ import {
   nextTourStop,
   prevTourStop,
 } from "./extension";
-import { TourState } from "./tourState";
 
 interface TemplateArgs {
   title: string;
@@ -19,24 +18,17 @@ interface TemplateArgs {
 }
 
 export class TouristWebview {
-  public static setContext(ctx: vscode.ExtensionContext) {
-    this.context = ctx;
-    vscode.workspace
-      .openTextDocument(this.context.asAbsolutePath("src/webview.html"))
-      .then((templateDoc) => {
-        this.htmlTemplate = template(templateDoc.getText());
-      });
+  public static async init(ctx: vscode.ExtensionContext) {
+    const templateDoc = await vscode.workspace.openTextDocument(
+      ctx.asAbsolutePath("src/webview.html"),
+    );
+    this.htmlTemplate = template(templateDoc.getText());
   }
 
   public static setTourStop(
     tour: Tour,
     stop: AbsoluteTourStop | BrokenTourStop,
   ) {
-    if (this.htmlTemplate === undefined) {
-      console.error("htmlTemplate is undefined in showTourstop()");
-      return;
-    }
-
     this.tour = tour;
     this.stop = stop;
 
@@ -50,22 +42,15 @@ export class TouristWebview {
   private static stop?: AbsoluteTourStop | BrokenTourStop;
   private static editingMessage: boolean = false;
 
-  // TODO: Don't use this context bullshit
-  private static context: vscode.ExtensionContext;
-
   private static refresh() {
-    if (
-      this.htmlTemplate === undefined ||
-      this.tour === undefined ||
-      this.stop === undefined
-    ) {
+    if (this.tour === undefined || this.stop === undefined) {
       this.getPanel().title = "";
       this.getPanel().webview.html = "";
       return;
     }
 
     this.getPanel().title = this.stop.title;
-    this.getPanel().webview.html = this.htmlTemplate({
+    this.getPanel().webview.html = this.htmlTemplate!({
       title: this.stop.title,
       message: this.editingMessage
         ? this.stop.body || ""
@@ -89,13 +74,13 @@ export class TouristWebview {
       this.panel.webview.onDidReceiveMessage(async (message: any) => {
         switch (message.command) {
           case "nextTourstop":
-            nextTourStop(this.context);
+            nextTourStop();
             break;
           case "prevTourstop":
-            prevTourStop(this.context);
+            prevTourStop();
             break;
           case "editTitle":
-            editTitle(this.context, this.stop!);
+            editTitle(this.stop!);
             break;
           case "editMessage":
             this.editingMessage = true;
@@ -107,11 +92,8 @@ export class TouristWebview {
             break;
           case "editMessageSave":
             this.editingMessage = false;
-            if (
-              this.stop !== undefined &&
-              message.newMessage !== undefined
-            ) {
-              await editMessage(this.context, this.stop, message.newMessage);
+            if (this.stop !== undefined && message.newMessage !== undefined) {
+              await editMessage(this.stop, message.newMessage);
             }
             break;
         }
