@@ -148,6 +148,11 @@
           "description": "Whether a code lens should be placed at each tourstop.",
           "default": "true"
         },
+        "tourist.showDecorations": {
+          "type": "boolean",
+          "description": "Whether a text decoration should be placed at each tourstop.",
+          "default": "true"
+        },
         "tourist.webviewColumn": {
           "type": [
             "number",

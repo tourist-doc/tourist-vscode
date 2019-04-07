@@ -543,7 +543,7 @@ function showTour(t: Tour) {
 }
 
 function showDecorations(tour: Tour) {
-  if (!tourState) {
+  if (!tourState || !config.showDecorations()) {
     return;
   }
   const current = tourState.getCurrentTourStop();

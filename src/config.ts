@@ -4,6 +4,10 @@ export function useCodeLens(): boolean {
   return workspace.getConfiguration().get<boolean>("tourist.useCodeLens", true);
 }
 
+export function showDecorations(): boolean {
+  return workspace.getConfiguration().get<boolean>("tourist.showDecorations", true);
+}
+
 export function breakpointsActive() {
   return workspace
     .getConfiguration()
