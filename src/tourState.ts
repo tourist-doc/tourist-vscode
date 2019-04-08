@@ -11,8 +11,8 @@ export class TourState {
   public readonly tourFile: TourFile;
   public readonly path: string;
   public readonly treeView:
-    | vscode.TreeView<AbsoluteTourStop | BrokenTourStop>
-    | vscode.TreeView<AbsoluteTourStop | BrokenTourStop>
+    | vscode.TreeView<TourFile>
+    | vscode.TreeView<AbsoluteTourStop | BrokenTourStop | "back">
     | undefined;
   private currentStopIdx: number | undefined;
 
@@ -22,7 +22,7 @@ export class TourState {
     this.path = path;
     // TODO: this is not the right place for this.
     this.treeView = vscode.window.createTreeView<
-      AbsoluteTourStop | BrokenTourStop
+      AbsoluteTourStop | BrokenTourStop | "back"
     >("touristView", { treeDataProvider: new TourStopTreeView(tour.stops) });
   }
 

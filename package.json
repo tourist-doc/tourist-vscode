@@ -72,6 +72,11 @@
         "category": "Tourist"
       },
       {
+        "command": "extension.stopTour",
+        "title": "Stop a tour",
+        "category": "Tourist"
+      },
+      {
         "command": "extension.newTour",
         "title": "Create a new tour",
         "category": "Tourist"
@@ -157,7 +162,10 @@
           "type": "string",
           "description": "Whether a text decoration should be placed at each tourstop.",
           "default": "Center",
-          "enum": ["Center", "Top"]
+          "enum": [
+            "Center",
+            "Top"
+          ]
         },
         "tourist.webviewColumn": {
           "type": [

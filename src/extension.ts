@@ -65,6 +65,7 @@ export async function activate(context: vscode.ExtensionContext) {
     ["extension.newTour", newTour],
     ["extension.moveTourstop", moveTourstop],
     ["extension.addBreakpoints", addBreakpoints],
+    ["extension.stopTour", stopTour],
   ];
   noArgsCommands.forEach((command) => {
     vscode.commands.registerCommand(command[0], async () => {
@@ -194,7 +195,8 @@ function gotoTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
 
   // In the TreeView, select the new tourstop
   if (tourState.treeView && tourState.treeView.visible) {
-    tourState.treeView.reveal(stop);
+    // TODO: do not use `as any`, you heathen
+    (tourState.treeView as any).reveal(stop);
   }
 
   const file = vscode.Uri.file(stop.absPath);
@@ -460,6 +462,13 @@ async function startTour(uri: vscode.Uri): Promise<void> {
   if (tourState.tour.stops) {
     gotoTourStop(tourState.tour.stops[0]);
   }
+}
+
+/**
+ * Stops the current tour, showing the list of tours in the TreeView
+ */
+async function stopTour(): Promise<void> {
+  showTourList();
 }
 
 async function mapRepo(ctx: vscode.ExtensionContext): Promise<void> {

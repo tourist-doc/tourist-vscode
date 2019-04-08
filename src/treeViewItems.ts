@@ -32,3 +32,13 @@ export class TourStopTreeItem extends vscode.TreeItem {
     this.tourstop = tourstop;
   }
 }
+
+export class BackButtonTreeItem extends vscode.TreeItem {
+  constructor() {
+    super("< Back to tour list");
+    this.command = {
+      command: "extension.stopTour",
+      title: "lol what?", // TODO: what does this option actually do?
+    }
+  }
+}
