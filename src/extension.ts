@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { relative } from "path";
+import * as path from "path";
 import {
   AbsoluteTourStop,
   BrokenTourStop,
@@ -593,8 +593,14 @@ function showDecorations(tour: Tour) {
 }
 
 function pathsEqual(path1: string, path2: string) {
-  // TODO: don't do this. This is wrong and broken.
-  return relative("C:", path1) === relative("C:", path2);
+  const x = path.parse(path1);
+  const y = path.parse(path2);
+
+  return (
+    x.root.toUpperCase() === y.root.toUpperCase() &&
+    x.dir === y.dir &&
+    x.base === y.base
+  );
 }
 
 /**
