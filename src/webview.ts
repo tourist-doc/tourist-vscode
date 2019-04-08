@@ -35,6 +35,12 @@ export class TouristWebview {
     this.refresh();
   }
 
+  public static clear() {
+    if (this.panel) {
+      this.panel.dispose();
+    }
+  }
+
   private static panel?: vscode.WebviewPanel;
   private static mdConverter = new showdown.Converter();
   private static htmlTemplate?: (args: TemplateArgs) => string;

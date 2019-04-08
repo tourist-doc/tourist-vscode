@@ -469,6 +469,7 @@ async function startTour(uri: vscode.Uri): Promise<void> {
  */
 async function stopTour(): Promise<void> {
   showTourList();
+  TouristWebview.clear();
 }
 
 async function mapRepo(ctx: vscode.ExtensionContext): Promise<void> {
