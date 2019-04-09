@@ -38,17 +38,17 @@
       },
       {
         "command": "extension.deleteTourstop",
-        "title": "Delete a tour stop",
+        "title": "Delete",
         "category": "Tourist"
       },
       {
         "command": "extension.moveTourstopUp",
-        "title": "Move a tour stop up",
+        "title": "Move up",
         "category": "Tourist"
       },
       {
         "command": "extension.moveTourstopDown",
-        "title": "Move a tour stop down",
+        "title": "Move down",
         "category": "Tourist"
       },
       {
@@ -58,12 +58,12 @@
       },
       {
         "command": "extension.editTitle",
-        "title": "Edit a tour stop's title",
+        "title": "Edit title",
         "category": "Tourist"
       },
       {
         "command": "extension.editMessage",
-        "title": "Edit a tour stop's message",
+        "title": "Edit message",
         "category": "Tourist"
       },
       {
@@ -79,6 +79,11 @@
       {
         "command": "extension.newTour",
         "title": "Create a new tour",
+        "category": "Tourist"
+      },
+      {
+        "command": "extension.refreshTour",
+        "title": "Refresh",
         "category": "Tourist"
       },
       {
@@ -113,19 +118,28 @@
       ],
       "view/item/context": [
         {
-          "command": "extension.editTitle"
+          "command": "extension.editTitle",
+          "when": "viewItem == stop"
         },
         {
-          "command": "extension.editMessage"
+          "command": "extension.editMessage",
+          "when": "viewItem == stop"
         },
         {
-          "command": "extension.deleteTourstop"
+          "command": "extension.deleteTourstop",
+          "when": "viewItem == stop"
         },
         {
-          "command": "extension.moveTourstopUp"
+          "command": "extension.moveTourstopUp",
+          "when": "viewItem == stop"
         },
         {
-          "command": "extension.moveTourstopDown"
+          "command": "extension.moveTourstopDown",
+          "when": "viewItem == stop"
+        },
+        {
+          "command": "extension.refreshTour",
+          "when": "viewItem == tour"
         }
       ]
     },

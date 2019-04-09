@@ -66,6 +66,7 @@ export async function activate(context: vscode.ExtensionContext) {
     ["extension.moveTourstop", moveTourstop],
     ["extension.addBreakpoints", addBreakpoints],
     ["extension.stopTour", stopTour],
+    ["extension.refreshTour", refreshTour],
   ];
   noArgsCommands.forEach((command) => {
     vscode.commands.registerCommand(command[0], async () => {
@@ -470,6 +471,20 @@ async function startTour(uri: vscode.Uri): Promise<void> {
 async function stopTour(): Promise<void> {
   showTourList();
   TouristWebview.clear();
+}
+
+async function refreshTour(): Promise<void> {
+  if (tourState) {
+    try {
+      await tourist.refresh(tourState.tourFile);
+      const tour = await tourist.resolve(tourState.tourFile);
+      tourState = new TourState(tourState.tourFile, tour, tourState.path);
+      await saveTour();
+      showTour(tourState.tour);
+    } catch (error) {
+      vscode.window.showErrorMessage(`Error code ${error.code} thrown`);
+    }
+  }
 }
 
 async function mapRepo(ctx: vscode.ExtensionContext): Promise<void> {

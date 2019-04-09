@@ -23,7 +23,9 @@ export class TourState {
     // TODO: this is not the right place for this.
     this.treeView = vscode.window.createTreeView<
       AbsoluteTourStop | BrokenTourStop | "back"
-    >("touristView", { treeDataProvider: new TourStopTreeView(tour.stops) });
+    >("touristView", {
+      treeDataProvider: new TourStopTreeView(tour.stops),
+    });
   }
 
   public setCurrentTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
