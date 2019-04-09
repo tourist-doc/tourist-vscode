@@ -67,6 +67,7 @@ export async function activate(context: vscode.ExtensionContext) {
     ["extension.addBreakpoints", addBreakpoints],
     ["extension.stopTour", stopTour],
     ["extension.refreshTour", refreshTour],
+    ["extension.renameTour", renameTour],
   ];
   noArgsCommands.forEach((command) => {
     vscode.commands.registerCommand(command[0], async () => {
@@ -483,6 +484,22 @@ async function refreshTour(): Promise<void> {
       showTour(tourState.tour);
     } catch (error) {
       vscode.window.showErrorMessage(`Error code ${error.code} thrown`);
+    }
+  }
+}
+
+async function renameTour(): Promise<void> {
+  if (tourState) {
+    const name = await vscode.window.showInputBox();
+    if (name !== undefined) {
+      try {
+        await tourist.rename(tourState.tourFile, name);
+        const tour = await tourist.resolve(tourState.tourFile);
+        tourState = new TourState(tourState.tourFile, tour, tourState.path);
+        await saveTour();
+      } catch (error) {
+        vscode.window.showErrorMessage(error);
+      }
     }
   }
 }

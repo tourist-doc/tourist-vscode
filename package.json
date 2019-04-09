@@ -87,6 +87,11 @@
         "category": "Tourist"
       },
       {
+        "command": "extension.renameTour",
+        "title": "Rename",
+        "category": "Tourist"
+      },
+      {
         "command": "extension.mapRepo",
         "title": "Map a name to a repository",
         "category": "Tourist"
@@ -136,6 +141,10 @@
         {
           "command": "extension.moveTourstopDown",
           "when": "viewItem == stop"
+        },
+        {
+          "command": "extension.renameTour",
+          "when": "viewItem == tour"
         },
         {
           "command": "extension.refreshTour",
