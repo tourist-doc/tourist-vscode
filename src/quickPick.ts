@@ -14,12 +14,12 @@ class TourstopQuickPickItem implements vscode.QuickPickItem {
     this.detail = tourstop.body || "";
 
     if (isNotBroken(tourstop)) {
-        const filename = tourstop.absPath
+      const filename = tourstop.absPath
         ? tourstop.absPath.split(/[/\\]/).pop()
         : "";
-        this.description = `${filename}, line ${tourstop.line}`;
+      this.description = `${filename}, line ${tourstop.line}`;
     } else {
-        this.description = "";
+      this.description = "";
     }
   }
 }

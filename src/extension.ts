@@ -1,14 +1,21 @@
 import * as fs from "fs";
-import { isNotBroken, Tour, Tourist, TourFile } from "tourist";
+import {
+  isNotBroken,
+  Tour,
+  Tourist,
+  TourFile,
+  AbsoluteTourStop,
+  BrokenTourStop,
+} from "tourist";
 import * as vscode from "vscode";
 
 import { Commands } from "./commands";
 import { TouristCodeLensProvider } from "./codeLenses";
 import * as config from "./config";
-import { TourState } from "./tourState";
 import { TouristWebview } from "./webview";
-import { TourFileTreeView } from "./treeViews";
-import { pathsEqual } from "./util";
+import { TourFileTreeView, TourStopTreeView } from "./treeViews";
+import { Util } from "./util";
+import { Globals } from "./globals";
 
 const activeTourstopDecorationType = vscode.window.createTextEditorDecorationType(
   {
@@ -23,12 +30,6 @@ const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationT
     isWholeLine: true,
   },
 );
-
-export module Globals {
-  // --- Global variables --- //
-  export let tourist = new Tourist();
-  export let tourState: TourState | undefined;
-}
 
 /**
  * Called when a workspace is opened with a .tour file at the top level
@@ -51,10 +52,6 @@ export async function activate(context: vscode.ExtensionContext) {
   TouristWebview.init(context);
   Commands.registerAll(context);
 
-  // Here we group all the commands listed in package.json by inputs.
-  // Each is registered with a function that first gets any arguments
-  // it is not passed from the user directly (with QuickPick, etc.)
-
   context.subscriptions.push(
     vscode.languages.registerCodeLensProvider(
       { scheme: "file" },
@@ -66,12 +63,17 @@ export async function activate(context: vscode.ExtensionContext) {
 /**
  * Show the given tour in the sidebar
  */
-export function showTour(t: Tour) {
+function showTour(tour: Tour) {
   if (!Globals.tourState) {
     return;
   }
 
-  showDecorations(t);
+  showDecorations(tour);
+  Globals.treeView = vscode.window.createTreeView<
+    AbsoluteTourStop | BrokenTourStop | "back"
+  >("touristView", {
+    treeDataProvider: new TourStopTreeView(tour.stops),
+  });
 }
 
 /**
@@ -81,12 +83,12 @@ export function showDecorations(tour: Tour) {
   if (!Globals.tourState || !config.showDecorations()) {
     return;
   }
-  const current = Globals.tourState.getCurrentTourStop();
+  const current = Globals.tourState.currentStop;
   vscode.window.visibleTextEditors.forEach((editor) => {
     if (
       current &&
       isNotBroken(current) &&
-      pathsEqual(current.absPath, editor.document.fileName)
+      Util.pathsEqual(current.absPath, editor.document.fileName)
     ) {
       editor.setDecorations(activeTourstopDecorationType, [
         editor.document.lineAt(new vscode.Position(current.line - 1, 0)).range,
@@ -102,7 +104,7 @@ export function showDecorations(tour: Tour) {
           (stop) =>
             stop !== current &&
             isNotBroken(stop) &&
-            pathsEqual(stop.absPath, editor.document.fileName),
+            Util.pathsEqual(stop.absPath, editor.document.fileName),
         )
         .map((stop) =>
           editor.document.lineAt(
@@ -135,19 +137,6 @@ export async function saveTour() {
   );
 }
 
-/**
- * Parses a TourFile, returning the TourState that results from starting this tour.
- * // TODO: refactor
- */
-export async function parseTourFile(path: string): Promise<TourState> {
-  const doc = await vscode.workspace.openTextDocument(path);
-
-  const tf = await Globals.tourist.deserializeTourFile(doc.getText());
-  const tour = await Globals.tourist.resolve(tf);
-
-  return new TourState(tf, tour, path);
-}
-
 export async function showTourList() {
   Globals.tourState = undefined;
   const uris = await vscode.workspace.findFiles("**/*.tour");
@@ -162,4 +151,10 @@ export async function showTourList() {
   vscode.window.createTreeView<TourFile>("touristView", {
     treeDataProvider: new TourFileTreeView(uris, tourFiles),
   });
+}
+
+export async function processTourFile(tf: TourFile, path: string) {
+  await Globals.setTourFile(tf, path);
+  await saveTour();
+  showTour(Globals.tourState!.tour);
 }

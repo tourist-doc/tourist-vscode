@@ -1,44 +1,60 @@
-import { AbsoluteTourStop, BrokenTourStop, Tour, TourFile } from "tourist";
 import * as vscode from "vscode";
-import { TourStopTreeView } from "./treeViews";
+import {
+  Tourist,
+  Tour,
+  TourFile,
+  AbsoluteTourStop,
+  BrokenTourStop,
+} from "tourist";
+
+/**
+ * Global state and resources
+ */
+export module Globals {
+  export let tourist = new Tourist();
+  export let tourState: TourState | undefined;
+  export let treeView:
+    | vscode.TreeView<TourFile>
+    | vscode.TreeView<AbsoluteTourStop | BrokenTourStop | "back">
+    | undefined;
+
+  export async function setTourFile(tf: TourFile, path: string) {
+    const tour = await Globals.tourist.resolve(tf);
+    tourState = new TourState(tf, tour, path);
+  }
+}
 
 /**
  * Represents the state of the active Tour
  */
-// TODO: Consider using singleton
 export class TourState {
-  public readonly tour: Tour;
-  public readonly tourFile: TourFile;
-  public readonly path: string;
-  public readonly treeView:
-    | vscode.TreeView<TourFile>
-    | vscode.TreeView<AbsoluteTourStop | BrokenTourStop | "back">
-    | undefined;
+  public tour: Tour;
+  public tourFile: TourFile;
+  public path: string;
   private currentStopIdx: number | undefined;
 
   constructor(tf: TourFile, tour: Tour, path: string) {
     this.tour = tour;
     this.tourFile = tf;
     this.path = path;
-    // TODO: this is not the right place for this.
-    this.treeView = vscode.window.createTreeView<
-      AbsoluteTourStop | BrokenTourStop | "back"
-    >("touristView", {
-      treeDataProvider: new TourStopTreeView(tour.stops),
-    });
   }
 
-  public setCurrentTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
-    const idx = this.tour.stops.indexOf(stop);
-    if (idx !== undefined) {
-      this.currentStopIdx = idx;
-    }
-  }
-
-  public getCurrentTourStop(): AbsoluteTourStop | BrokenTourStop | undefined {
+  get currentStop(): AbsoluteTourStop | BrokenTourStop | undefined {
     return this.currentStopIdx !== undefined
       ? this.tour.stops[this.currentStopIdx]
       : undefined;
+  }
+
+  set currentStop(stop: AbsoluteTourStop | BrokenTourStop | undefined) {
+    if (stop) {
+      const idx = this.tour.stops.indexOf(stop);
+      if (idx !== undefined) {
+        this.currentStopIdx = idx;
+        return;
+      }
+    }
+
+    this.currentStopIdx = undefined;
   }
 
   public prevTourStop(): AbsoluteTourStop | BrokenTourStop | undefined {

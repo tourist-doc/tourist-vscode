@@ -42,6 +42,6 @@ export class BackButtonTreeItem extends vscode.TreeItem {
     this.command = {
       command: "extension.stopTour",
       title: "lol what?", // TODO: what does this option actually do?
-    }
+    };
   }
 }

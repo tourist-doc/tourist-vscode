@@ -3,17 +3,14 @@ import { AbsoluteTourStop, BrokenTourStop, isNotBroken } from "tourist";
 
 import * as config from "./config";
 import { quickPickTourstop } from "./quickPick";
-import {
-  Globals,
-  saveTour,
-  showTour,
-  showDecorations,
-  parseTourFile,
-  showTourList,
-} from "./extension";
-import { TourState } from "./tourState";
+import { showDecorations, showTourList, processTourFile } from "./extension";
 import { TouristWebview } from "./webview";
+import { Globals } from "./globals";
+import { Util } from "./util";
 
+/**
+ * Exports a function corresponding to every VSCode command we contribute.
+ */
 export module Commands {
   const noArgsCommands: Array<[string, () => void]> = [
     ["extension.nextTourstop", nextTourStop],
@@ -101,14 +98,14 @@ export module Commands {
   /**
    * Goes to the next tourstop in the active editor
    */
-  export function nextTourStop() {
+  export async function nextTourStop() {
     if (!Globals.tourState) {
       return;
     }
 
     const next = Globals.tourState.nextTourStop();
     if (next) {
-      gotoTourStop(next);
+      await gotoTourStop(next);
     } else {
       vscode.window.showInformationMessage("No more tourstops!");
     }
@@ -117,14 +114,14 @@ export module Commands {
   /**
    * Goes to the previous tourstop in the active editor
    */
-  export function prevTourStop() {
+  export async function prevTourStop() {
     if (!Globals.tourState) {
       return;
     }
 
     const prev = Globals.tourState.prevTourStop();
     if (prev) {
-      gotoTourStop(prev);
+      await gotoTourStop(prev);
     } else {
       vscode.window.showInformationMessage("No more tourstops!");
     }
@@ -150,30 +147,23 @@ export module Commands {
     } catch (error) {
       console.error(error);
     }
-    const tour = await Globals.tourist.resolve(Globals.tourState.tourFile);
-    Globals.tourState = new TourState(
-      Globals.tourState.tourFile,
-      tour,
-      Globals.tourState.path,
-    );
-    await saveTour();
-    showTour(Globals.tourState.tour);
+    await processTourFile(Globals.tourState.tourFile, Globals.tourState.path);
   }
 
   /**
    * Goes to the given tourstop in the active editor
    */
-  export function gotoTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
+  export async function gotoTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
     if (!Globals.tourState || !isNotBroken(stop)) {
       return;
     }
 
-    Globals.tourState.setCurrentTourStop(stop);
+    Globals.tourState.currentStop = stop;
 
     // In the TreeView, select the new tourstop
-    if (Globals.tourState.treeView && Globals.tourState.treeView.visible) {
+    if (Globals.treeView && Globals.treeView.visible) {
       // TODO: do not use `as any`, you heathen
-      (Globals.tourState.treeView as any).reveal(stop);
+      (Globals.treeView as any).reveal(stop);
     }
 
     const file = vscode.Uri.file(stop.absPath);
@@ -208,7 +198,9 @@ export module Commands {
   /**
    * Delete TourStop from current Tour
    */
-  export async function deleteTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
+  export async function deleteTourStop(
+    stop: AbsoluteTourStop | BrokenTourStop,
+  ) {
     if (!Globals.tourState) {
       return;
     }
@@ -220,14 +212,7 @@ export module Commands {
       } catch (error) {
         console.error(error);
       }
-      const tour = await Globals.tourist.resolve(Globals.tourState.tourFile);
-      Globals.tourState = new TourState(
-        Globals.tourState.tourFile,
-        tour,
-        Globals.tourState.path,
-      );
-      await saveTour();
-      showTour(Globals.tourState.tour);
+      await processTourFile(Globals.tourState.tourFile, Globals.tourState.path);
     }
   }
 
@@ -248,20 +233,14 @@ export module Commands {
           await Globals.tourist.edit(Globals.tourState.tourFile, idx, {
             title,
           });
-          const tour = await Globals.tourist.resolve(
+          await processTourFile(
             Globals.tourState.tourFile,
-          );
-          Globals.tourState = new TourState(
-            Globals.tourState.tourFile,
-            tour,
             Globals.tourState.path,
           );
-          await saveTour();
           TouristWebview.setTourStop(
             Globals.tourState.tour,
             Globals.tourState.tour.stops[idx],
           );
-          showTour(Globals.tourState.tour);
         }
       }
     });
@@ -288,18 +267,14 @@ export module Commands {
         await Globals.tourist.edit(Globals.tourState.tourFile, idx, {
           body: message,
         });
-        const tour = await Globals.tourist.resolve(Globals.tourState.tourFile);
-        Globals.tourState = new TourState(
+        await processTourFile(
           Globals.tourState.tourFile,
-          tour,
           Globals.tourState.path,
         );
-        await saveTour();
         TouristWebview.setTourStop(
           Globals.tourState.tour,
           Globals.tourState.tour.stops[idx],
         );
-        showTour(Globals.tourState.tour);
       }
     }
   }
@@ -307,7 +282,9 @@ export module Commands {
   /**
    * Swaps the given tourstop with the one above it
    */
-  export async function moveTourstopUp(stop: AbsoluteTourStop | BrokenTourStop) {
+  export async function moveTourstopUp(
+    stop: AbsoluteTourStop | BrokenTourStop,
+  ) {
     if (!Globals.tourState) {
       return;
     }
@@ -330,21 +307,16 @@ export module Commands {
         await Globals.tourist.scramble(Globals.tourState.tourFile, newIndices);
       }
 
-      const tour = await Globals.tourist.resolve(Globals.tourState.tourFile);
-      Globals.tourState = new TourState(
-        Globals.tourState.tourFile,
-        tour,
-        Globals.tourState.path,
-      );
-      await saveTour();
-      showTour(Globals.tourState.tour);
+      await processTourFile(Globals.tourState.tourFile, Globals.tourState.path);
     }
   }
 
   /**
    * Swaps the given tourstop with the one below it
    */
-  export async function moveTourstopDown(stop: AbsoluteTourStop | BrokenTourStop) {
+  export async function moveTourstopDown(
+    stop: AbsoluteTourStop | BrokenTourStop,
+  ) {
     if (!Globals.tourState) {
       return;
     }
@@ -367,14 +339,7 @@ export module Commands {
         await Globals.tourist.scramble(Globals.tourState.tourFile, newIndices);
       }
 
-      const tour = await Globals.tourist.resolve(Globals.tourState.tourFile);
-      Globals.tourState = new TourState(
-        Globals.tourState.tourFile,
-        tour,
-        Globals.tourState.path,
-      );
-      await saveTour();
-      showTour(Globals.tourState.tour);
+      await processTourFile(Globals.tourState.tourFile, Globals.tourState.path);
     }
   }
 
@@ -400,14 +365,10 @@ export module Commands {
         } catch (error) {
           console.error(error);
         }
-        const tour = await Globals.tourist.resolve(Globals.tourState.tourFile);
-        Globals.tourState = new TourState(
+        await processTourFile(
           Globals.tourState.tourFile,
-          tour,
           Globals.tourState.path,
         );
-        showTour(Globals.tourState.tour);
-        await saveTour();
       }
     }
   }
@@ -416,8 +377,9 @@ export module Commands {
    * Starts a Tour from a .tour file
    */
   export async function startTour(uri: vscode.Uri): Promise<void> {
-    Globals.tourState = await parseTourFile(uri.fsPath);
-    if (Globals.tourState.tour.stops) {
+    const tf = await Util.parseTourFile(uri.fsPath);
+    await processTourFile(tf, uri.fsPath);
+    if (Globals.tourState) {
       gotoTourStop(Globals.tourState.tour.stops[0]);
     }
   }
@@ -434,14 +396,10 @@ export module Commands {
     if (Globals.tourState) {
       try {
         await Globals.tourist.refresh(Globals.tourState.tourFile);
-        const tour = await Globals.tourist.resolve(Globals.tourState.tourFile);
-        Globals.tourState = new TourState(
+        await processTourFile(
           Globals.tourState.tourFile,
-          tour,
           Globals.tourState.path,
         );
-        await saveTour();
-        showTour(Globals.tourState.tour);
       } catch (error) {
         vscode.window.showErrorMessage(`Error code ${error.code} thrown`);
       }
@@ -454,15 +412,10 @@ export module Commands {
       if (name !== undefined) {
         try {
           await Globals.tourist.rename(Globals.tourState.tourFile, name);
-          const tour = await Globals.tourist.resolve(
+          await processTourFile(
             Globals.tourState.tourFile,
-          );
-          Globals.tourState = new TourState(
-            Globals.tourState.tourFile,
-            tour,
             Globals.tourState.path,
           );
-          await saveTour();
         } catch (error) {
           vscode.window.showErrorMessage(error);
         }
@@ -509,12 +462,7 @@ export module Commands {
       ".tour";
     if (title !== undefined) {
       const tf = await Globals.tourist.init(title);
-      const tour = await Globals.tourist.resolve(tf);
-
-      Globals.tourState = new TourState(tf, tour, path);
-
-      await saveTour();
-      showTour(tour);
+      await processTourFile(tf, path);
     }
   }
 
