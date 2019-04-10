@@ -114,13 +114,13 @@ export async function activate(context: vscode.ExtensionContext) {
   const tourstopCommands: Array<
     [string, (tourstop: AbsoluteTourStop | BrokenTourStop) => void]
   > = [
-    ["extension.gotoTourstop", gotoTourStop],
-    ["extension.deleteTourstop", deleteTourStop],
-    ["extension.moveTourstopUp", moveTourstopUp],
-    ["extension.moveTourstopDown", moveTourstopDown],
-    ["extension.editTitle", editTitle],
-    ["extension.editMessage", editMessage],
-  ];
+      ["extension.gotoTourstop", gotoTourStop],
+      ["extension.deleteTourstop", deleteTourStop],
+      ["extension.moveTourstopUp", moveTourstopUp],
+      ["extension.moveTourstopDown", moveTourstopDown],
+      ["extension.editTitle", editTitle],
+      ["extension.editMessage", editMessage],
+    ];
   tourstopCommands.forEach((command) => {
     vscode.commands.registerCommand(
       command[0],
@@ -150,7 +150,7 @@ export async function activate(context: vscode.ExtensionContext) {
           (stop: AbsoluteTourStop | BrokenTourStop) => {
             if (isNotBroken(stop)) {
               if (pathsEqual(document.fileName, stop.absPath)) {
-                const position = new vscode.Position(stop.line, 0);
+                const position = new vscode.Position(stop.line - 1, 0);
                 lenses.push(
                   new vscode.CodeLens(new vscode.Range(position, position), {
                     arguments: [stop],
@@ -207,7 +207,7 @@ function gotoTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
       vscode.window
         .showTextDocument(doc, vscode.ViewColumn.One)
         .then((editor) => {
-          const pos = new vscode.Position(stop.line, 0);
+          const pos = new vscode.Position(stop.line - 1, 0);
           editor.selection = new vscode.Selection(pos, pos);
           editor.revealRange(editor.selection, config.tourstopRevealLocation());
           if (tourState) {
@@ -274,7 +274,7 @@ async function addTourStop() {
     await tourist.add(tourState.tourFile, {
       title,
       absPath: editor.document.fileName,
-      line: editor.selection.active.line,
+      line: editor.selection.active.line + 1,
     });
   } catch (error) {
     console.error(error);
@@ -442,7 +442,7 @@ async function moveTourstop() {
           tourState.tour.stops.indexOf(stop),
           {
             absPath: editor.document.fileName,
-            line: editor.selection.active.line,
+            line: editor.selection.active.line + 1,
           },
         );
       } catch (error) {
@@ -564,7 +564,7 @@ async function addBreakpoints(): Promise<void> {
         new vscode.SourceBreakpoint(
           new vscode.Location(
             vscode.Uri.file(stop.absPath),
-            new vscode.Position(stop.line, 0),
+            new vscode.Position(stop.line - 1, 0),
           ),
         ),
       );
@@ -600,7 +600,9 @@ function showDecorations(tour: Tour) {
       pathsEqual(current.absPath, editor.document.fileName)
     ) {
       editor.setDecorations(activeTourstopDecorationType, [
-        editor.document.lineAt(new vscode.Position(current.line, 0)).range,
+        editor.document.lineAt(
+          new vscode.Position(current.line - 1, 0),
+        ).range,
       ]);
     } else {
       editor.setDecorations(activeTourstopDecorationType, []);
@@ -617,7 +619,7 @@ function showDecorations(tour: Tour) {
         )
         .map((stop) =>
           editor.document.lineAt(
-            new vscode.Position(isNotBroken(stop) ? stop.line : 0, 0),
+            new vscode.Position(isNotBroken(stop) ? stop.line - 1 : 0, 0),
           ),
         ),
     );
