@@ -4,12 +4,7 @@ import { AbsoluteTourStop, BrokenTourStop, Tour } from "tourist";
 import * as vscode from "vscode";
 
 import * as config from "./config";
-import {
-  editMessage,
-  editTitle,
-  nextTourStop,
-  prevTourStop,
-} from "./extension";
+import { Commands } from "./commands";
 
 interface TemplateArgs {
   title: string;
@@ -80,13 +75,13 @@ export class TouristWebview {
       this.panel.webview.onDidReceiveMessage(async (message: any) => {
         switch (message.command) {
           case "nextTourstop":
-            nextTourStop();
+            await Commands.nextTourStop();
             break;
           case "prevTourstop":
-            prevTourStop();
+            await Commands.prevTourStop();
             break;
           case "editTitle":
-            editTitle(this.stop!);
+            await Commands.editTitle(this.stop!);
             break;
           case "editMessage":
             this.editingMessage = true;
@@ -99,7 +94,7 @@ export class TouristWebview {
           case "editMessageSave":
             this.editingMessage = false;
             if (this.stop !== undefined && message.newMessage !== undefined) {
-              await editMessage(this.stop, message.newMessage);
+              await Commands.editMessage(this.stop, message.newMessage);
             }
             break;
         }
