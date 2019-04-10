@@ -124,23 +124,27 @@
       "view/item/context": [
         {
           "command": "extension.editTitle",
-          "when": "viewItem == stop"
+          "when": "viewItem == stop",
+          "group": "edit@1"
         },
         {
           "command": "extension.editMessage",
-          "when": "viewItem == stop"
+          "when": "viewItem == stop",
+          "group": "edit@2"
+        },
+        {
+          "command": "extension.moveTourstopUp",
+          "when": "viewItem == stop",
+          "group": "move@1"
         },
         {
           "command": "extension.deleteTourstop",
           "when": "viewItem == stop"
         },
         {
-          "command": "extension.moveTourstopUp",
-          "when": "viewItem == stop"
-        },
-        {
           "command": "extension.moveTourstopDown",
-          "when": "viewItem == stop"
+          "when": "viewItem == stop",
+          "group": "move@2"
         },
         {
           "command": "extension.renameTour",
