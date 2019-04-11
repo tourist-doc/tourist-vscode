@@ -11,9 +11,9 @@ export class TourFileTreeItem extends vscode.TreeItem {
   constructor(uri: vscode.Uri, tourFile: TourFile) {
     super(tourFile.title);
     this.command = {
-      arguments: [uri],
+      title: "startTour",
       command: "tourist.startTour",
-      title: "lol what?", // TODO: what does this option actually do?
+      arguments: [uri],
     };
     this.contextValue = "tour";
     this.tooltip = `${tourFile.stops.length} stops`;
@@ -31,9 +31,9 @@ export class TourStopTreeItem extends vscode.TreeItem {
   constructor(tourstop: AbsoluteTourStop | BrokenTourStop) {
     super(tourstop.title);
     this.command = {
-      arguments: [tourstop],
+      title: "gotoTourstop",
       command: "tourist.gotoTourstop",
-      title: "lol what?", // TODO: what does this option actually do?
+      arguments: [tourstop],
     };
     this.contextValue = "stop";
     this.tooltip = tourstop.body || "";
@@ -49,8 +49,8 @@ export class BackButtonTreeItem extends vscode.TreeItem {
     super("< Back to tour list");
     this.contextValue = "back";
     this.command = {
+      title: "back",
       command: "tourist.stopTour",
-      title: "lol what?", // TODO: what does this option actually do?
     };
   }
 }

@@ -144,12 +144,11 @@ export async function saveTour() {
  */
 export async function showTourList() {
   Globals.tourState = undefined;
-  const uris = await vscode.workspace.findFiles("**/*.tour");
-  let tourFiles: TourFile[] = [];
 
-  for (const uri of uris) {
-    const doc = await vscode.workspace.openTextDocument(uri);
-    const tf = Globals.tourist.deserializeTourFile(doc.getText());
+  let uris: vscode.Uri[] = [];
+  let tourFiles: TourFile[] = [];
+  for (const [uri, tf] of await Util.getWorkspaceTours()) {
+    uris.push(uri);
     tourFiles.push(tf);
   }
 

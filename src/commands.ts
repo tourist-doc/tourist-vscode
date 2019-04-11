@@ -1,110 +1,57 @@
 import * as vscode from "vscode";
-import { AbsoluteTourStop, BrokenTourStop, isNotBroken } from "tourist";
+import { AbsoluteTourStop, BrokenTourStop, isNotBroken, TourFile } from "tourist";
 
 import * as config from "./config";
-import { quickPickTourstop } from "./quickPick";
 import { showDecorations, showTourList, processTourFile } from "./extension";
 import { TouristWebview } from "./webview";
 import { Globals } from "./globals";
 import { Util } from "./util";
+import { getTourFileURI, quickPickTourstop, quickPickTourFile } from "./userInput";
 
 /**
  * Exports a function corresponding to every VSCode command we contribute.
  */
 export module Commands {
-  const noArgsCommands: Array<[string, () => void]> = [
-    ["tourist.nextTourstop", nextTourStop],
-    ["tourist.prevTourstop", prevTourStop],
-    ["tourist.addTourstop", addTourStop],
-    ["tourist.newTour", newTour],
-    ["tourist.moveTourstop", moveTourstop],
-    ["tourist.addBreakpoints", addBreakpoints],
-    ["tourist.stopTour", stopTour],
-    ["tourist.refreshTour", refreshTour],
-    ["tourist.renameTour", renameTour],
-  ];
+  const commands = {
+    "tourist.addBreakpoints": addBreakpoints,
+    "tourist.addTourstop": addTourStop,
+    "tourist.deleteTourstop": deleteTourStop,
+    "tourist.editMessage": editMessage,
+    "tourist.editTitle": editTitle,
+    "tourist.gotoTourstop": gotoTourStop,
+    "tourist.mapRepo": mapRepo,
+    "tourist.moveTourstop": moveTourstop,
+    "tourist.moveTourstopDown": moveTourstopDown,
+    "tourist.moveTourstopUp": moveTourstopUp,
+    "tourist.newTour": newTour,
+    "tourist.nextTourstop": nextTourStop,
+    "tourist.prevTourstop": prevTourStop,
+    "tourist.refreshTour": refreshTour,
+    "tourist.renameTour": renameTour,
+    "tourist.startTour": startTour,
+    "tourist.stopTour": stopTour,
+  };
 
-  const uriCommands: Array<[string, (uri: vscode.Uri) => void]> = [
-    ["tourist.startTour", startTour],
-  ];
-
-  const contextCommands: Array<
-    [string, (ctx: vscode.ExtensionContext) => void]
-  > = [["tourist.mapRepo", mapRepo]];
-
-  const tourstopCommands: Array<
-    [string, (tourstop: AbsoluteTourStop | BrokenTourStop) => void]
-  > = [
-    ["tourist.gotoTourstop", gotoTourStop],
-    ["tourist.deleteTourstop", deleteTourStop],
-    ["tourist.moveTourstopUp", moveTourstopUp],
-    ["tourist.moveTourstopDown", moveTourstopDown],
-    ["tourist.editTitle", editTitle],
-    ["tourist.editMessage", editMessage],
-  ];
+  // TODO: it'd be best to not keep this here. Could stick it in Extension or
+  //       Globals, but I'm not crazy about that either.
+  let context: vscode.ExtensionContext | undefined;
 
   /**
    * Registers each command with the `vscode` API, called on activation.
    */
   export function registerAll(ctx: vscode.ExtensionContext) {
-    noArgsCommands.forEach((command) => {
-      vscode.commands.registerCommand(command[0], async () => {
-        await command[1]();
-      });
-    });
+    context = ctx;
 
-    uriCommands.forEach((command) => {
-      vscode.commands.registerCommand(command[0], async (uri?: vscode.Uri) => {
-        if (uri === undefined) {
-          vscode.window
-            .showOpenDialog({
-              openLabel: "Start tour",
-              canSelectMany: false,
-              filters: {
-                Tours: ["tour"],
-              },
-            })
-            .then(async (uris: vscode.Uri[] | undefined) => {
-              if (uris) {
-                uri = uris[0];
-              }
-            });
-        }
-
-        if (uri) {
-          await command[1](uri);
-        }
-      });
-    });
-
-    contextCommands.forEach((command) => {
-      vscode.commands.registerCommand(command[0], async () => {
-        await command[1](ctx);
-      });
-    });
-
-    tourstopCommands.forEach((command) => {
-      vscode.commands.registerCommand(
-        command[0],
-        async (stop?: AbsoluteTourStop | BrokenTourStop) => {
-          if (Globals.tourState && stop === undefined) {
-            stop = await quickPickTourstop(Globals.tourState.tour);
-          }
-          if (stop) {
-            await command[1](stop);
-          }
-        },
-      );
-    });
+    for (const [cmdName, cmdFn] of Object.entries(commands)) {
+      vscode.commands.registerCommand(cmdName, cmdFn);
+    }
   }
 
   /**
    * Goes to the next tourstop in the active editor
    */
   export async function nextTourStop() {
-    if (!Globals.tourState) {
-      return;
-    }
+    if (!Globals.tourState) return;
 
     const next = Globals.tourState.nextTourStop();
     if (next) {
@@ -118,9 +65,7 @@ export module Commands {
    * Goes to the previous tourstop in the active editor
    */
   export async function prevTourStop() {
-    if (!Globals.tourState) {
-      return;
-    }
+    if (!Globals.tourState) return;
 
     const prev = Globals.tourState.prevTourStop();
     if (prev) {
@@ -131,13 +76,11 @@ export module Commands {
   }
 
   /**
-   * Adds a TourStop to the current Tour
+   * Adds a new TourStop to the current Tour
    */
   export async function addTourStop() {
     const editor = vscode.window.activeTextEditor;
-    if (!editor || !Globals.tourState) {
-      return;
-    }
+    if (!Globals.tourState || !editor) return;
 
     const title =
       (await vscode.window.showInputBox({ prompt: "Stop title:" })) || "";
@@ -156,66 +99,73 @@ export module Commands {
   /**
    * Goes to the given tourstop in the active editor
    */
-  export async function gotoTourStop(stop: AbsoluteTourStop | BrokenTourStop) {
-    if (!Globals.tourState || !isNotBroken(stop)) {
-      return;
+  export async function gotoTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
+    if (!Globals.tourState) return;
+    if (stop === undefined) stop = await quickPickTourstop();
+
+    if (stop && isNotBroken(stop)) {
+      Globals.tourState.currentStop = stop;
+
+      // In the TreeView, select the new tourstop
+      if (Globals.treeView && Globals.treeView.visible) {
+        // TODO: do not use `as any`, you heathen
+        (Globals.treeView as any).reveal(stop);
+      }
+
+      const file = vscode.Uri.file(stop.absPath);
+      vscode.workspace.openTextDocument(file).then(
+        (doc) => {
+          vscode.window
+            .showTextDocument(doc, vscode.ViewColumn.One)
+            .then((editor) => {
+              if (stop && isNotBroken(stop)) {
+                const pos = new vscode.Position(stop.line - 1, 0);
+                editor.selection = new vscode.Selection(pos, pos);
+                editor.revealRange(
+                  editor.selection,
+                  config.tourstopRevealLocation(),
+                );
+                if (Globals.tourState) {
+                  showDecorations(Globals.tourState.tour);
+                }
+              }
+            })
+            .then(() => {
+              if (Globals.tourState) {
+                TouristWebview.setTourStop(Globals.tourState.tour, stop!);
+              }
+            });
+        },
+        (error: any) => {
+          console.error(error);
+          vscode.window.showErrorMessage(`Unable to open ${file.fsPath}`);
+        },
+      );
     }
-
-    Globals.tourState.currentStop = stop;
-
-    // In the TreeView, select the new tourstop
-    if (Globals.treeView && Globals.treeView.visible) {
-      // TODO: do not use `as any`, you heathen
-      (Globals.treeView as any).reveal(stop);
-    }
-
-    const file = vscode.Uri.file(stop.absPath);
-    vscode.workspace.openTextDocument(file).then(
-      (doc) => {
-        vscode.window
-          .showTextDocument(doc, vscode.ViewColumn.One)
-          .then((editor) => {
-            const pos = new vscode.Position(stop.line - 1, 0);
-            editor.selection = new vscode.Selection(pos, pos);
-            editor.revealRange(
-              editor.selection,
-              config.tourstopRevealLocation(),
-            );
-            if (Globals.tourState) {
-              showDecorations(Globals.tourState.tour);
-            }
-          })
-          .then(() => {
-            if (Globals.tourState) {
-              TouristWebview.setTourStop(Globals.tourState.tour, stop);
-            }
-          });
-      },
-      (error: any) => {
-        console.error(error);
-        vscode.window.showErrorMessage(`Unable to open ${file.fsPath}`);
-      },
-    );
   }
 
   /**
    * Delete TourStop from current Tour
    */
   export async function deleteTourStop(
-    stop: AbsoluteTourStop | BrokenTourStop,
+    stop?: AbsoluteTourStop | BrokenTourStop,
   ) {
-    if (!Globals.tourState) {
-      return;
-    }
+    if (!Globals.tourState) return;
+    if (stop === undefined) stop = await quickPickTourstop();
 
-    const idx = Globals.tourState.tour.stops.indexOf(stop);
-    if (idx !== -1) {
-      try {
-        await Globals.tourist.remove(Globals.tourState.tourFile, idx);
-      } catch (error) {
-        console.error(error);
+    if (stop) {
+      const idx = Globals.tourState.tour.stops.indexOf(stop);
+      if (idx !== -1) {
+        try {
+          await Globals.tourist.remove(Globals.tourState.tourFile, idx);
+        } catch (error) {
+          console.error(error);
+        }
+        await processTourFile(
+          Globals.tourState.tourFile,
+          Globals.tourState.path,
+        );
       }
-      await processTourFile(Globals.tourState.tourFile, Globals.tourState.path);
     }
   }
 
@@ -223,14 +173,14 @@ export module Commands {
    * Edits the title of a TourStop in the current Tour
    */
   export async function editTitle(
-    stop: AbsoluteTourStop | BrokenTourStop,
+    stop?: AbsoluteTourStop | BrokenTourStop,
   ): Promise<void> {
-    if (!Globals.tourState) {
-      return;
-    }
+    if (!Globals.tourState) return;
+    if (stop === undefined) stop = await quickPickTourstop();
 
-    vscode.window.showInputBox().then(async (title) => {
-      if (Globals.tourState && title !== undefined) {
+    if (stop) {
+      const title = await vscode.window.showInputBox();
+      if (title !== undefined) {
         const idx = Globals.tourState.tour.stops.indexOf(stop);
         if (idx !== -1) {
           await Globals.tourist.edit(Globals.tourState.tourFile, idx, {
@@ -246,38 +196,39 @@ export module Commands {
           );
         }
       }
-    });
+    }
   }
 
   /**
    * Edits the message of a TourStop in the current Tour
    */
   export async function editMessage(
-    stop: AbsoluteTourStop | BrokenTourStop,
+    stop?: AbsoluteTourStop | BrokenTourStop,
     message?: string,
   ): Promise<void> {
-    if (!Globals.tourState) {
-      return;
-    }
+    if (!Globals.tourState) return;
+    if (stop === undefined) stop = await quickPickTourstop();
 
-    if (message === undefined) {
-      message = await vscode.window.showInputBox();
-    }
+    if (stop) {
+      if (message === undefined) {
+        message = await vscode.window.showInputBox();
+      }
 
-    if (message !== undefined) {
-      const idx = Globals.tourState.tour.stops.indexOf(stop);
-      if (idx !== -1) {
-        await Globals.tourist.edit(Globals.tourState.tourFile, idx, {
-          body: message,
-        });
-        await processTourFile(
-          Globals.tourState.tourFile,
-          Globals.tourState.path,
-        );
-        TouristWebview.setTourStop(
-          Globals.tourState.tour,
-          Globals.tourState.tour.stops[idx],
-        );
+      if (message !== undefined) {
+        const idx = Globals.tourState.tour.stops.indexOf(stop);
+        if (idx !== -1) {
+          await Globals.tourist.edit(Globals.tourState.tourFile, idx, {
+            body: message,
+          });
+          await processTourFile(
+            Globals.tourState.tourFile,
+            Globals.tourState.path,
+          );
+          TouristWebview.setTourStop(
+            Globals.tourState.tour,
+            Globals.tourState.tour.stops[idx],
+          );
+        }
       }
     }
   }
@@ -286,13 +237,12 @@ export module Commands {
    * Swaps the given tourstop with the one above it
    */
   export async function moveTourstopUp(
-    stop: AbsoluteTourStop | BrokenTourStop,
+    stop?: AbsoluteTourStop | BrokenTourStop,
   ) {
-    if (!Globals.tourState) {
-      return;
-    }
+    if (!Globals.tourState) return;
+    if (stop === undefined) stop = await quickPickTourstop();
 
-    if (Globals.tourState.tour) {
+    if (stop) {
       const idx = Globals.tourState.tour.stops.indexOf(stop);
       if (idx > 0) {
         const otherIdx = idx - 1;
@@ -318,13 +268,12 @@ export module Commands {
    * Swaps the given tourstop with the one below it
    */
   export async function moveTourstopDown(
-    stop: AbsoluteTourStop | BrokenTourStop,
+    stop?: AbsoluteTourStop | BrokenTourStop,
   ) {
-    if (!Globals.tourState) {
-      return;
-    }
+    if (!Globals.tourState) return;
+    if (stop === undefined) stop = await quickPickTourstop();
 
-    if (Globals.tourState.tour) {
+    if (stop) {
       const idx = Globals.tourState.tour.stops.indexOf(stop);
       if (idx < Globals.tourState.tour.stops.length && idx !== -1) {
         const otherIdx = idx + 1;
@@ -350,12 +299,10 @@ export module Commands {
    * Changes a TourStop's location
    */
   // TODO: this should probably be renamed, since it has nothing to do with moveTourstopUp/Down
-  export async function moveTourstop() {
-    if (!Globals.tourState) {
-      return;
-    }
+  export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
+    if (!Globals.tourState) return;
+    if (stop === undefined) stop = await quickPickTourstop();
 
-    const stop = await quickPickTourstop(Globals.tourState.tour);
     if (stop) {
       const editor = vscode.window.activeTextEditor;
       if (editor) {
@@ -382,11 +329,17 @@ export module Commands {
   /**
    * Starts a Tour from a .tour file
    */
-  export async function startTour(uri: vscode.Uri): Promise<void> {
-    const tf = await Util.parseTourFile(uri.fsPath);
-    await processTourFile(tf, uri.fsPath);
-    if (Globals.tourState) {
-      gotoTourStop(Globals.tourState.tour.stops[0]);
+  export async function startTour(uri?: vscode.Uri): Promise<void> {
+    if (uri === undefined) {
+      uri = await getTourFileURI();
+    }
+
+    if (uri) {
+      const tf = await Util.parseTourFile(uri.fsPath);
+      await processTourFile(tf, uri.fsPath);
+      if (Globals.tourState) {
+        gotoTourStop(Globals.tourState.tour.stops[0]);
+      }
     }
   }
 
@@ -401,44 +354,46 @@ export module Commands {
   /**
    * Update the tourstop locations in a TourFile to reflect the current version
    */
-  export async function refreshTour(): Promise<void> {
-    if (Globals.tourState) {
-      try {
-        await Globals.tourist.refresh(Globals.tourState.tourFile);
-        await processTourFile(
-          Globals.tourState.tourFile,
-          Globals.tourState.path,
-        );
-      } catch (error) {
-        vscode.window.showErrorMessage(`Error code ${error.code} thrown`);
-      }
+  export async function refreshTour(tf?: TourFile): Promise<void> {
+    // TODO: so this doesn't work when you're not in a tour (which is the common case)
+    if (!Globals.tourState) return;
+    if (!tf) tf = await quickPickTourFile();
+    if (!tf) return;
+
+    try {
+      await Globals.tourist.refresh(tf);
+      await processTourFile(tf, Globals.tourState.path);
+    } catch (error) {
+      vscode.window.showErrorMessage(`Error code ${error.code} thrown`);
     }
   }
 
   /**
    * Changes the title of the tour
    */
-  export async function renameTour(): Promise<void> {
-    if (Globals.tourState) {
-      const name = await vscode.window.showInputBox();
-      if (name !== undefined) {
-        try {
-          await Globals.tourist.rename(Globals.tourState.tourFile, name);
-          await processTourFile(
-            Globals.tourState.tourFile,
-            Globals.tourState.path,
-          );
-        } catch (error) {
-          vscode.window.showErrorMessage(error);
-        }
-      }
+  export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
+    // TODO: so this doesn't work when you're not in a tour (which is the common case)
+    if (!Globals.tourState) return;
+    if (!tf) tf = await quickPickTourFile();
+    if (!tf) return;
+    if (name === undefined) name = await vscode.window.showInputBox();
+    if (name === undefined) return;
+
+    try {
+      await Globals.tourist.rename(tf, name);
+      await processTourFile(
+        tf,
+        Globals.tourState.path,
+      );
+    } catch (error) {
+      vscode.window.showErrorMessage(error);
     }
   }
 
   /**
    * Maps a name used in the .tour file to a repository path on disk
    */
-  export async function mapRepo(ctx: vscode.ExtensionContext): Promise<void> {
+  export async function mapRepo(): Promise<void> {
     const repoName = await vscode.window.showInputBox({
       prompt: "What's the name of the repository?",
     });
@@ -450,7 +405,10 @@ export module Commands {
       });
       if (path) {
         await Globals.tourist.mapConfig(repoName, path[0].fsPath);
-        ctx.globalState.update("touristInstance", Globals.tourist.serialize());
+        context!.globalState.update(
+          "touristInstance",
+          Globals.tourist.serialize(),
+        );
       }
     }
   }
@@ -486,9 +444,7 @@ export module Commands {
    * Places a breakpoint at each tourstop location in the active tour
    */
   export async function addBreakpoints(): Promise<void> {
-    if (!Globals.tourState) {
-      return;
-    }
+    if (!Globals.tourState) return;
 
     const breakpoints = [] as vscode.SourceBreakpoint[];
     for (const stop of Globals.tourState.tour.stops) {

@@ -29,4 +29,19 @@ export module Util {
     const doc = await vscode.workspace.openTextDocument(path);
     return await Globals.tourist.deserializeTourFile(doc.getText());
   }
+
+  /**
+   * Finds, parses, and returns all the TourFiles found in the current workspace
+   */
+  export async function getWorkspaceTours() {
+    const uris = await vscode.workspace.findFiles("**/*.tour");
+    let tourFiles: Array<[vscode.Uri, TourFile]> = [];
+
+    for (const uri of uris) {
+      const tf = await parseTourFile(uri.fsPath);
+      tourFiles.push([uri, tf]);
+    }
+
+    return tourFiles;
+  }
 }
