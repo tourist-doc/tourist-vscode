@@ -13,34 +13,34 @@ import { Util } from "./util";
  */
 export module Commands {
   const noArgsCommands: Array<[string, () => void]> = [
-    ["extension.nextTourstop", nextTourStop],
-    ["extension.prevTourstop", prevTourStop],
-    ["extension.addTourstop", addTourStop],
-    ["extension.newTour", newTour],
-    ["extension.moveTourstop", moveTourstop],
-    ["extension.addBreakpoints", addBreakpoints],
-    ["extension.stopTour", stopTour],
-    ["extension.refreshTour", refreshTour],
-    ["extension.renameTour", renameTour],
+    ["tourist.nextTourstop", nextTourStop],
+    ["tourist.prevTourstop", prevTourStop],
+    ["tourist.addTourstop", addTourStop],
+    ["tourist.newTour", newTour],
+    ["tourist.moveTourstop", moveTourstop],
+    ["tourist.addBreakpoints", addBreakpoints],
+    ["tourist.stopTour", stopTour],
+    ["tourist.refreshTour", refreshTour],
+    ["tourist.renameTour", renameTour],
   ];
 
   const uriCommands: Array<[string, (uri: vscode.Uri) => void]> = [
-    ["extension.startTour", startTour],
+    ["tourist.startTour", startTour],
   ];
 
   const contextCommands: Array<
     [string, (ctx: vscode.ExtensionContext) => void]
-  > = [["extension.mapRepo", mapRepo]];
+  > = [["tourist.mapRepo", mapRepo]];
 
   const tourstopCommands: Array<
     [string, (tourstop: AbsoluteTourStop | BrokenTourStop) => void]
   > = [
-    ["extension.gotoTourstop", gotoTourStop],
-    ["extension.deleteTourstop", deleteTourStop],
-    ["extension.moveTourstopUp", moveTourstopUp],
-    ["extension.moveTourstopDown", moveTourstopDown],
-    ["extension.editTitle", editTitle],
-    ["extension.editMessage", editMessage],
+    ["tourist.gotoTourstop", gotoTourStop],
+    ["tourist.deleteTourstop", deleteTourStop],
+    ["tourist.moveTourstopUp", moveTourstopUp],
+    ["tourist.moveTourstopDown", moveTourstopDown],
+    ["tourist.editTitle", editTitle],
+    ["tourist.editMessage", editMessage],
   ];
 
   /**

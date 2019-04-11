@@ -17,87 +17,87 @@
   "contributes": {
     "commands": [
       {
-        "command": "extension.gotoTourstop",
+        "command": "tourist.gotoTourstop",
         "title": "Go to tour stop",
         "category": "Tourist"
       },
       {
-        "command": "extension.addTourstop",
+        "command": "tourist.addTourstop",
         "title": "Add a tour stop",
         "category": "Tourist"
       },
       {
-        "command": "extension.nextTourstop",
+        "command": "tourist.nextTourstop",
         "title": "Go to next tour stop",
         "category": "Tourist"
       },
       {
-        "command": "extension.prevTourstop",
+        "command": "tourist.prevTourstop",
         "title": "Go to previous tour stop",
         "category": "Tourist"
       },
       {
-        "command": "extension.deleteTourstop",
+        "command": "tourist.deleteTourstop",
         "title": "Delete",
         "category": "Tourist"
       },
       {
-        "command": "extension.moveTourstopUp",
+        "command": "tourist.moveTourstopUp",
         "title": "Move up",
         "category": "Tourist"
       },
       {
-        "command": "extension.moveTourstopDown",
+        "command": "tourist.moveTourstopDown",
         "title": "Move down",
         "category": "Tourist"
       },
       {
-        "command": "extension.moveTourstop",
+        "command": "tourist.moveTourstop",
         "title": "Move a tour stop to a different location in a file",
         "category": "Tourist"
       },
       {
-        "command": "extension.editTitle",
+        "command": "tourist.editTitle",
         "title": "Edit title",
         "category": "Tourist"
       },
       {
-        "command": "extension.editMessage",
+        "command": "tourist.editMessage",
         "title": "Edit message",
         "category": "Tourist"
       },
       {
-        "command": "extension.startTour",
+        "command": "tourist.startTour",
         "title": "Start a tour",
         "category": "Tourist"
       },
       {
-        "command": "extension.stopTour",
+        "command": "tourist.stopTour",
         "title": "Stop a tour",
         "category": "Tourist"
       },
       {
-        "command": "extension.newTour",
+        "command": "tourist.newTour",
         "title": "Create a new tour",
         "category": "Tourist"
       },
       {
-        "command": "extension.refreshTour",
+        "command": "tourist.refreshTour",
         "title": "Refresh",
         "category": "Tourist"
       },
       {
-        "command": "extension.renameTour",
+        "command": "tourist.renameTour",
         "title": "Rename",
         "category": "Tourist"
       },
       {
-        "command": "extension.mapRepo",
+        "command": "tourist.mapRepo",
         "title": "Map a name to a repository",
         "category": "Tourist"
       },
       {
-        "command": "extension.addBreakpoints",
+        "command": "tourist.addBreakpoints",
         "title": "Add a breakpoint for all tourstops",
         "category": "Tourist"
       }
@@ -113,61 +113,61 @@
     "menus": {
       "editor/context": [
         {
-          "command": "extension.addTourstop",
+          "command": "tourist.addTourstop",
           "group": "Tourist"
         },
         {
-          "command": "extension.moveTourstop",
+          "command": "tourist.moveTourstop",
           "group": "Tourist"
         }
       ],
       "view/item/context": [
         {
-          "command": "extension.editTitle",
+          "command": "tourist.editTitle",
           "when": "viewItem == stop",
           "group": "edit@1"
         },
         {
-          "command": "extension.editMessage",
+          "command": "tourist.editMessage",
           "when": "viewItem == stop",
           "group": "edit@2"
         },
         {
-          "command": "extension.moveTourstopUp",
+          "command": "tourist.moveTourstopUp",
           "when": "viewItem == stop",
           "group": "move@1"
         },
         {
-          "command": "extension.deleteTourstop",
+          "command": "tourist.deleteTourstop",
           "when": "viewItem == stop"
         },
         {
-          "command": "extension.moveTourstopDown",
+          "command": "tourist.moveTourstopDown",
           "when": "viewItem == stop",
           "group": "move@2"
         },
         {
-          "command": "extension.renameTour",
+          "command": "tourist.renameTour",
           "when": "viewItem == tour"
         },
         {
-          "command": "extension.refreshTour",
+          "command": "tourist.refreshTour",
           "when": "viewItem == tour"
         }
       ]
     },
     "keybindings": [
       {
-        "command": "extension.addTourstop",
+        "command": "tourist.addTourstop",
         "key": "Ctrl+Shift+S",
         "when": "editorTextFocus"
       },
       {
-        "command": "extension.nextTourstop",
+        "command": "tourist.nextTourstop",
         "key": "Ctrl+Shift+Alt+J"
       },
       {
-        "command": "extension.prevTourstop",
+        "command": "tourist.prevTourstop",
         "key": "Ctrl+Shift+Alt+K"
       }
     ],

@@ -12,7 +12,7 @@ export class TourFileTreeItem extends vscode.TreeItem {
     super(tourFile.title);
     this.command = {
       arguments: [uri],
-      command: "extension.startTour",
+      command: "tourist.startTour",
       title: "lol what?", // TODO: what does this option actually do?
     };
     this.contextValue = "tour";
@@ -32,7 +32,7 @@ export class TourStopTreeItem extends vscode.TreeItem {
     super(tourstop.title);
     this.command = {
       arguments: [tourstop],
-      command: "extension.gotoTourstop",
+      command: "tourist.gotoTourstop",
       title: "lol what?", // TODO: what does this option actually do?
     };
     this.contextValue = "stop";
@@ -49,7 +49,7 @@ export class BackButtonTreeItem extends vscode.TreeItem {
     super("< Back to tour list");
     this.contextValue = "back";
     this.command = {
-      command: "extension.stopTour",
+      command: "tourist.stopTour",
       title: "lol what?", // TODO: what does this option actually do?
     };
   }

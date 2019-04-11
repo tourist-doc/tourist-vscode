@@ -27,7 +27,7 @@ export class TouristCodeLensProvider implements vscode.CodeLensProvider {
               lenses.push(
                 new vscode.CodeLens(new vscode.Range(position, position), {
                   arguments: [stop],
-                  command: "extension.gotoTourstop",
+                  command: "tourist.gotoTourstop",
                   title: stop.title,
                 }),
               );
