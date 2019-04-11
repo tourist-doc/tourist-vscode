@@ -12,6 +12,7 @@ interface TemplateArgs {
   editingMessage: boolean;
 }
 
+// TODO: consider using a module instead
 export class TouristWebview {
   public static async init(ctx: vscode.ExtensionContext) {
     const templateDoc = await vscode.workspace.openTextDocument(
@@ -20,6 +21,11 @@ export class TouristWebview {
     this.htmlTemplate = template(templateDoc.getText());
   }
 
+  /**
+   * Updates the webview to reflect the given stop
+   * @param tour The tour in which `stop` is contained
+   * @param stop The stop to be displayed
+   */
   public static setTourStop(
     tour: Tour,
     stop: AbsoluteTourStop | BrokenTourStop,
@@ -30,17 +36,31 @@ export class TouristWebview {
     this.refresh();
   }
 
-  public static clear() {
+  /**
+   * Closes the webview
+   */
+  public static close() {
     if (this.panel) {
       this.panel.dispose();
     }
   }
 
+  /** The panel that contains the webview */
   private static panel?: vscode.WebviewPanel;
+
+  /** An object that converts markdown into HTML */
   private static mdConverter = new showdown.Converter();
+
+  /** The `doT` template that is rendered in the webview */
   private static htmlTemplate?: (args: TemplateArgs) => string;
-  private static tour?: Tour;
+
+  /** The current tourstop being shown */
   private static stop?: AbsoluteTourStop | BrokenTourStop;
+
+  /** The tour that `this.stop` is contained in */
+  private static tour?: Tour;
+
+  /** Whether the message is currently being edited (the TextArea is showing) */
   private static editingMessage: boolean = false;
 
   private static refresh() {

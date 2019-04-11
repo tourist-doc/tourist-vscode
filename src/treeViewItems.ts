@@ -1,6 +1,9 @@
 import { AbsoluteTourStop, BrokenTourStop, TourFile } from "tourist";
 import * as vscode from "vscode";
 
+/**
+ * Controls how a `TourFile` is displayed in the TreeView
+ */
 export class TourFileTreeItem extends vscode.TreeItem {
   public tourFile: TourFile;
   public uri: vscode.Uri;
@@ -19,6 +22,9 @@ export class TourFileTreeItem extends vscode.TreeItem {
   }
 }
 
+/**
+ * Controls how a `TourStop` is displayed in the TreeView
+ */
 export class TourStopTreeItem extends vscode.TreeItem {
   public tourstop: AbsoluteTourStop | BrokenTourStop;
 
@@ -35,6 +41,9 @@ export class TourStopTreeItem extends vscode.TreeItem {
   }
 }
 
+/**
+ * Controls how a back button is displayed in the TreeView
+ */
 export class BackButtonTreeItem extends vscode.TreeItem {
   constructor() {
     super("< Back to tour list");

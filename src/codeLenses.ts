@@ -5,6 +5,9 @@ import * as config from "./config";
 import { Util } from "./util";
 import { Globals } from "./globals";
 
+/**
+ * Provides CodeLenses for each tourstop in the active tour
+ */
 export class TouristCodeLensProvider implements vscode.CodeLensProvider {
   public provideCodeLenses(
     document: vscode.TextDocument,

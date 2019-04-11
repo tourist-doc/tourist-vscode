@@ -11,13 +11,23 @@ import {
  * Global state and resources
  */
 export module Globals {
+  /** The tourist library instance */
   export let tourist = new Tourist();
+
+  /** The state of the active tour */
   export let tourState: TourState | undefined;
+
+  /**
+   * The TreeView in the side bar. Currently used to show both tours and tourstops
+   */
   export let treeView:
     | vscode.TreeView<TourFile>
     | vscode.TreeView<AbsoluteTourStop | BrokenTourStop | "back">
     | undefined;
 
+  /**
+   * Sets the active tour file to `tf`, its path to `path`, and updates related state
+   */
   export async function setTourFile(tf: TourFile, path: string) {
     const tour = await Globals.tourist.resolve(tf);
     tourState = new TourState(tf, tour, path);
@@ -57,6 +67,11 @@ export class TourState {
     this.currentStopIdx = undefined;
   }
 
+  /**
+   * Sets the current tourstop to the old previous stop, and returns it
+   *
+   * Returns undefined if there is no current stop or if the current stop is the first one
+   */
   public prevTourStop(): AbsoluteTourStop | BrokenTourStop | undefined {
     if (this.currentStopIdx !== undefined && this.currentStopIdx > 0) {
       return this.tour.stops[--this.currentStopIdx];
@@ -65,6 +80,11 @@ export class TourState {
     }
   }
 
+  /**
+   * Sets the current tourstop to the old previous stop, and returns it
+   *
+   * Returns undefined if there is no current stop or if the current stop is the last one
+   */
   public nextTourStop(): AbsoluteTourStop | BrokenTourStop | undefined {
     if (
       this.currentStopIdx !== undefined &&

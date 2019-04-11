@@ -1,21 +1,36 @@
 import { ViewColumn, workspace, TextEditorRevealType } from "vscode";
 
+/**
+ * Whether CodeLenses should be displayed at each tourstop
+ */
 export function useCodeLens(): boolean {
   return workspace.getConfiguration().get<boolean>("tourist.useCodeLens", true);
 }
 
+/**
+ * Whether text decorations (like highlighting) should be displayed at each tourstop
+ */
 export function showDecorations(): boolean {
   return workspace
     .getConfiguration()
     .get<boolean>("tourist.showDecorations", true);
 }
 
+/**
+ * Whether the `addBreakpoints` command creates active breakpoints
+ */
 export function breakpointsActive(): boolean {
   return workspace
     .getConfiguration()
     .get<boolean>("tourist.breakpointsActive", true);
 }
 
+/**
+ * Where, when you jump to a tourstop, the tourstop is in your viewport
+ *
+ * For instance, if `Center` is chosen and you jump to a tourstop, it will be
+ * placed in the center of your screen.
+ */
 export function tourstopRevealLocation(): TextEditorRevealType {
   switch (
     workspace
@@ -29,7 +44,13 @@ export function tourstopRevealLocation(): TextEditorRevealType {
   }
 }
 
+/**
+ * Which editor column the webview is shown in
+ *
+ * See https://code.visualstudio.com/api/references/vscode-api#ViewColumn
+ */
 export function webviewColumn(): ViewColumn {
+  // TODO: consider limiting the options to sane ones: 1, 2, 3, Active, Beside?
   switch (
     workspace
       .getConfiguration()

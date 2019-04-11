@@ -17,6 +17,7 @@ import { TourFileTreeView, TourStopTreeView } from "./treeViews";
 import { Util } from "./util";
 import { Globals } from "./globals";
 
+/** The text decoration shown on the active tourstop */
 const activeTourstopDecorationType = vscode.window.createTextEditorDecorationType(
   {
     backgroundColor: new vscode.ThemeColor("merge.incomingHeaderBackground"),
@@ -24,6 +25,7 @@ const activeTourstopDecorationType = vscode.window.createTextEditorDecorationTyp
   },
 );
 
+/** The text decoration shown on inactive tourstops */
 const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationType(
   {
     backgroundColor: new vscode.ThemeColor("merge.incomingContentBackground"),
@@ -137,6 +139,9 @@ export async function saveTour() {
   );
 }
 
+/**
+ * Closes the active tour and shows the list of known tours in the side bar
+ */
 export async function showTourList() {
   Globals.tourState = undefined;
   const uris = await vscode.workspace.findFiles("**/*.tour");

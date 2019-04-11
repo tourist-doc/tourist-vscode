@@ -43,6 +43,9 @@ export module Commands {
     ["extension.editMessage", editMessage],
   ];
 
+  /**
+   * Registers each command with the `vscode` API, called on activation.
+   */
   export function registerAll(ctx: vscode.ExtensionContext) {
     noArgsCommands.forEach((command) => {
       vscode.commands.registerCommand(command[0], async () => {
@@ -343,6 +346,9 @@ export module Commands {
     }
   }
 
+  /**
+   * Changes a TourStop's location
+   */
   // TODO: this should probably be renamed, since it has nothing to do with moveTourstopUp/Down
   export async function moveTourstop() {
     if (!Globals.tourState) {
@@ -389,9 +395,12 @@ export module Commands {
    */
   export async function stopTour(): Promise<void> {
     showTourList();
-    TouristWebview.clear();
+    TouristWebview.close();
   }
 
+  /**
+   * Update the tourstop locations in a TourFile to reflect the current version
+   */
   export async function refreshTour(): Promise<void> {
     if (Globals.tourState) {
       try {
@@ -406,6 +415,9 @@ export module Commands {
     }
   }
 
+  /**
+   * Changes the title of the tour
+   */
   export async function renameTour(): Promise<void> {
     if (Globals.tourState) {
       const name = await vscode.window.showInputBox();
@@ -423,6 +435,9 @@ export module Commands {
     }
   }
 
+  /**
+   * Maps a name used in the .tour file to a repository path on disk
+   */
   export async function mapRepo(ctx: vscode.ExtensionContext): Promise<void> {
     const repoName = await vscode.window.showInputBox({
       prompt: "What's the name of the repository?",
@@ -441,8 +456,9 @@ export module Commands {
   }
 
   /**
-   * Creates a new Tour.
+   * Creates a new Tour, saving the .tour file to disk
    */
+  //TODO: accept fully qualified path as an argument
   export async function newTour(): Promise<void> {
     const folderName = vscode.workspace.rootPath
       ? vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
@@ -466,6 +482,9 @@ export module Commands {
     }
   }
 
+  /**
+   * Places a breakpoint at each tourstop location in the active tour
+   */
   export async function addBreakpoints(): Promise<void> {
     if (!Globals.tourState) {
       return;

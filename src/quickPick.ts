@@ -1,6 +1,9 @@
 import { AbsoluteTourStop, BrokenTourStop, isNotBroken, Tour } from "tourist";
 import * as vscode from "vscode";
 
+/**
+ * Controls how tourstops are displayed in QuickPicks
+ */
 class TourstopQuickPickItem implements vscode.QuickPickItem {
   public tourstop: AbsoluteTourStop | BrokenTourStop;
 
@@ -24,6 +27,10 @@ class TourstopQuickPickItem implements vscode.QuickPickItem {
   }
 }
 
+/**
+ * Presents a QuickPick of tourstops to the user, returning the one she picked, or `undefined`.
+ * @param tour The tour from which to pick a stop
+ */
 export async function quickPickTourstop(
   tour: Tour,
 ): Promise<AbsoluteTourStop | BrokenTourStop | undefined> {
