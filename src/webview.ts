@@ -8,8 +8,8 @@ import { Commands } from "./commands";
 
 interface TemplateArgs {
   title: string;
-  message: string;
-  editingMessage: boolean;
+  body: string;
+  editingBody: boolean;
 }
 
 // TODO: consider using a module instead
@@ -60,8 +60,8 @@ export class TouristWebview {
   /** The tour that `this.stop` is contained in */
   private static tour?: Tour;
 
-  /** Whether the message is currently being edited (the TextArea is showing) */
-  private static editingMessage: boolean = false;
+  /** Whether the body is currently being edited (the TextArea is showing) */
+  private static editingBody: boolean = false;
 
   private static refresh() {
     if (this.tour === undefined || this.stop === undefined) {
@@ -73,10 +73,10 @@ export class TouristWebview {
     this.getPanel().title = this.stop.title;
     this.getPanel().webview.html = this.htmlTemplate!({
       title: this.stop.title,
-      message: this.editingMessage
+      body: this.editingBody
         ? this.stop.body || ""
         : this.mdConverter.makeHtml(this.stop.body || ""),
-      editingMessage: this.editingMessage,
+      editingBody: this.editingBody,
     });
   }
 
@@ -103,18 +103,18 @@ export class TouristWebview {
           case "editTitle":
             await Commands.editTitle(this.stop!);
             break;
-          case "editMessage":
-            this.editingMessage = true;
+          case "editBody":
+            this.editingBody = true;
             this.refresh();
             break;
-          case "editMessageCancel":
-            this.editingMessage = false;
+          case "editBodyCancel":
+            this.editingBody = false;
             this.refresh();
             break;
-          case "editMessageSave":
-            this.editingMessage = false;
-            if (this.stop !== undefined && message.newMessage !== undefined) {
-              await Commands.editMessage(this.stop, message.newMessage);
+          case "editBodySave":
+            this.editingBody = false;
+            if (this.stop !== undefined && message.newBody !== undefined) {
+              await Commands.editBody(this.stop, message.newBody);
             }
             break;
         }

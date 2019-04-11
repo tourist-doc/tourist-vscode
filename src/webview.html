@@ -7,7 +7,7 @@
       #footer {
         user-select: none;
       }
-      #message {
+      #body {
         width: 80%;
         height: 200px;
         align-content: center;
@@ -21,23 +21,23 @@
 
   <body>
     <h1>{{=it.title}}</h1>
-    {{?it.editingMessage}}
-    <textarea id="message">{{=it.message}}</textarea>
+    {{?it.editingBody}}
+    <textarea id="body">{{=it.body}}</textarea>
     <br />
     <a
       title="Save"
-      onclick='vscode.postMessage({command: "editMessageSave", newMessage: document.getElementById("message").value})'
+      onclick='vscode.postMessage({command: "editBodySave", newBody: document.getElementById("body").value})'
       >Save</a
     >
     |
     <a
       title="Cancel"
-      onclick='vscode.postMessage({command: "editMessageCancel"})'
+      onclick='vscode.postMessage({command: "editBodyCancel"})'
       >Cancel</a
     >
 
     {{??}}
-    {{=it.message}}
+    {{=it.body}}
     <hr />
     <div id="footer">
       <a
@@ -61,9 +61,9 @@
 
       <br />
       <a
-        title="Edit message"
-        onclick='vscode.postMessage({command: "editMessage"});'
-        >Edit message</a
+        title="Edit body"
+        onclick='vscode.postMessage({command: "editBody"});'
+        >Edit body</a
       >
     </div>
     {{?}}

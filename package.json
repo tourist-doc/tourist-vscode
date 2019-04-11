@@ -62,8 +62,8 @@
         "category": "Tourist"
       },
       {
-        "command": "tourist.editMessage",
-        "title": "Edit message",
+        "command": "tourist.editBody",
+        "title": "Edit body",
         "category": "Tourist"
       },
       {
@@ -128,7 +128,7 @@
           "group": "edit@1"
         },
         {
-          "command": "tourist.editMessage",
+          "command": "tourist.editBody",
           "when": "viewItem == stop",
           "group": "edit@2"
         },

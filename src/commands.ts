@@ -16,7 +16,7 @@ export module Commands {
     "tourist.addBreakpoints": addBreakpoints,
     "tourist.addTourstop": addTourStop,
     "tourist.deleteTourstop": deleteTourStop,
-    "tourist.editMessage": editMessage,
+    "tourist.editBody": editBody,
     "tourist.editTitle": editTitle,
     "tourist.gotoTourstop": gotoTourStop,
     "tourist.mapRepo": mapRepo,
@@ -200,25 +200,25 @@ export module Commands {
   }
 
   /**
-   * Edits the message of a TourStop in the current Tour
+   * Edits the body of a TourStop in the current Tour
    */
-  export async function editMessage(
+  export async function editBody(
     stop?: AbsoluteTourStop | BrokenTourStop,
-    message?: string,
+    body?: string,
   ): Promise<void> {
     if (!Globals.tourState) return;
     if (stop === undefined) stop = await quickPickTourstop();
 
     if (stop) {
-      if (message === undefined) {
-        message = await vscode.window.showInputBox();
+      if (body === undefined) {
+        body = await vscode.window.showInputBox();
       }
 
-      if (message !== undefined) {
+      if (body !== undefined) {
         const idx = Globals.tourState.tour.stops.indexOf(stop);
         if (idx !== -1) {
           await Globals.tourist.edit(Globals.tourState.tourFile, idx, {
-            body: message,
+            body: body,
           });
           await processTourFile(
             Globals.tourState.tourFile,
