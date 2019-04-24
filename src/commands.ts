@@ -1,12 +1,22 @@
 import * as vscode from "vscode";
-import { AbsoluteTourStop, BrokenTourStop, isNotBroken, TourFile } from "tourist";
+import {
+  AbsoluteTourStop,
+  BrokenTourStop,
+  isNotBroken,
+  TourFile,
+  TouristError,
+} from "tourist";
 
 import * as config from "./config";
 import { showDecorations, showTourList, processTourFile } from "./extension";
 import { TouristWebview } from "./webview";
 import { Globals } from "./globals";
 import { Util } from "./util";
-import { getTourFileURI, quickPickTourstop, quickPickTourFile } from "./userInput";
+import {
+  getTourFileURI,
+  quickPickTourstop,
+  quickPickTourFile,
+} from "./userInput";
 
 /**
  * Exports a function corresponding to every VSCode command we contribute.
@@ -91,6 +101,25 @@ export module Commands {
         line: editor.selection.active.line + 1,
       });
     } catch (error) {
+      switch (error.code) {
+        case 200: // Repo not mapped to path
+          // TODO: The repo name should be attached to the error
+          await mapRepo();
+          break;
+        case 201: // Path not mapped to repo
+          // TODO: This could be better...
+          await mapRepo();
+          break;
+        case 203: // Mismatched repo versions
+          showError(error);
+          break;
+        case 100: // Invalid file
+        case 101: // Invalid line number
+        case 202: // Could not get current repo version
+        default:
+          showError(error, false);
+          break;
+      }
       console.error(error);
     }
     await processTourFile(Globals.tourState.tourFile, Globals.tourState.path);
@@ -159,6 +188,12 @@ export module Commands {
         try {
           await Globals.tourist.remove(Globals.tourState.tourFile, idx);
         } catch (error) {
+          switch (error.code) {
+            case 0:
+            default:
+              showError(error, false);
+              break;
+          }
           console.error(error);
         }
         await processTourFile(
@@ -183,9 +218,18 @@ export module Commands {
       if (title !== undefined) {
         const idx = Globals.tourState.tour.stops.indexOf(stop);
         if (idx !== -1) {
-          await Globals.tourist.edit(Globals.tourState.tourFile, idx, {
-            title,
-          });
+          try {
+            await Globals.tourist.edit(Globals.tourState.tourFile, idx, {
+              title,
+            });
+          } catch (error) {
+            switch (error.code) {
+              case 0:
+              default:
+                showError(error, false);
+                break;
+            }
+          }
           await processTourFile(
             Globals.tourState.tourFile,
             Globals.tourState.path,
@@ -217,9 +261,18 @@ export module Commands {
       if (body !== undefined) {
         const idx = Globals.tourState.tour.stops.indexOf(stop);
         if (idx !== -1) {
-          await Globals.tourist.edit(Globals.tourState.tourFile, idx, {
-            body: body,
-          });
+          try {
+            await Globals.tourist.edit(Globals.tourState.tourFile, idx, {
+              body: body,
+            });
+          } catch (error) {
+            switch (error.code) {
+              case 0:
+              default:
+                showError(error, false);
+                break;
+            }
+          }
           await processTourFile(
             Globals.tourState.tourFile,
             Globals.tourState.path,
@@ -257,7 +310,19 @@ export module Commands {
             return i;
           }
         });
-        await Globals.tourist.scramble(Globals.tourState.tourFile, newIndices);
+        try {
+          await Globals.tourist.scramble(
+            Globals.tourState.tourFile,
+            newIndices,
+          );
+        } catch (error) {
+          switch (error.code) {
+            case 1:
+            default:
+              showError(error, false);
+              break;
+          }
+        }
       }
 
       await processTourFile(Globals.tourState.tourFile, Globals.tourState.path);
@@ -288,7 +353,19 @@ export module Commands {
             return i;
           }
         });
-        await Globals.tourist.scramble(Globals.tourState.tourFile, newIndices);
+        try {
+          await Globals.tourist.scramble(
+            Globals.tourState.tourFile,
+            newIndices,
+          );
+        } catch (error) {
+          switch (error.code) {
+            case 1:
+            default:
+              showError(error, false);
+              break;
+          }
+        }
       }
 
       await processTourFile(Globals.tourState.tourFile, Globals.tourState.path);
@@ -316,6 +393,25 @@ export module Commands {
             },
           );
         } catch (error) {
+          switch (error.code) {
+            case 200: // Repo not mapped to path
+              // TODO: The repo name should be attached to the error
+              await mapRepo();
+              break;
+            case 201: // Path not mapped to repo
+              // TODO: This could be better...
+              await mapRepo();
+              break;
+            case 203: // Mismatched repo versions
+              showError(error);
+              break;
+            case 100: // Invalid file
+            case 101: // Invalid line number
+            case 202: // Could not get current repo version
+            default:
+              showError(error, false);
+              break;
+          }
           console.error(error);
         }
         await processTourFile(
@@ -364,6 +460,15 @@ export module Commands {
       await Globals.tourist.refresh(tf);
       await processTourFile(tf, Globals.tourState.path);
     } catch (error) {
+      switch (error.code) {
+        case 200: // Repo not mapped to path
+          // TODO: The repo name should be attached to the error
+          await mapRepo();
+        case 300: // No repo version
+        default:
+          showError(error, false);
+          break;
+      }
       vscode.window.showErrorMessage(`Error code ${error.code} thrown`);
     }
   }
@@ -371,7 +476,10 @@ export module Commands {
   /**
    * Changes the title of the tour
    */
-  export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
+  export async function renameTour(
+    tf?: TourFile,
+    name?: string,
+  ): Promise<void> {
     // TODO: so this doesn't work when you're not in a tour (which is the common case)
     if (!Globals.tourState) return;
     if (!tf) tf = await quickPickTourFile();
@@ -381,11 +489,17 @@ export module Commands {
 
     try {
       await Globals.tourist.rename(tf, name);
-      await processTourFile(
-        tf,
-        Globals.tourState.path,
-      );
+      await processTourFile(tf, Globals.tourState.path);
     } catch (error) {
+      switch (error.code) {
+        case 200: // Repo not mapped to path
+          // TODO: The repo name should be attached to the error
+          await mapRepo();
+        case 300: // No repo version
+        default:
+          showError(error, false);
+          break;
+      }
       vscode.window.showErrorMessage(error);
     }
   }
@@ -393,10 +507,13 @@ export module Commands {
   /**
    * Maps a name used in the .tour file to a repository path on disk
    */
-  export async function mapRepo(): Promise<void> {
-    const repoName = await vscode.window.showInputBox({
-      prompt: "What's the name of the repository?",
-    });
+  export async function mapRepo(repoName?: string): Promise<void> {
+    if (!repoName) {
+      repoName = await vscode.window.showInputBox({
+        prompt: "What's the name of the repository?",
+      });
+    }
+
     if (repoName) {
       const path = await vscode.window.showOpenDialog({
         canSelectFiles: false,
@@ -462,4 +579,15 @@ export module Commands {
 
     vscode.debug.addBreakpoints(breakpoints);
   }
+}
+
+function showError(error: TouristError, expected = true) {
+  if (expected) {
+    console.warn(error.message);
+  } else {
+    console.error(
+      `Hit an unexpected error. code: ${error.code}, message: ${error.message}`,
+    );
+  }
+  vscode.window.showErrorMessage(error.message);
 }
