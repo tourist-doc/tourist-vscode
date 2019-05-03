@@ -81,7 +81,15 @@ function showTour(tour: Tour) {
 /**
  * Shows the decorations for the given tour
  */
-export function showDecorations(tour: Tour) {
+export function showDecorations(tour?: Tour) {
+  if (tour === undefined) {
+    vscode.window.visibleTextEditors.forEach((editor) => {
+      editor.setDecorations(activeTourstopDecorationType, []);
+      editor.setDecorations(inactiveTourstopDecorationType, []);
+    });
+    return;
+  }
+
   if (!Globals.tourState || !config.showDecorations()) {
     return;
   }
@@ -151,6 +159,9 @@ export async function showTourList() {
     uris.push(uri);
     tourFiles.push(tf);
   }
+
+  // Clear text decorations
+  showDecorations(undefined);
 
   vscode.window.createTreeView<TourFile>("touristView", {
     treeDataProvider: new TourFileTreeView(uris, tourFiles),
