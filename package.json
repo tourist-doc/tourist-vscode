@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "publisher": "hgoldstein95",
   "repository": "github:hgoldstein95/tourist-vscode",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.25.0"
   },
