@@ -103,11 +103,10 @@ export module Commands {
     } catch (error) {
       switch (error.code) {
         case 200: // Repo not mapped to path
-          // TODO: The repo name should be attached to the error
-          await mapRepo();
+          await mapRepo(error.repoName);
           break;
         case 201: // Path not mapped to repo
-          // TODO: This could be better...
+          // TODO: maybe in this case, search upward to find .git folder?
           await mapRepo();
           break;
         case 203: // Mismatched repo versions
@@ -395,11 +394,10 @@ export module Commands {
         } catch (error) {
           switch (error.code) {
             case 200: // Repo not mapped to path
-              // TODO: The repo name should be attached to the error
-              await mapRepo();
+              await mapRepo(error.repoName);
               break;
             case 201: // Path not mapped to repo
-              // TODO: This could be better...
+              // TODO: maybe in this case, search upward to find .git folder?
               await mapRepo();
               break;
             case 203: // Mismatched repo versions
@@ -462,8 +460,7 @@ export module Commands {
     } catch (error) {
       switch (error.code) {
         case 200: // Repo not mapped to path
-          // TODO: The repo name should be attached to the error
-          await mapRepo();
+          await mapRepo(error.repoName);
         case 300: // No repo version
         default:
           showError(error, false);
@@ -493,8 +490,7 @@ export module Commands {
     } catch (error) {
       switch (error.code) {
         case 200: // Repo not mapped to path
-          // TODO: The repo name should be attached to the error
-          await mapRepo();
+          await mapRepo(error.repoName);
         case 300: // No repo version
         default:
           showError(error, false);
@@ -516,6 +512,7 @@ export module Commands {
 
     if (repoName) {
       const path = await vscode.window.showOpenDialog({
+        openLabel: `Map to '${repoName}'`,
         canSelectFiles: false,
         canSelectFolders: true,
         canSelectMany: false,
