@@ -91,7 +91,13 @@ export module Commands {
    */
   export async function addTourStop() {
     const editor = vscode.window.activeTextEditor;
-    if (!Globals.tourState || !editor) return;
+    if (!Globals.tourState) {
+      vscode.window.showInformationMessage("You need to start a tour before adding a stop");
+      return;
+    } else if (!editor) {
+      vscode.window.showInformationMessage("No editor is active");
+      return;
+    }
 
     const title =
       (await vscode.window.showInputBox({ prompt: "Stop title:" })) || "";
