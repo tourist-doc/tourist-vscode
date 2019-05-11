@@ -22,6 +22,7 @@ import { StatusBar } from "./statusBar";
 const activeTourstopDecorationType = vscode.window.createTextEditorDecorationType(
   {
     backgroundColor: new vscode.ThemeColor("merge.incomingHeaderBackground"),
+    overviewRulerColor: new vscode.ThemeColor("merge.incomingHeaderBackground"),
     isWholeLine: true,
   },
 );
@@ -30,6 +31,7 @@ const activeTourstopDecorationType = vscode.window.createTextEditorDecorationTyp
 const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationType(
   {
     backgroundColor: new vscode.ThemeColor("merge.incomingContentBackground"),
+    overviewRulerColor: new vscode.ThemeColor("merge.incomingContentBackground"),
     isWholeLine: true,
   },
 );
