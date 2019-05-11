@@ -11,7 +11,9 @@ import {
  * A wrapper around a list of TourFiles which provides data to the GUI
  */
 export class TourFileTreeView implements vscode.TreeDataProvider<TourFile> {
-  public onDidChangeTreeData?: vscode.Event<TourFile | null | undefined> | undefined;
+  public onDidChangeTreeData?:
+    | vscode.Event<TourFile | null | undefined>
+    | undefined;
 
   private uris: vscode.Uri[];
   private tourFiles: TourFile[];
@@ -22,12 +24,16 @@ export class TourFileTreeView implements vscode.TreeDataProvider<TourFile> {
     this.tourFiles = tourFiles;
   }
 
-  public getTreeItem(tf: TourFile): vscode.TreeItem | Thenable<vscode.TreeItem> {
+  public getTreeItem(
+    tf: TourFile,
+  ): vscode.TreeItem | Thenable<vscode.TreeItem> {
     const uri = this.uris[this.tourFiles.indexOf(tf)];
     return new TourFileTreeItem(uri, tf);
   }
 
-  public getChildren(tf?: TourFile | undefined): vscode.ProviderResult<TourFile[]> {
+  public getChildren(
+    tf?: TourFile | undefined,
+  ): vscode.ProviderResult<TourFile[]> {
     if (tf === undefined) {
       return this.tourFiles;
     } else {

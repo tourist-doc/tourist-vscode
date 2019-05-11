@@ -26,7 +26,9 @@ export function pathsEqual(path1: string, path2: string) {
  * Parses a TourFile from a location on disk
  * @param path The path to the TourFile
  */
-export async function parseTourFile(tfPath: string): Promise<TourFile | undefined> {
+export async function parseTourFile(
+  tfPath: string,
+): Promise<TourFile | undefined> {
   const doc = await vscode.workspace.openTextDocument(tfPath);
   try {
     return globals.tourist.deserializeTourFile(doc.getText());

@@ -133,9 +133,12 @@ export async function quickPickTourFile(): Promise<TourFile | undefined> {
 
 export async function quickPickRepoName(): Promise<string | undefined> {
   const items: vscode.QuickPickItem[] = [];
-// tslint:disable-next-line: forin
+  // tslint:disable-next-line: forin
   for (const repoName in globals.tourist.config) {
-    items.push({label: repoName, description: globals.tourist.config[repoName]});
+    items.push({
+      label: repoName,
+      description: globals.tourist.config[repoName],
+    });
   }
   const item = await vscode.window.showQuickPick(items);
   return item ? item.label : undefined;

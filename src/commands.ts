@@ -579,10 +579,7 @@ export async function unmapRepo(): Promise<void> {
 
   if (repoName) {
     await globals.tourist.unmapConfig(repoName);
-    context!.globalState.update(
-      "touristInstance",
-      globals.tourist.serialize(),
-    );
+    context!.globalState.update("touristInstance", globals.tourist.serialize());
   }
 }
 

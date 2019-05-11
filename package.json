@@ -242,15 +242,15 @@
     "husky": "^2.2.0",
     "lint-staged": "^8.1.6",
     "tslint": "^5.15.0",
-    "typescript": "^2.6.1",
-    "vscode": "^1.1.33"
+    "typescript": "^2.6.1"
   },
   "dependencies": {
     "@types/sinon": "^7.0.11",
     "dot": "^1.1.2",
     "showdown": "^1.9.0",
     "sinon": "^7.3.2",
-    "tourist": "file:../tourist"
+    "tourist": "file:../tourist",
+    "vscode": "^1.1.34"
   },
   "prettier": {
     "arrowParens": "always",

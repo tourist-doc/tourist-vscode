@@ -1,9 +1,5 @@
 import * as fs from "fs";
-import {
-  isNotBroken,
-  Tour,
-  TourFile,
-} from "tourist";
+import { isNotBroken, Tour, TourFile } from "tourist";
 import * as vscode from "vscode";
 
 import { TouristCodeLensProvider } from "./codeLenses";
@@ -28,7 +24,9 @@ const activeTourstopDecorationType = vscode.window.createTextEditorDecorationTyp
 const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationType(
   {
     backgroundColor: new vscode.ThemeColor("merge.incomingContentBackground"),
-    overviewRulerColor: new vscode.ThemeColor("merge.incomingContentBackground"),
+    overviewRulerColor: new vscode.ThemeColor(
+      "merge.incomingContentBackground",
+    ),
     isWholeLine: true,
   },
 );
