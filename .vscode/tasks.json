@@ -19,8 +19,8 @@
   // show the output window only if unrecognized errors occur.
   "showOutput": "silent",
 
-  // we run the custom script "compile" as defined in package.json
-  "args": ["run", "compile", "--loglevel", "silent"],
+  // we run the custom script "webpack" as defined in package.json
+  "args": ["run", "webpack", "--loglevel", "silent"],
 
   // The tsc compiler is started in watching mode
   "isBackground": true,
