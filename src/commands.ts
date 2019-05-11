@@ -11,7 +11,11 @@ import * as config from "./config";
 import { processTourFile, showDecorations, showTourList } from "./extension";
 import * as globals from "./globals";
 import * as statusBar from "./statusBar";
-import { quickPickTourFile, quickPickTourstop } from "./userInput";
+import {
+  quickPickRepoName,
+  quickPickTourFile,
+  quickPickTourstop,
+} from "./userInput";
 import * as util from "./util";
 import { TouristWebview } from "./webview";
 
@@ -26,6 +30,7 @@ const commands = {
   "tourist.editTitle": editTitle,
   "tourist.gotoTourstop": gotoTourStop,
   "tourist.mapRepo": mapRepo,
+  "tourist.unmapRepo": unmapRepo,
   "tourist.moveTourstop": moveTourstop,
   "tourist.moveTourstopDown": moveTourstopDown,
   "tourist.moveTourstopUp": moveTourstopUp,
@@ -447,7 +452,9 @@ export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
 export async function startTour(uri?: vscode.Uri): Promise<void> {
   if (uri) {
     const tf = await util.parseTourFile(uri.fsPath);
-    await processTourFile(tf, uri.fsPath);
+    if (tf) {
+      await processTourFile(tf, uri.fsPath);
+    }
     if (globals.tourState) {
       gotoTourStop(globals.tourState.tour.stops[0]);
     }
@@ -567,6 +574,18 @@ export async function mapRepo(repoName?: string): Promise<void> {
   }
 }
 
+export async function unmapRepo(): Promise<void> {
+  const repoName = await quickPickRepoName();
+
+  if (repoName) {
+    await globals.tourist.unmapConfig(repoName);
+    context!.globalState.update(
+      "touristInstance",
+      globals.tourist.serialize(),
+    );
+  }
+}
+
 /**
  * Creates a new Tour, saving the .tour file to disk
  */
@@ -619,7 +638,7 @@ export async function addBreakpoints(): Promise<void> {
   vscode.debug.addBreakpoints(breakpoints);
 }
 
-function showError(error: TouristError, expected = true) {
+export function showError(error: TouristError, expected = true) {
   if (expected) {
     console.warn(error.message);
   } else {

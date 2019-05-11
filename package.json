@@ -99,6 +99,11 @@
         "category": "Tourist"
       },
       {
+        "command": "tourist.unmapRepo",
+        "title": "Unmap a repository name",
+        "category": "Tourist"
+      },
+      {
         "command": "tourist.addBreakpoints",
         "title": "Add a breakpoint for all tourstops",
         "category": "Tourist"
@@ -257,10 +262,10 @@
     }
   },
   "lint-staged": {
-      "*.ts": [
-        "npx tslint",
-        "npx prettier --write",
-        "git add"
+    "*.ts": [
+      "npx tslint",
+      "npx prettier --write",
+      "git add"
     ]
   }
 }
