@@ -234,6 +234,8 @@
     "@types/node": "^7.10.6",
     "@types/showdown": "^1.9.2",
     "chai": "^4.2.0",
+    "husky": "^2.2.0",
+    "lint-staged": "^8.1.6",
     "tslint": "^5.15.0",
     "typescript": "^2.6.1",
     "vscode": "^1.1.33"
@@ -248,5 +250,17 @@
   "prettier": {
     "arrowParens": "always",
     "trailingComma": "all"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+      "*.ts": [
+        "npx tslint",
+        "npx prettier --write",
+        "git add"
+    ]
   }
 }

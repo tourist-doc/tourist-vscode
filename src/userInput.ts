@@ -1,6 +1,12 @@
 import * as vscode from "vscode";
 
-import { AbsoluteTourStop, BrokenTourStop, isNotBroken, Tour, TourFile } from "tourist";
+import {
+  AbsoluteTourStop,
+  BrokenTourStop,
+  isNotBroken,
+  Tour,
+  TourFile,
+} from "tourist";
 import { Globals } from "./globals";
 import { Util } from "./util";
 
@@ -8,20 +14,19 @@ import { Util } from "./util";
  * Gets a file path to a TourFile from the user and returns it
  */
 export async function getTourFileURI(): Promise<vscode.Uri | undefined> {
-  const uris = await vscode.window
-    .showOpenDialog({
-      openLabel: "Start tour",
-      canSelectMany: false,
-      filters: {
-        Tours: ["tour"],
-      },
-    });
+  const uris = await vscode.window.showOpenDialog({
+    openLabel: "Start tour",
+    canSelectMany: false,
+    filters: {
+      Tours: ["tour"],
+    },
+  });
 
-    if (uris) {
-      return uris[0];
-    }
+  if (uris) {
+    return uris[0];
+  }
 
-    return undefined;
+  return undefined;
 }
 
 /**

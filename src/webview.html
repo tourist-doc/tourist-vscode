@@ -30,14 +30,11 @@
       >Save</a
     >
     |
-    <a
-      title="Cancel"
-      onclick='vscode.postMessage({command: "editBodyCancel"})'
+    <a title="Cancel" onclick='vscode.postMessage({command: "editBodyCancel"})'
       >Cancel</a
     >
 
-    {{??}}
-    {{=it.body}}
+    {{??}} {{=it.body}}
     <hr />
     <div id="footer">
       <a
@@ -60,9 +57,7 @@
       >
 
       <br />
-      <a
-        title="Edit body"
-        onclick='vscode.postMessage({command: "editBody"});'
+      <a title="Edit body" onclick='vscode.postMessage({command: "editBody"});'
         >Edit body</a
       >
     </div>
