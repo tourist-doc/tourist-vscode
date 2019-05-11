@@ -39,13 +39,7 @@ const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationT
  */
 export async function activate(context: vscode.ExtensionContext) {
   showTourList();
-  vscode.workspace.onDidChangeConfiguration(
-    (evt: vscode.ConfigurationChangeEvent) => {
-      if (Globals.tourState === undefined) {
-        showTourList();
-      }
-    },
-  );
+  vscode.workspace.onDidChangeConfiguration(configChanged);
 
   const touristJSON = context.globalState.get<string>("touristInstance");
   if (touristJSON) {
@@ -84,7 +78,7 @@ function showTour(tour: Tour) {
  * Shows the decorations for the given tour
  */
 export function showDecorations(tour?: Tour) {
-  if (tour === undefined) {
+  if (!Globals.tourState || !config.showDecorations() || tour === undefined) {
     vscode.window.visibleTextEditors.forEach((editor) => {
       editor.setDecorations(activeTourstopDecorationType, []);
       editor.setDecorations(inactiveTourstopDecorationType, []);
@@ -92,9 +86,6 @@ export function showDecorations(tour?: Tour) {
     return;
   }
 
-  if (!Globals.tourState || !config.showDecorations()) {
-    return;
-  }
   const current = Globals.tourState.currentStop;
   vscode.window.visibleTextEditors.forEach((editor) => {
     if (
@@ -174,4 +165,10 @@ export async function processTourFile(tf: TourFile, path: string) {
   await Globals.setTourFile(tf, path);
   await saveTour();
   showTour(Globals.tourState!.tour);
+}
+
+function configChanged(evt: vscode.ConfigurationChangeEvent) {
+  if (evt.affectsConfiguration("tourist.showDecorations")) {
+    showDecorations(Globals.tourState ? Globals.tourState.tour : undefined);
+  }
 }
