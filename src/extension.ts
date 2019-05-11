@@ -2,21 +2,18 @@ import * as fs from "fs";
 import {
   isNotBroken,
   Tour,
-  Tourist,
   TourFile,
-  AbsoluteTourStop,
-  BrokenTourStop,
 } from "tourist";
 import * as vscode from "vscode";
 
-import { Commands } from "./commands";
 import { TouristCodeLensProvider } from "./codeLenses";
+import * as commands from "./commands";
 import * as config from "./config";
+import * as globals from "./globals";
+import * as statusBar from "./statusBar";
+import { TourFileTreeView } from "./treeViews";
+import * as util from "./util";
 import { TouristWebview } from "./webview";
-import { TourFileTreeView, TourStopTreeView } from "./treeViews";
-import { Util } from "./util";
-import { Globals } from "./globals";
-import { StatusBar } from "./statusBar";
 
 /** The text decoration shown on the active tourstop */
 const activeTourstopDecorationType = vscode.window.createTextEditorDecorationType(
@@ -43,14 +40,10 @@ export async function activate(context: vscode.ExtensionContext) {
   showTourList();
   vscode.workspace.onDidChangeConfiguration(configChanged);
 
-  const touristJSON = context.globalState.get<string>("touristInstance");
-  if (touristJSON) {
-    Globals.tourist = Tourist.deserialize(touristJSON);
-  }
-
-  StatusBar.init();
+  globals.init(context);
+  statusBar.init();
   TouristWebview.init(context);
-  Commands.registerAll(context);
+  commands.registerAll(context);
 
   context.subscriptions.push(
     vscode.languages.registerCodeLensProvider(
@@ -64,23 +57,19 @@ export async function activate(context: vscode.ExtensionContext) {
  * Show the given tour in the sidebar
  */
 function showTour(tour: Tour) {
-  if (!Globals.tourState) {
+  if (!globals.tourState) {
     return;
   }
 
   showDecorations(tour);
-  Globals.treeView = vscode.window.createTreeView<
-    AbsoluteTourStop | BrokenTourStop | "back"
-  >("touristView", {
-    treeDataProvider: new TourStopTreeView(tour.stops),
-  });
+  globals.createTreeView(tour);
 }
 
 /**
  * Shows the decorations for the given tour
  */
 export function showDecorations(tour?: Tour) {
-  if (!Globals.tourState || !config.showDecorations() || tour === undefined) {
+  if (!globals.tourState || !config.showDecorations() || tour === undefined) {
     vscode.window.visibleTextEditors.forEach((editor) => {
       editor.setDecorations(activeTourstopDecorationType, []);
       editor.setDecorations(inactiveTourstopDecorationType, []);
@@ -88,12 +77,12 @@ export function showDecorations(tour?: Tour) {
     return;
   }
 
-  const current = Globals.tourState.currentStop;
+  const current = globals.tourState.currentStop;
   vscode.window.visibleTextEditors.forEach((editor) => {
     if (
       current &&
       isNotBroken(current) &&
-      Util.pathsEqual(current.absPath, editor.document.fileName)
+      util.pathsEqual(current.absPath, editor.document.fileName)
     ) {
       editor.setDecorations(activeTourstopDecorationType, [
         editor.document.lineAt(new vscode.Position(current.line - 1, 0)).range,
@@ -109,7 +98,7 @@ export function showDecorations(tour?: Tour) {
           (stop) =>
             stop !== current &&
             isNotBroken(stop) &&
-            Util.pathsEqual(stop.absPath, editor.document.fileName),
+            util.pathsEqual(stop.absPath, editor.document.fileName),
         )
         .map((stop) =>
           editor.document.lineAt(
@@ -124,14 +113,14 @@ export function showDecorations(tour?: Tour) {
  * Writes active TourFile to disk
  */
 export async function saveTour() {
-  if (!Globals.tourState) {
+  if (!globals.tourState) {
     return;
   }
 
-  console.log(`Attempting to save ${Globals.tourState.path}`);
+  console.log(`Attempting to save ${globals.tourState.path}`);
   fs.writeFile(
-    Globals.tourState.path,
-    await Globals.tourist.serializeTourFile(Globals.tourState.tourFile),
+    globals.tourState.path,
+    await globals.tourist.serializeTourFile(globals.tourState.tourFile),
     (err) => {
       if (err) {
         console.log(err);
@@ -146,11 +135,11 @@ export async function saveTour() {
  * Closes the active tour and shows the list of known tours in the side bar
  */
 export async function showTourList() {
-  Globals.tourState = undefined;
+  globals.clearTourState();
 
-  let uris: vscode.Uri[] = [];
-  let tourFiles: TourFile[] = [];
-  for (const [uri, tf] of await Util.getWorkspaceTours()) {
+  const uris: vscode.Uri[] = [];
+  const tourFiles: TourFile[] = [];
+  for (const [uri, tf] of await util.getWorkspaceTours()) {
     uris.push(uri);
     tourFiles.push(tf);
   }
@@ -164,13 +153,13 @@ export async function showTourList() {
 }
 
 export async function processTourFile(tf: TourFile, path: string) {
-  await Globals.setTourFile(tf, path);
+  await globals.setTourFile(tf, path);
   await saveTour();
-  showTour(Globals.tourState!.tour);
+  showTour(globals.tourState!.tour);
 }
 
 function configChanged(evt: vscode.ConfigurationChangeEvent) {
   if (evt.affectsConfiguration("tourist.showDecorations")) {
-    showDecorations(Globals.tourState ? Globals.tourState.tour : undefined);
+    showDecorations(globals.tourState ? globals.tourState.tour : undefined);
   }
 }

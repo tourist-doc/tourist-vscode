@@ -2,16 +2,19 @@ import { AbsoluteTourStop, BrokenTourStop, TourFile } from "tourist";
 import * as vscode from "vscode";
 
 import {
+  BackButtonTreeItem,
   TourFileTreeItem,
   TourStopTreeItem,
-  BackButtonTreeItem,
 } from "./treeViewItems";
 
 /**
  * A wrapper around a list of TourFiles which provides data to the GUI
  */
 export class TourFileTreeView implements vscode.TreeDataProvider<TourFile> {
-  onDidChangeTreeData?: vscode.Event<TourFile | null | undefined> | undefined;
+  public onDidChangeTreeData?: vscode.Event<TourFile | null | undefined> | undefined;
+
+  private uris: vscode.Uri[];
+  private tourFiles: TourFile[];
 
   // TODO: this isn't great. Should really only need to take one or the other.
   constructor(uris: vscode.Uri[], tourFiles: TourFile[]) {
@@ -19,21 +22,18 @@ export class TourFileTreeView implements vscode.TreeDataProvider<TourFile> {
     this.tourFiles = tourFiles;
   }
 
-  getTreeItem(tf: TourFile): vscode.TreeItem | Thenable<vscode.TreeItem> {
+  public getTreeItem(tf: TourFile): vscode.TreeItem | Thenable<vscode.TreeItem> {
     const uri = this.uris[this.tourFiles.indexOf(tf)];
     return new TourFileTreeItem(uri, tf);
   }
 
-  getChildren(tf?: TourFile | undefined): vscode.ProviderResult<TourFile[]> {
+  public getChildren(tf?: TourFile | undefined): vscode.ProviderResult<TourFile[]> {
     if (tf === undefined) {
       return this.tourFiles;
     } else {
       return [];
     }
   }
-
-  private uris: vscode.Uri[];
-  private tourFiles: TourFile[];
 }
 
 /**
@@ -47,6 +47,8 @@ export class TourStopTreeView
         AbsoluteTourStop | BrokenTourStop | "back" | null | undefined
       >
     | undefined;
+
+  private tourstops: Array<AbsoluteTourStop | BrokenTourStop>;
 
   constructor(stops: Array<AbsoluteTourStop | BrokenTourStop> = []) {
     this.tourstops = stops;
@@ -66,8 +68,8 @@ export class TourStopTreeView
     stop?: AbsoluteTourStop | BrokenTourStop | "back" | undefined,
   ): vscode.ProviderResult<Array<AbsoluteTourStop | BrokenTourStop | "back">> {
     if (stop === undefined) {
-      let x: Array<AbsoluteTourStop | BrokenTourStop | "back"> = ["back"];
-      return x.concat(this.tourstops);
+      const back: Array<AbsoluteTourStop | BrokenTourStop | "back"> = ["back"];
+      return back.concat(this.tourstops);
     } else {
       return [];
     }
@@ -78,6 +80,4 @@ export class TourStopTreeView
   ): vscode.ProviderResult<AbsoluteTourStop> {
     return undefined;
   }
-
-  private tourstops: Array<AbsoluteTourStop | BrokenTourStop>;
 }

@@ -7,8 +7,8 @@ import {
   Tour,
   TourFile,
 } from "tourist";
-import { Globals } from "./globals";
-import { Util } from "./util";
+import * as globals from "./globals";
+import * as util from "./util";
 
 /**
  * Controls how tourstops are displayed in QuickPicks
@@ -44,8 +44,8 @@ export async function quickPickTourstop(
   tour?: Tour,
 ): Promise<AbsoluteTourStop | BrokenTourStop | undefined> {
   if (!tour) {
-    if (Globals.tourState) {
-      tour = Globals.tourState.tour;
+    if (globals.tourState) {
+      tour = globals.tourState.tour;
     } else {
       return undefined;
     }
@@ -105,7 +105,7 @@ async function getTourFileURI(): Promise<vscode.Uri | undefined> {
  * @param tour The tour from which to pick a stop
  */
 export async function quickPickTourFile(): Promise<TourFile | undefined> {
-  const tourFiles = await Util.getWorkspaceTours();
+  const tourFiles = await util.getWorkspaceTours();
   const fromFile: vscode.QuickPickItem = { label: "Open .tour file" };
   const quickPickItems = tourFiles
     .map(
@@ -124,7 +124,7 @@ export async function quickPickTourFile(): Promise<TourFile | undefined> {
   } else if (item) {
     const uri = await getTourFileURI();
     if (uri) {
-      return Util.parseTourFile(uri.fsPath);
+      return util.parseTourFile(uri.fsPath);
     }
   }
 

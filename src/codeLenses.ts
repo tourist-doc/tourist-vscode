@@ -1,9 +1,9 @@
-import * as vscode from "vscode";
 import { AbsoluteTourStop, BrokenTourStop, isNotBroken } from "tourist";
+import * as vscode from "vscode";
 
 import * as config from "./config";
-import { Util } from "./util";
-import { Globals } from "./globals";
+import * as globals from "./globals";
+import * as util from "./util";
 
 /**
  * Provides CodeLenses for each tourstop in the active tour
@@ -18,11 +18,11 @@ export class TouristCodeLensProvider implements vscode.CodeLensProvider {
     }
 
     const lenses = [] as vscode.CodeLens[];
-    if (Globals.tourState) {
-      Globals.tourState.tour.stops.forEach(
+    if (globals.tourState) {
+      globals.tourState.tour.stops.forEach(
         (stop: AbsoluteTourStop | BrokenTourStop) => {
           if (isNotBroken(stop)) {
-            if (Util.pathsEqual(document.fileName, stop.absPath)) {
+            if (util.pathsEqual(document.fileName, stop.absPath)) {
               const position = new vscode.Position(stop.line - 1, 0);
               lenses.push(
                 new vscode.CodeLens(new vscode.Range(position, position), {

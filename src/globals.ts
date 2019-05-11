@@ -1,37 +1,36 @@
-import * as vscode from "vscode";
 import {
-  Tourist,
-  Tour,
-  TourFile,
   AbsoluteTourStop,
   BrokenTourStop,
+  Tour,
+  TourFile,
+  Tourist,
 } from "tourist";
+import * as vscode from "vscode";
+import { TourStopTreeView } from "./treeViews";
 
 /**
  * Global state and resources
  */
-export module Globals {
-  /** The tourist library instance */
-  export let tourist = new Tourist();
+/** The tourist library instance */
+export let tourist = new Tourist();
 
-  /** The state of the active tour */
-  export let tourState: TourState | undefined;
+/** The state of the active tour */
+export let tourState: TourState | undefined;
 
-  /**
-   * The TreeView in the side bar. Currently used to show both tours and tourstops
-   */
-  export let treeView:
-    | vscode.TreeView<TourFile>
-    | vscode.TreeView<AbsoluteTourStop | BrokenTourStop | "back">
-    | undefined;
+/**
+ * The TreeView in the side bar. Currently used to show both tours and tourstops
+ */
+export let treeView:
+  | vscode.TreeView<TourFile>
+  | vscode.TreeView<AbsoluteTourStop | BrokenTourStop | "back">
+  | undefined;
 
-  /**
-   * Sets the active tour file to `tf`, its path to `path`, and updates related state
-   */
-  export async function setTourFile(tf: TourFile, path: string) {
-    const tour = await Globals.tourist.resolve(tf);
-    tourState = new TourState(tf, tour, path);
-  }
+/**
+ * Sets the active tour file to `tf`, its path to `path`, and updates related state
+ */
+export async function setTourFile(tf: TourFile, path: string) {
+  const tour = await tourist.resolve(tf);
+  tourState = new TourState(tf, tour, path);
 }
 
 /**
@@ -95,4 +94,23 @@ export class TourState {
       return undefined;
     }
   }
+}
+
+export function init(context: vscode.ExtensionContext) {
+  const touristJSON = context.globalState.get<string>("touristInstance");
+  if (touristJSON) {
+    tourist = Tourist.deserialize(touristJSON);
+  }
+}
+
+export function createTreeView(tour: Tour) {
+  treeView = vscode.window.createTreeView<
+    AbsoluteTourStop | BrokenTourStop | "back"
+  >("touristView", {
+    treeDataProvider: new TourStopTreeView(tour.stops),
+  });
+}
+
+export function clearTourState() {
+  tourState = undefined;
 }

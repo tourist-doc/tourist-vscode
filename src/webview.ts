@@ -3,8 +3,8 @@ import * as showdown from "showdown";
 import { AbsoluteTourStop, BrokenTourStop, Tour } from "tourist";
 import * as vscode from "vscode";
 
+import * as commands from "./commands";
 import * as config from "./config";
-import { Commands } from "./commands";
 
 interface TemplateArgs {
   title: string;
@@ -12,7 +12,6 @@ interface TemplateArgs {
   editingBody: boolean;
 }
 
-// TODO: consider using a module instead
 export class TouristWebview {
   public static async init(ctx: vscode.ExtensionContext) {
     const templateDoc = await vscode.workspace.openTextDocument(
@@ -95,13 +94,13 @@ export class TouristWebview {
       this.panel.webview.onDidReceiveMessage(async (message: any) => {
         switch (message.command) {
           case "nextTourstop":
-            await Commands.nextTourStop();
+            await commands.nextTourStop();
             break;
           case "prevTourstop":
-            await Commands.prevTourStop();
+            await commands.prevTourStop();
             break;
           case "editTitle":
-            await Commands.editTitle(this.stop!);
+            await commands.editTitle(this.stop!);
             break;
           case "editBody":
             this.editingBody = true;
@@ -114,7 +113,7 @@ export class TouristWebview {
           case "editBodySave":
             this.editingBody = false;
             if (this.stop !== undefined && message.newBody !== undefined) {
-              await Commands.editBody(this.stop, message.newBody);
+              await commands.editBody(this.stop, message.newBody);
             }
             break;
         }

@@ -1,4 +1,4 @@
-import { ViewColumn, workspace, TextEditorRevealType } from "vscode";
+import { TextEditorRevealType, ViewColumn, workspace } from "vscode";
 
 /**
  * Whether CodeLenses should be displayed at each tourstop
