@@ -11,25 +11,6 @@ import { Globals } from "./globals";
 import { Util } from "./util";
 
 /**
- * Gets a file path to a TourFile from the user and returns it
- */
-export async function getTourFileURI(): Promise<vscode.Uri | undefined> {
-  const uris = await vscode.window.showOpenDialog({
-    openLabel: "Start tour",
-    canSelectMany: false,
-    filters: {
-      Tours: ["tour"],
-    },
-  });
-
-  if (uris) {
-    return uris[0];
-  }
-
-  return undefined;
-}
-
-/**
  * Controls how tourstops are displayed in QuickPicks
  */
 class TourstopQuickPickItem implements vscode.QuickPickItem {
@@ -101,17 +82,51 @@ class TourFileQuickPickItem implements vscode.QuickPickItem {
 }
 
 /**
+ * Gets a file path to a TourFile from the user and returns it
+ */
+async function getTourFileURI(): Promise<vscode.Uri | undefined> {
+  const uris = await vscode.window.showOpenDialog({
+    openLabel: "Start tour",
+    canSelectMany: false,
+    filters: {
+      Tours: ["tour"],
+    },
+  });
+
+  if (uris) {
+    return uris[0];
+  }
+
+  return undefined;
+}
+
+/**
  * Presents a QuickPick of tourstops to the user, returning the one she picked, or `undefined`.
  * @param tour The tour from which to pick a stop
  */
 export async function quickPickTourFile(): Promise<TourFile | undefined> {
   const tourFiles = await Util.getWorkspaceTours();
-  const quickPickItems = tourFiles.map(
-    ([uri, tf]) => new TourFileQuickPickItem(tf, uri.fsPath),
-  );
-  const item = await vscode.window.showQuickPick<TourFileQuickPickItem>(
+  const fromFile: vscode.QuickPickItem = { label: "Open .tour file" };
+  const quickPickItems = tourFiles
+    .map(
+      ([uri, tf]) =>
+        new TourFileQuickPickItem(tf, uri.fsPath) as vscode.QuickPickItem,
+    )
+    .concat([fromFile]);
+
+  const item = await vscode.window.showQuickPick<vscode.QuickPickItem>(
     quickPickItems,
     { canPickMany: false },
   );
-  return item ? item.tf : undefined;
+
+  if (item instanceof TourFileQuickPickItem) {
+    return item.tf;
+  } else if (item) {
+    const uri = await getTourFileURI();
+    if (uri) {
+      return Util.parseTourFile(uri.fsPath);
+    }
+  }
+
+  return undefined;
 }

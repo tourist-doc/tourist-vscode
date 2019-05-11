@@ -13,7 +13,6 @@ import { TouristWebview } from "./webview";
 import { Globals } from "./globals";
 import { Util } from "./util";
 import {
-  getTourFileURI,
   quickPickTourstop,
   quickPickTourFile,
 } from "./userInput";
@@ -434,15 +433,20 @@ export module Commands {
    * Starts a Tour from a .tour file
    */
   export async function startTour(uri?: vscode.Uri): Promise<void> {
-    if (uri === undefined) {
-      uri = await getTourFileURI();
-    }
-
     if (uri) {
       const tf = await Util.parseTourFile(uri.fsPath);
       await processTourFile(tf, uri.fsPath);
       if (Globals.tourState) {
         gotoTourStop(Globals.tourState.tour.stops[0]);
+      }
+    } else {
+      const tf = await quickPickTourFile();
+      if (tf) {
+        // TODO: we need the uri here...
+        await processTourFile(tf, "");
+        if (Globals.tourState) {
+          gotoTourStop(Globals.tourState.tour.stops[0]);
+        }
       }
     }
   }
