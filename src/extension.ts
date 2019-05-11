@@ -16,6 +16,7 @@ import { TouristWebview } from "./webview";
 import { TourFileTreeView, TourStopTreeView } from "./treeViews";
 import { Util } from "./util";
 import { Globals } from "./globals";
+import { StatusBar } from "./statusBar";
 
 /** The text decoration shown on the active tourstop */
 const activeTourstopDecorationType = vscode.window.createTextEditorDecorationType(
@@ -51,6 +52,7 @@ export async function activate(context: vscode.ExtensionContext) {
     Globals.tourist = Tourist.deserialize(touristJSON);
   }
 
+  StatusBar.init();
   TouristWebview.init(context);
   Commands.registerAll(context);
 

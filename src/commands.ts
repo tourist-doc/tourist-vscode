@@ -17,6 +17,7 @@ import {
   quickPickTourstop,
   quickPickTourFile,
 } from "./userInput";
+import { StatusBar } from "./statusBar";
 
 /**
  * Exports a function corresponding to every VSCode command we contribute.
@@ -153,6 +154,7 @@ export module Commands {
                   editor.selection,
                   config.tourstopRevealLocation(),
                 );
+                StatusBar.setTourStop(stop);
                 if (Globals.tourState) {
                   showDecorations(Globals.tourState.tour);
                 }
@@ -442,6 +444,7 @@ export module Commands {
    */
   export async function stopTour(): Promise<void> {
     showTourList();
+    StatusBar.setTourStop(undefined);
     TouristWebview.close();
   }
 
