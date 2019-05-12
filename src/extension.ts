@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { isNotBroken, Tour, TourFile } from "tourist";
+import { isNotBroken, Tour } from "tourist";
 import * as vscode from "vscode";
 
 import { TouristCodeLensProvider } from "./codeLenses";
@@ -7,6 +7,7 @@ import * as commands from "./commands";
 import * as config from "./config";
 import * as globals from "./globals";
 import * as statusBar from "./statusBar";
+import { getWorkspaceTours, TourFile } from "./tourFile";
 import { TourFileTreeView } from "./treeViews";
 import * as util from "./util";
 import { TouristWebview } from "./webview";
@@ -115,9 +116,9 @@ export async function saveTour() {
     return;
   }
 
-  console.log(`Attempting to save ${globals.tourState.path}`);
+  console.log(`Attempting to save ${globals.tourState.tourFile.path}`);
   fs.writeFile(
-    globals.tourState.path,
+    globals.tourState.tourFile.path.fsPath,
     await globals.tourist.serializeTourFile(globals.tourState.tourFile),
     (err) => {
       if (err) {
@@ -135,23 +136,18 @@ export async function saveTour() {
 export async function showTourList() {
   globals.clearTourState();
 
-  const uris: vscode.Uri[] = [];
-  const tourFiles: TourFile[] = [];
-  for (const [uri, tf] of await util.getWorkspaceTours()) {
-    uris.push(uri);
-    tourFiles.push(tf);
-  }
+  const tourFiles = await getWorkspaceTours();
 
   // Clear text decorations
   showDecorations(undefined);
 
   vscode.window.createTreeView<TourFile>("touristView", {
-    treeDataProvider: new TourFileTreeView(uris, tourFiles),
+    treeDataProvider: new TourFileTreeView(tourFiles),
   });
 }
 
-export async function processTourFile(tf: TourFile, path: string) {
-  await globals.setTourFile(tf, path);
+export async function processTourFile(tf: TourFile) {
+  await globals.setTourFile(tf);
   await saveTour();
   showTour(globals.tourState!.tour);
 }

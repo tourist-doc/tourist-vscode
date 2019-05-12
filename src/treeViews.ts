@@ -1,6 +1,7 @@
-import { AbsoluteTourStop, BrokenTourStop, TourFile } from "tourist";
+import { AbsoluteTourStop, BrokenTourStop } from "tourist";
 import * as vscode from "vscode";
 
+import { TourFile } from "./tourFile";
 import {
   BackButtonTreeItem,
   TourFileTreeItem,
@@ -15,20 +16,16 @@ export class TourFileTreeView implements vscode.TreeDataProvider<TourFile> {
     | vscode.Event<TourFile | null | undefined>
     | undefined;
 
-  private uris: vscode.Uri[];
   private tourFiles: TourFile[];
 
-  // TODO: this isn't great. Should really only need to take one or the other.
-  constructor(uris: vscode.Uri[], tourFiles: TourFile[]) {
-    this.uris = uris;
+  constructor(tourFiles: TourFile[]) {
     this.tourFiles = tourFiles;
   }
 
   public getTreeItem(
     tf: TourFile,
   ): vscode.TreeItem | Thenable<vscode.TreeItem> {
-    const uri = this.uris[this.tourFiles.indexOf(tf)];
-    return new TourFileTreeItem(uri, tf);
+    return new TourFileTreeItem(tf);
   }
 
   public getChildren(

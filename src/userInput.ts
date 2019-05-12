@@ -1,14 +1,8 @@
+import { AbsoluteTourStop, BrokenTourStop, isNotBroken, Tour } from "tourist";
 import * as vscode from "vscode";
 
-import {
-  AbsoluteTourStop,
-  BrokenTourStop,
-  isNotBroken,
-  Tour,
-  TourFile,
-} from "tourist";
 import * as globals from "./globals";
-import * as util from "./util";
+import { getWorkspaceTours, parseTourFile, TourFile } from "./tourFile";
 
 /**
  * Controls how tourstops are displayed in QuickPicks
@@ -66,18 +60,16 @@ export async function quickPickTourstop(
  */
 class TourFileQuickPickItem implements vscode.QuickPickItem {
   public tf: TourFile;
-  public path: string;
 
   public label: string;
   public detail: string;
   public description: string;
 
-  constructor(tf: TourFile, path: string) {
+  constructor(tf: TourFile) {
     this.tf = tf;
-    this.path = path;
     this.label = tf.title;
     this.detail = "";
-    this.description = vscode.workspace.asRelativePath(path);
+    this.description = vscode.workspace.asRelativePath(tf.path);
   }
 }
 
@@ -105,13 +97,10 @@ async function getTourFileURI(): Promise<vscode.Uri | undefined> {
  * @param tour The tour from which to pick a stop
  */
 export async function quickPickTourFile(): Promise<TourFile | undefined> {
-  const tourFiles = await util.getWorkspaceTours();
+  const tourFiles = await getWorkspaceTours();
   const fromFile: vscode.QuickPickItem = { label: "Open .tour file" };
   const quickPickItems = tourFiles
-    .map(
-      ([uri, tf]) =>
-        new TourFileQuickPickItem(tf, uri.fsPath) as vscode.QuickPickItem,
-    )
+    .map((tf) => new TourFileQuickPickItem(tf) as vscode.QuickPickItem)
     .concat([fromFile]);
 
   const item = await vscode.window.showQuickPick<vscode.QuickPickItem>(
@@ -124,7 +113,7 @@ export async function quickPickTourFile(): Promise<TourFile | undefined> {
   } else if (item) {
     const uri = await getTourFileURI();
     if (uri) {
-      return util.parseTourFile(uri.fsPath);
+      return parseTourFile(uri.fsPath);
     }
   }
 

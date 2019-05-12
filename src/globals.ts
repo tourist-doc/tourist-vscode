@@ -1,11 +1,6 @@
-import {
-  AbsoluteTourStop,
-  BrokenTourStop,
-  Tour,
-  TourFile,
-  Tourist,
-} from "tourist";
+import { AbsoluteTourStop, BrokenTourStop, Tour, Tourist } from "tourist";
 import * as vscode from "vscode";
+import { TourFile } from "./tourFile";
 import { TourStopTreeView } from "./treeViews";
 
 /**
@@ -28,9 +23,9 @@ export let treeView:
 /**
  * Sets the active tour file to `tf`, its path to `path`, and updates related state
  */
-export async function setTourFile(tf: TourFile, path: string) {
+export async function setTourFile(tf: TourFile) {
   const tour = await tourist.resolve(tf);
-  tourState = new TourState(tf, tour, path);
+  tourState = new TourState(tf, tour);
 }
 
 /**
@@ -39,13 +34,11 @@ export async function setTourFile(tf: TourFile, path: string) {
 export class TourState {
   public tour: Tour;
   public tourFile: TourFile;
-  public path: string;
   private currentStopIdx: number | undefined;
 
-  constructor(tf: TourFile, tour: Tour, path: string) {
+  constructor(tf: TourFile, tour: Tour) {
     this.tour = tour;
     this.tourFile = tf;
-    this.path = path;
   }
 
   get currentStop(): AbsoluteTourStop | BrokenTourStop | undefined {

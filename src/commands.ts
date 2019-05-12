@@ -2,7 +2,6 @@ import {
   AbsoluteTourStop,
   BrokenTourStop,
   isNotBroken,
-  TourFile,
   TouristError,
 } from "tourist";
 import * as vscode from "vscode";
@@ -11,12 +10,12 @@ import * as config from "./config";
 import { processTourFile, showDecorations, showTourList } from "./extension";
 import * as globals from "./globals";
 import * as statusBar from "./statusBar";
+import { parseTourFile, TourFile } from "./tourFile";
 import {
   quickPickRepoName,
   quickPickTourFile,
   quickPickTourstop,
 } from "./userInput";
-import * as util from "./util";
 import { TouristWebview } from "./webview";
 
 /**
@@ -134,7 +133,7 @@ export async function addTourStop() {
     }
     console.error(error);
   }
-  await processTourFile(globals.tourState.tourFile, globals.tourState.path);
+  await processTourFile(globals.tourState.tourFile);
 }
 
 /**
@@ -215,7 +214,7 @@ export async function deleteTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
         }
         console.error(error);
       }
-      await processTourFile(globals.tourState.tourFile, globals.tourState.path);
+      await processTourFile(globals.tourState.tourFile);
     }
   }
 }
@@ -250,10 +249,7 @@ export async function editTitle(
               break;
           }
         }
-        await processTourFile(
-          globals.tourState.tourFile,
-          globals.tourState.path,
-        );
+        await processTourFile(globals.tourState.tourFile);
         TouristWebview.setTourStop(
           globals.tourState.tour,
           globals.tourState.tour.stops[idx],
@@ -297,10 +293,7 @@ export async function editBody(
               break;
           }
         }
-        await processTourFile(
-          globals.tourState.tourFile,
-          globals.tourState.path,
-        );
+        await processTourFile(globals.tourState.tourFile);
         TouristWebview.setTourStop(
           globals.tourState.tour,
           globals.tourState.tour.stops[idx],
@@ -348,7 +341,7 @@ export async function moveTourstopUp(stop?: AbsoluteTourStop | BrokenTourStop) {
       }
     }
 
-    await processTourFile(globals.tourState.tourFile, globals.tourState.path);
+    await processTourFile(globals.tourState.tourFile);
   }
 }
 
@@ -392,7 +385,7 @@ export async function moveTourstopDown(
       }
     }
 
-    await processTourFile(globals.tourState.tourFile, globals.tourState.path);
+    await processTourFile(globals.tourState.tourFile);
   }
 }
 
@@ -441,7 +434,7 @@ export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
         }
         console.error(error);
       }
-      await processTourFile(globals.tourState.tourFile, globals.tourState.path);
+      await processTourFile(globals.tourState.tourFile);
     }
   }
 }
@@ -451,9 +444,9 @@ export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
  */
 export async function startTour(uri?: vscode.Uri): Promise<void> {
   if (uri) {
-    const tf = await util.parseTourFile(uri.fsPath);
+    const tf = await parseTourFile(uri.fsPath);
     if (tf) {
-      await processTourFile(tf, uri.fsPath);
+      await processTourFile(tf);
     }
     if (globals.tourState) {
       gotoTourStop(globals.tourState.tour.stops[0]);
@@ -461,8 +454,7 @@ export async function startTour(uri?: vscode.Uri): Promise<void> {
   } else {
     const tf = await quickPickTourFile();
     if (tf) {
-      // TODO: we need the uri here...
-      await processTourFile(tf, "");
+      await processTourFile(tf);
       if (globals.tourState) {
         gotoTourStop(globals.tourState.tour.stops[0]);
       }
@@ -483,10 +475,6 @@ export async function stopTour(): Promise<void> {
  * Update the tourstop locations in a TourFile to reflect the current version
  */
 export async function refreshTour(tf?: TourFile): Promise<void> {
-  // TODO: so this doesn't work when you're not in a tour (which is the common case)
-  if (!globals.tourState) {
-    return;
-  }
   if (!tf) {
     tf = await quickPickTourFile();
   }
@@ -496,7 +484,7 @@ export async function refreshTour(tf?: TourFile): Promise<void> {
 
   try {
     await globals.tourist.refresh(tf);
-    await processTourFile(tf, globals.tourState.path);
+    await processTourFile(tf);
   } catch (error) {
     switch (error.code) {
       case 200: // Repo not mapped to path
@@ -514,10 +502,6 @@ export async function refreshTour(tf?: TourFile): Promise<void> {
  * Changes the title of the tour
  */
 export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
-  // TODO: so this doesn't work when you're not in a tour (which is the common case)
-  if (!globals.tourState) {
-    return;
-  }
   if (!tf) {
     tf = await quickPickTourFile();
   }
@@ -533,7 +517,7 @@ export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
 
   try {
     await globals.tourist.rename(tf, name);
-    await processTourFile(tf, globals.tourState.path);
+    await processTourFile(tf);
   } catch (error) {
     switch (error.code) {
       case 200: // Repo not mapped to path
@@ -606,7 +590,10 @@ export async function newTour(): Promise<void> {
     ".tour";
   if (title !== undefined) {
     const tf = await globals.tourist.init(title);
-    await processTourFile(tf, path);
+    await processTourFile({
+      path: vscode.Uri.file(path),
+      ...tf,
+    });
   }
 }
 

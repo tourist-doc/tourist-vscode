@@ -1,5 +1,6 @@
-import { AbsoluteTourStop, BrokenTourStop, TourFile } from "tourist";
+import { AbsoluteTourStop, BrokenTourStop } from "tourist";
 import * as vscode from "vscode";
+import { TourFile } from "./tourFile";
 
 /**
  * Controls how a `TourFile` is displayed in the TreeView
@@ -8,17 +9,17 @@ export class TourFileTreeItem extends vscode.TreeItem {
   public tourFile: TourFile;
   public uri: vscode.Uri;
 
-  constructor(uri: vscode.Uri, tourFile: TourFile) {
+  constructor(tourFile: TourFile) {
     super(tourFile.title);
     this.command = {
       title: "startTour",
       command: "tourist.startTour",
-      arguments: [uri],
+      arguments: [tourFile.path],
     };
     this.contextValue = "tour";
     this.tooltip = `${tourFile.stops.length} stops`;
     this.tourFile = tourFile;
-    this.uri = uri;
+    this.uri = tourFile.path;
   }
 }
 
