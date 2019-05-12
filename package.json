@@ -39,6 +39,11 @@
         "category": "Tourist"
       },
       {
+        "command": "tourist.deleteTour",
+        "title": "Delete",
+        "category": "Tourist"
+      },
+      {
         "command": "tourist.deleteTourstop",
         "title": "Delete",
         "category": "Tourist"
@@ -152,6 +157,10 @@
           "command": "tourist.moveTourstopDown",
           "when": "viewItem == stop",
           "group": "move@2"
+        },
+        {
+          "command": "tourist.deleteTour",
+          "when": "viewItem == tour"
         },
         {
           "command": "tourist.renameTour",

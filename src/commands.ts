@@ -1,3 +1,4 @@
+import { unlinkSync } from "fs";
 import {
   AbsoluteTourStop,
   BrokenTourStop,
@@ -29,6 +30,7 @@ import { TouristWebview } from "./webview";
 const commands = {
   "tourist.addBreakpoints": addBreakpoints,
   "tourist.addTourstop": addTourStop,
+  "tourist.deleteTour": deleteTour,
   "tourist.deleteTourstop": deleteTourStop,
   "tourist.editBody": editBody,
   "tourist.editTitle": editTitle,
@@ -192,6 +194,21 @@ export async function gotoTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
       },
     );
   }
+}
+
+export async function deleteTour(tf?: TourFile) {
+  if (!tf) {
+    tf = await quickPickTourFile();
+  }
+  if (!tf) {
+    return;
+  }
+
+  globals.forgetTour(tf);
+  if (!globals.tourState || globals.tourState.tourFile !== tf) {
+    showTourList();
+  }
+  unlinkSync(tf.path.fsPath);
 }
 
 /**
@@ -453,7 +470,7 @@ export async function startTour(uri?: vscode.Uri): Promise<void> {
     if (tf) {
       await processTourFile(tf);
     }
-    if (globals.tourState) {
+    if (globals.tourState && globals.tourState.tour.stops.length > 0) {
       gotoTourStop(globals.tourState.tour.stops[0]);
     }
   } else {
@@ -594,11 +611,13 @@ export async function newTour(): Promise<void> {
     title +
     ".tour";
   if (title !== undefined) {
-    const tf = await globals.tourist.init(title);
-    await processTourFile({
+    const _tf = await globals.tourist.init(title);
+    const tf = {
       path: vscode.Uri.file(path),
-      ...tf,
-    });
+      ..._tf,
+    };
+    globals.newTourFile(tf);
+    await processTourFile(tf);
   }
 }
 

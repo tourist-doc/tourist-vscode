@@ -129,3 +129,11 @@ export async function getWorkspaceTours(update: boolean): Promise<TourFile[]> {
 
   return knownTourFiles;
 }
+
+export function forgetTour(tf: TourFile) {
+  knownTourFiles.splice(knownTourFiles.indexOf(tf), 1);
+}
+
+export function newTourFile(tf: TourFile) {
+  knownTourFiles.push(tf);
+}
