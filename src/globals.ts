@@ -1,6 +1,6 @@
 import { AbsoluteTourStop, BrokenTourStop, Tour, Tourist } from "tourist";
 import * as vscode from "vscode";
-import { TourFile } from "./tourFile";
+import { parseTourFile, TourFile } from "./tourFile";
 import { TourStopTreeView } from "./treeViews";
 
 /**
@@ -11,6 +11,8 @@ export let tourist = new Tourist();
 
 /** The state of the active tour */
 export let tourState: TourState | undefined;
+
+let knownTourFiles: TourFile[];
 
 /**
  * The TreeView in the side bar. Currently used to show both tours and tourstops
@@ -106,4 +108,24 @@ export function createTreeView(tour: Tour) {
 
 export function clearTourState() {
   tourState = undefined;
+}
+
+/**
+ * Finds, parses, and returns all the TourFiles found in the current workspace
+ * @param update Whether to update the list from disk
+ */
+export async function getWorkspaceTours(update: boolean): Promise<TourFile[]> {
+  if (update) {
+    const uris = await vscode.workspace.findFiles("**/*.tour");
+    knownTourFiles = [];
+
+    for (const uri of uris) {
+      const tf = await parseTourFile(uri.fsPath);
+      if (tf) {
+        knownTourFiles.push(tf);
+      }
+    }
+  }
+
+  return knownTourFiles;
 }

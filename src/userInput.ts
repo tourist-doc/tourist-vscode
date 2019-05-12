@@ -2,7 +2,7 @@ import { AbsoluteTourStop, BrokenTourStop, isNotBroken, Tour } from "tourist";
 import * as vscode from "vscode";
 
 import * as globals from "./globals";
-import { getWorkspaceTours, parseTourFile, TourFile } from "./tourFile";
+import { parseTourFile, TourFile } from "./tourFile";
 
 /**
  * Controls how tourstops are displayed in QuickPicks
@@ -97,7 +97,7 @@ async function getTourFileURI(): Promise<vscode.Uri | undefined> {
  * @param tour The tour from which to pick a stop
  */
 export async function quickPickTourFile(): Promise<TourFile | undefined> {
-  const tourFiles = await getWorkspaceTours();
+  const tourFiles = await globals.getWorkspaceTours(false);
   const fromFile: vscode.QuickPickItem = { label: "Open .tour file" };
   const quickPickItems = tourFiles
     .map((tf) => new TourFileQuickPickItem(tf) as vscode.QuickPickItem)

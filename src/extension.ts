@@ -7,7 +7,7 @@ import * as commands from "./commands";
 import * as config from "./config";
 import * as globals from "./globals";
 import * as statusBar from "./statusBar";
-import { getWorkspaceTours, TourFile } from "./tourFile";
+import { TourFile } from "./tourFile";
 import { TourFileTreeView } from "./treeViews";
 import * as util from "./util";
 import { TouristWebview } from "./webview";
@@ -36,7 +36,7 @@ const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationT
  * Called when a workspace is opened with a .tour file at the top level
  */
 export async function activate(context: vscode.ExtensionContext) {
-  showTourList();
+  showTourList(true);
   vscode.workspace.onDidChangeConfiguration(configChanged);
 
   globals.init(context);
@@ -111,32 +111,21 @@ export function showDecorations(tour?: Tour) {
 /**
  * Writes active TourFile to disk
  */
-export async function saveTour() {
-  if (!globals.tourState) {
-    return;
-  }
-
-  console.log(`Attempting to save ${globals.tourState.tourFile.path}`);
-  fs.writeFile(
-    globals.tourState.tourFile.path.fsPath,
-    await globals.tourist.serializeTourFile(globals.tourState.tourFile),
-    (err) => {
-      if (err) {
-        console.log(err);
-        throw err;
-      }
-      console.log("The file has been saved!");
-    },
-  );
+export async function saveTour(tf: TourFile) {
+  console.log(`Attempting to save ${tf.title} to ${tf.path.fsPath}`);
+  await fs.writeFileSync(tf.path.fsPath, globals.tourist.serializeTourFile(tf));
+  console.log("The file has been saved!");
 }
 
 /**
  * Closes the active tour and shows the list of known tours in the side bar
+ * @param update Whether to update the list of known tours from disk
  */
-export async function showTourList() {
+export async function showTourList(update = false) {
+  console.log("Showing tour list");
   globals.clearTourState();
 
-  const tourFiles = await getWorkspaceTours();
+  const tourFiles = await globals.getWorkspaceTours(update);
 
   // Clear text decorations
   showDecorations(undefined);
@@ -148,7 +137,7 @@ export async function showTourList() {
 
 export async function processTourFile(tf: TourFile) {
   await globals.setTourFile(tf);
-  await saveTour();
+  await saveTour(globals.tourState!.tourFile);
   showTour(globals.tourState!.tour);
 }
 

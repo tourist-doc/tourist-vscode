@@ -7,7 +7,12 @@ import {
 import * as vscode from "vscode";
 
 import * as config from "./config";
-import { processTourFile, showDecorations, showTourList } from "./extension";
+import {
+  processTourFile,
+  saveTour,
+  showDecorations,
+  showTourList,
+} from "./extension";
 import * as globals from "./globals";
 import * as statusBar from "./statusBar";
 import { parseTourFile, TourFile } from "./tourFile";
@@ -29,7 +34,6 @@ const commands = {
   "tourist.editTitle": editTitle,
   "tourist.gotoTourstop": gotoTourStop,
   "tourist.mapRepo": mapRepo,
-  "tourist.unmapRepo": unmapRepo,
   "tourist.moveTourstop": moveTourstop,
   "tourist.moveTourstopDown": moveTourstopDown,
   "tourist.moveTourstopUp": moveTourstopUp,
@@ -40,6 +44,7 @@ const commands = {
   "tourist.renameTour": renameTour,
   "tourist.startTour": startTour,
   "tourist.stopTour": stopTour,
+  "tourist.unmapRepo": unmapRepo,
 };
 
 // TODO: it'd be best to not keep this here. Could stick it in Extension or
@@ -517,7 +522,8 @@ export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
 
   try {
     await globals.tourist.rename(tf, name);
-    await processTourFile(tf);
+    await saveTour(tf);
+    await showTourList();
   } catch (error) {
     switch (error.code) {
       case 200: // Repo not mapped to path
@@ -527,7 +533,6 @@ export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
         showError(error, false);
         break;
     }
-    vscode.window.showErrorMessage(error);
   }
 }
 

@@ -41,20 +41,3 @@ export async function parseTourFile(
     return undefined;
   }
 }
-
-/**
- * Finds, parses, and returns all the TourFiles found in the current workspace
- */
-export async function getWorkspaceTours(): Promise<TourFile[]> {
-  const uris = await workspace.findFiles("**/*.tour");
-  const tourFiles: TourFile[] = [];
-
-  for (const uri of uris) {
-    const tf = await parseTourFile(uri.fsPath);
-    if (tf) {
-      tourFiles.push(tf);
-    }
-  }
-
-  return tourFiles;
-}
