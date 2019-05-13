@@ -465,21 +465,16 @@ export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
  * Starts a Tour from a .tour file
  */
 export async function startTour(uri?: vscode.Uri): Promise<void> {
-  if (uri) {
-    const tf = await parseTourFile(uri.fsPath);
-    if (tf) {
-      await processTourFile(tf);
-    }
-    if (globals.tourState && globals.tourState.tour.stops.length > 0) {
+  const tf = uri ? await parseTourFile(uri.fsPath) : await quickPickTourFile();
+
+  if (tf) {
+    await processTourFile(tf);
+    if (
+      globals.tourState &&
+      globals.tourState.tour.stops.length > 0 &&
+      config.gotoFirstTourstopOnTourStart()
+    ) {
       gotoTourStop(globals.tourState.tour.stops[0]);
-    }
-  } else {
-    const tf = await quickPickTourFile();
-    if (tf) {
-      await processTourFile(tf);
-      if (globals.tourState) {
-        gotoTourStop(globals.tourState.tour.stops[0]);
-      }
     }
   }
 }

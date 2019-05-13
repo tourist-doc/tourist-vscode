@@ -81,3 +81,12 @@ export function webviewColumn(): ViewColumn {
       return ViewColumn.Beside;
   }
 }
+
+/**
+ * When startTour() is run, should gotoTourstop(firstStop) be run?
+ */
+export function gotoFirstTourstopOnTourStart(): boolean {
+  return workspace
+    .getConfiguration()
+    .get<boolean>("tourist.gotoFirstTourstopOnTourStart", true);
+}

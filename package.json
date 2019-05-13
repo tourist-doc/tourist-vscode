@@ -215,7 +215,7 @@
             "number",
             "string"
           ],
-          "description": "The editor column that the webview will occupy. Valid values are 1-9 ",
+          "description": "The editor column that the webview will occupy. Valid values are 1-9.",
           "default": "Beside",
           "enum": [
             1,
@@ -230,6 +230,11 @@
             "Beside",
             "Active"
           ]
+        },
+        "tourist.gotoFirstTourstopOnTourStart": {
+          "type": "boolean",
+          "description": "Whether starting a tour automatically goes to the first tour stop.",
+          "default": "true"
         }
       }
     }
