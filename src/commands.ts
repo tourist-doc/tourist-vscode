@@ -111,8 +111,11 @@ export async function addTourStop() {
     return;
   }
 
-  const title =
-    (await vscode.window.showInputBox({ prompt: "Stop title:" })) || "";
+  const title = await vscode.window.showInputBox({ prompt: "Stop title:" });
+  if (title === undefined) {
+    return;
+  }
+
   try {
     await globals.tourist.add(globals.tourState.tourFile, {
       title,
@@ -255,7 +258,10 @@ export async function editTitle(
   }
 
   if (stop) {
-    const title = await vscode.window.showInputBox();
+    const title = await vscode.window.showInputBox({
+      prompt: "New title:",
+      value: stop.title,
+    });
     if (title !== undefined) {
       const idx = globals.tourState.tour.stops.indexOf(stop);
       if (idx !== -1) {
@@ -297,7 +303,10 @@ export async function editBody(
 
   if (stop) {
     if (body === undefined) {
-      body = await vscode.window.showInputBox();
+      body = await vscode.window.showInputBox({
+        prompt: "New body:",
+        value: stop.body,
+      });
     }
 
     if (body !== undefined) {
@@ -526,7 +535,10 @@ export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
     return;
   }
   if (name === undefined) {
-    name = await vscode.window.showInputBox();
+    name = await vscode.window.showInputBox({
+      prompt: "New title:",
+      value: tf.title,
+    });
   }
   if (name === undefined) {
     return;
@@ -593,8 +605,8 @@ export async function newTour(): Promise<void> {
     ? vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
     : "My Tour";
   const title = await vscode.window.showInputBox({
-    value: folderName,
     prompt: "Tour name:",
+    value: folderName,
   });
   // TODO: preferably let them pick a save location
   // TODO: this is pretty brittle...
