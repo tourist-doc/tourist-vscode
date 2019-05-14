@@ -99,7 +99,7 @@ export async function prevTourStop() {
 /**
  * Adds a new TourStop to the current Tour
  */
-export async function addTourStop() {
+export async function addTourStop(fileUri: vscode.Uri, title?: string) {
   const editor = vscode.window.activeTextEditor;
   if (!globals.tourState) {
     vscode.window.showInformationMessage(
@@ -111,7 +111,9 @@ export async function addTourStop() {
     return;
   }
 
-  const title = await vscode.window.showInputBox({ prompt: "Stop title:" });
+  if (title === undefined) {
+    title = await vscode.window.showInputBox({ prompt: "Stop title:" });
+  }
   if (title === undefined) {
     return;
   }
@@ -130,6 +132,7 @@ export async function addTourStop() {
       case 201: // Path not mapped to repo
         // TODO: maybe in this case, search upward to find .git folder?
         await mapRepo();
+        await addTourStop(fileUri, title);
         break;
       case 203: // Mismatched repo versions
         showError(error);
