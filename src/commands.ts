@@ -189,9 +189,7 @@ export async function gotoTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
             }
           })
           .then(() => {
-            if (globals.tourState) {
-              TouristWebview.setTourStop(globals.tourState.tour, stop!);
-            }
+            TouristWebview.refresh();
           });
       },
       (error: any) => {
@@ -281,10 +279,7 @@ export async function editTitle(
           }
         }
         await processTourFile(globals.tourState.tourFile);
-        TouristWebview.setTourStop(
-          globals.tourState.tour,
-          globals.tourState.tour.stops[idx],
-        );
+        TouristWebview.refresh();
       }
     }
   }
@@ -328,10 +323,7 @@ export async function editBody(
           }
         }
         await processTourFile(globals.tourState.tourFile);
-        TouristWebview.setTourStop(
-          globals.tourState.tour,
-          globals.tourState.tour.stops[idx],
-        );
+        TouristWebview.refresh();
       }
     }
   }
@@ -481,13 +473,7 @@ export async function startTour(uri?: vscode.Uri): Promise<void> {
 
   if (tf) {
     await processTourFile(tf);
-    if (
-      globals.tourState &&
-      globals.tourState.tour.stops.length > 0 &&
-      config.gotoFirstTourstopOnTourStart()
-    ) {
-      gotoTourStop(globals.tourState.tour.stops[0]);
-    }
+    TouristWebview.refresh();
   }
 }
 

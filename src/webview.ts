@@ -1,38 +1,60 @@
 import { template } from "dot";
 import * as showdown from "showdown";
-import { AbsoluteTourStop, BrokenTourStop, Tour } from "tourist";
 import * as vscode from "vscode";
 
 import * as commands from "./commands";
 import * as config from "./config";
+import { tourState } from "./globals";
+import { TourFile } from "./tourFile";
 
-interface TemplateArgs {
+interface TourTemplateArgs {
+  tf: TourFile;
+}
+
+interface TourStopTemplateArgs {
   title: string;
   body: string;
   editingBody: boolean;
 }
 
+/**
+ * A singleton that controls the webview. Makes heavy use of global state with
+ * the assumption that for now, only one extension-wide webview will exist.
+ */
 export class TouristWebview {
   public static async init(ctx: vscode.ExtensionContext) {
-    const templateDoc = await vscode.workspace.openTextDocument(
-      ctx.asAbsolutePath("src/webview.html"),
+    const tourTemplateDoc = await vscode.workspace.openTextDocument(
+      ctx.asAbsolutePath("src/tour.html"),
     );
-    this.htmlTemplate = template(templateDoc.getText());
+    this.tourTemplate = template(tourTemplateDoc.getText());
+
+    const tourStopTemplateDoc = await vscode.workspace.openTextDocument(
+      ctx.asAbsolutePath("src/tourstop.html"),
+    );
+    this.tourStopTemplate = template(tourStopTemplateDoc.getText());
   }
 
-  /**
-   * Updates the webview to reflect the given stop
-   * @param tour The tour in which `stop` is contained
-   * @param stop The stop to be displayed
-   */
-  public static setTourStop(
-    tour: Tour,
-    stop: AbsoluteTourStop | BrokenTourStop,
-  ) {
-    this.tour = tour;
-    this.stop = stop;
+  public static refresh() {
+    this.getPanel().title = "";
+    this.getPanel().webview.html = "";
 
-    this.refresh();
+    if (tourState) {
+      if (tourState.currentStop) {
+        this.getPanel().title = tourState.currentStop.title;
+        this.getPanel().webview.html = this.tourStopTemplate!({
+          title: tourState.currentStop.title,
+          body: this.editingBody
+            ? tourState.currentStop.body || ""
+            : this.mdConverter.makeHtml(tourState.currentStop.body || ""),
+          editingBody: this.editingBody,
+        });
+      } else {
+        this.getPanel().title = tourState!.tourFile.title;
+        this.getPanel().webview.html = this.tourTemplate!({
+          tf: tourState!.tourFile,
+        });
+      }
+    }
   }
 
   /**
@@ -50,41 +72,17 @@ export class TouristWebview {
   /** An object that converts markdown into HTML */
   private static mdConverter = new showdown.Converter();
 
-  /** The `doT` template that is rendered in the webview */
-  private static htmlTemplate?: (args: TemplateArgs) => string;
+  /** A `doT` template that renders a TourFile */
+  private static tourTemplate: (args: TourTemplateArgs) => string;
 
-  /** The current tourstop being shown */
-  private static stop?: AbsoluteTourStop | BrokenTourStop;
-
-  /** The tour that `this.stop` is contained in */
-  private static tour?: Tour;
+  /** A `doT` template that renders a TourFile */
+  private static tourStopTemplate: (args: TourStopTemplateArgs) => string;
 
   /** Whether the body is currently being edited (the TextArea is showing) */
   private static editingBody: boolean = false;
 
-  private static refresh() {
-    if (this.tour === undefined || this.stop === undefined) {
-      this.getPanel().title = "";
-      this.getPanel().webview.html = "";
-      return;
-    }
-
-    this.getPanel().title = this.stop.title;
-    this.getPanel().webview.html = this.htmlTemplate!({
-      title: this.stop.title,
-      body: this.editingBody
-        ? this.stop.body || ""
-        : this.mdConverter.makeHtml(this.stop.body || ""),
-      editingBody: this.editingBody,
-    });
-  }
-
   private static getPanel(): vscode.WebviewPanel {
     if (this.panel === undefined) {
-      if (this.tour === undefined) {
-        throw new Error("No tour!");
-      }
-
       this.panel = vscode.window.createWebviewPanel(
         "tour",
         "title",
@@ -93,6 +91,14 @@ export class TouristWebview {
       );
       this.panel.webview.onDidReceiveMessage(async (message: any) => {
         switch (message.command) {
+          // TourFile webview
+          case "gotoTourstop":
+            await commands.gotoTourStop(
+              tourState!.tour.stops[message.stopIndex],
+            );
+            break;
+
+          // TourStop webview
           case "nextTourstop":
             await commands.nextTourStop();
             break;
@@ -100,7 +106,7 @@ export class TouristWebview {
             await commands.prevTourStop();
             break;
           case "editTitle":
-            await commands.editTitle(this.stop!);
+            await commands.editTitle(tourState!.currentStop);
             break;
           case "editBody":
             this.editingBody = true;
@@ -112,13 +118,21 @@ export class TouristWebview {
             break;
           case "editBodySave":
             this.editingBody = false;
-            if (this.stop !== undefined && message.newBody !== undefined) {
-              await commands.editBody(this.stop, message.newBody);
+            if (
+              tourState!.currentStop !== undefined &&
+              message.newBody !== undefined
+            ) {
+              await commands.editBody(tourState!.currentStop, message.newBody);
             }
+            break;
+          case "backToTour":
+            tourState!.currentStop = undefined;
+            this.refresh();
             break;
         }
       });
-      this.panel.onDidDispose((event) => {
+      this.panel.onDidDispose(async (event) => {
+        await commands.stopTour();
         this.panel = undefined;
       });
     }
