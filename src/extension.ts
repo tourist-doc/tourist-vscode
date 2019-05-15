@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { isNotBroken, Tour } from "tourist";
+import { isNotBroken } from "tourist";
 import * as vscode from "vscode";
 
 import { TouristCodeLensProvider } from "./codeLenses";
@@ -7,8 +7,8 @@ import * as commands from "./commands";
 import * as config from "./config";
 import * as globals from "./globals";
 import * as statusBar from "./statusBar";
-import { TourFile } from "./tourFile";
-import { TourFileTreeView } from "./treeViews";
+import { findWithUri, TourFile } from "./tourFile";
+import * as treeView from "./treeView";
 import * as util from "./util";
 import { TouristWebview } from "./webview";
 
@@ -33,16 +33,17 @@ const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationT
 );
 
 /**
- * Called when a workspace is opened with a .tour file at the top level
+ * The entry point to the extension. Currently, called on startup.
  */
 export async function activate(context: vscode.ExtensionContext) {
-  showTourList(true);
   vscode.workspace.onDidChangeConfiguration(configChanged);
 
-  globals.init(context);
+  await globals.init(context);
   statusBar.init();
   TouristWebview.init(context);
   commands.registerAll(context);
+
+  updateGUI();
 
   context.subscriptions.push(
     vscode.languages.registerCodeLensProvider(
@@ -50,25 +51,29 @@ export async function activate(context: vscode.ExtensionContext) {
       new TouristCodeLensProvider(),
     ),
   );
+
+  const tourFileWatcher = vscode.workspace.createFileSystemWatcher("**/*.tour");
+  tourFileWatcher.onDidDelete(async (deletedUri) => {
+    const tf = await findWithUri(deletedUri);
+    if (tf) {
+      globals.forgetTour(tf);
+      updateGUI();
+    }
+  });
 }
 
-/**
- * Show the given tour in the sidebar
- */
-function showTour(tour: Tour) {
-  if (!globals.tourState) {
-    return;
-  }
-
-  showDecorations(tour);
-  globals.createTreeView(tour);
+export function updateGUI() {
+  showDecorations();
+  treeView.refresh();
+  TouristWebview.refresh();
+  statusBar.refresh();
 }
 
 /**
  * Shows the decorations for the given tour
  */
-export function showDecorations(tour?: Tour) {
-  if (!globals.tourState || !config.showDecorations() || tour === undefined) {
+export function showDecorations() {
+  if (!globals.tourState || !config.showDecorations()) {
     vscode.window.visibleTextEditors.forEach((editor) => {
       editor.setDecorations(activeTourstopDecorationType, []);
       editor.setDecorations(inactiveTourstopDecorationType, []);
@@ -92,8 +97,8 @@ export function showDecorations(tour?: Tour) {
 
     editor.setDecorations(
       inactiveTourstopDecorationType,
-      tour.stops
-        .filter(
+      globals
+        .tourState!.tour.stops.filter(
           (stop) =>
             stop !== current &&
             isNotBroken(stop) &&
@@ -112,37 +117,18 @@ export function showDecorations(tour?: Tour) {
  * Writes active TourFile to disk
  */
 export async function saveTour(tf: TourFile) {
-  console.log(`Attempting to save ${tf.title} to ${tf.path.fsPath}`);
   await fs.writeFileSync(tf.path.fsPath, globals.tourist.serializeTourFile(tf));
-  console.log("The file has been saved!");
-}
-
-/**
- * Closes the active tour and shows the list of known tours in the side bar
- * @param update Whether to update the list of known tours from disk
- */
-export async function showTourList(update = false) {
-  console.log("Showing tour list");
-  globals.clearTourState();
-
-  const tourFiles = await globals.getWorkspaceTours(update);
-
-  // Clear text decorations
-  showDecorations(undefined);
-
-  vscode.window.createTreeView<TourFile>("touristView", {
-    treeDataProvider: new TourFileTreeView(tourFiles),
-  });
+  console.log(`Saved ${tf.title} at ${tf.path.fsPath}`);
 }
 
 export async function processTourFile(tf: TourFile) {
   await globals.setTourFile(tf);
   await saveTour(globals.tourState!.tourFile);
-  showTour(globals.tourState!.tour);
+  updateGUI();
 }
 
 function configChanged(evt: vscode.ConfigurationChangeEvent) {
   if (evt.affectsConfiguration("tourist.showDecorations")) {
-    showDecorations(globals.tourState ? globals.tourState.tour : undefined);
+    showDecorations();
   }
 }

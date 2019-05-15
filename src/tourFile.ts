@@ -4,6 +4,7 @@ import { Uri, workspace } from "vscode";
 
 import { showError } from "./commands";
 import * as globals from "./globals";
+import { pathsEqual } from "./util";
 
 /**
  * A subtype of tourist::TourFile that holds a file path
@@ -40,4 +41,14 @@ export async function parseTourFile(
     }
     return undefined;
   }
+}
+
+export async function findWithUri(uri: Uri): Promise<TourFile | undefined> {
+  for (const tf of globals.knownTours()) {
+    if (pathsEqual(tf.path.path, uri.path)) {
+      return tf;
+    }
+  }
+
+  return undefined;
 }

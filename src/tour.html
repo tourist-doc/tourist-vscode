@@ -19,13 +19,16 @@
   <body>
     <h1>{{=it.tf.title}}</h1>
 
+    {{? it.tf.stops.length === 0 }}
+    <i>No stops yet! You can add one with tourist.addTourstop<i>
+    {{?}}
+
     {{~it.tf.stops :stop:idx}}
     <a
       title="Goto Tourstop"
       onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'})"
       >{{=stop.title}}</a
     >
-
     <br />
     {{~}}
   </body>

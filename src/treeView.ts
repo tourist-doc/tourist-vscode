@@ -1,12 +1,35 @@
 import { AbsoluteTourStop, BrokenTourStop } from "tourist";
 import * as vscode from "vscode";
 
+import { knownTours, tourState } from "./globals";
 import { TourFile } from "./tourFile";
 import {
   BackButtonTreeItem,
   TourFileTreeItem,
   TourStopTreeItem,
 } from "./treeViewItems";
+
+let treeView: vscode.TreeView<
+  TourFile | AbsoluteTourStop | BrokenTourStop | "back"
+>;
+
+export function refresh() {
+  if (tourState) {
+    treeView = vscode.window.createTreeView<
+      AbsoluteTourStop | BrokenTourStop | "back"
+    >("touristView", {
+      treeDataProvider: new TourStopTreeView(),
+    });
+    if (tourState.currentStop) {
+      // In the TreeView, select the new tourstop
+      treeView.reveal(tourState.currentStop);
+    }
+  } else {
+    treeView = vscode.window.createTreeView<TourFile>("touristView", {
+      treeDataProvider: new TourFileTreeView(),
+    });
+  }
+}
 
 /**
  * A wrapper around a list of TourFiles which provides data to the GUI
@@ -16,26 +39,20 @@ export class TourFileTreeView implements vscode.TreeDataProvider<TourFile> {
     | vscode.Event<TourFile | null | undefined>
     | undefined;
 
-  private tourFiles: TourFile[];
-
-  constructor(tourFiles: TourFile[]) {
-    this.tourFiles = tourFiles;
-  }
-
-  public getTreeItem(
-    tf: TourFile,
-  ): vscode.TreeItem | Thenable<vscode.TreeItem> {
+  public getTreeItem(tf: TourFile): vscode.TreeItem {
     return new TourFileTreeItem(tf);
   }
 
-  public getChildren(
-    tf?: TourFile | undefined,
-  ): vscode.ProviderResult<TourFile[]> {
+  public getChildren(tf?: TourFile | undefined): TourFile[] {
     if (tf === undefined) {
-      return this.tourFiles;
+      return knownTours();
     } else {
       return [];
     }
+  }
+
+  public getParent(element: TourFile) {
+    return undefined;
   }
 }
 
@@ -51,12 +68,6 @@ export class TourStopTreeView
       >
     | undefined;
 
-  private tourstops: Array<AbsoluteTourStop | BrokenTourStop>;
-
-  constructor(stops: Array<AbsoluteTourStop | BrokenTourStop> = []) {
-    this.tourstops = stops;
-  }
-
   public getTreeItem(
     stop: AbsoluteTourStop | BrokenTourStop | "back",
   ): TourStopTreeItem | BackButtonTreeItem {
@@ -69,18 +80,16 @@ export class TourStopTreeView
 
   public getChildren(
     stop?: AbsoluteTourStop | BrokenTourStop | "back" | undefined,
-  ): vscode.ProviderResult<Array<AbsoluteTourStop | BrokenTourStop | "back">> {
-    if (stop === undefined) {
+  ): Array<AbsoluteTourStop | BrokenTourStop | "back"> {
+    if (stop === undefined && tourState && tourState.tour) {
       const back: Array<AbsoluteTourStop | BrokenTourStop | "back"> = ["back"];
-      return back.concat(this.tourstops);
+      return back.concat(tourState.tour.stops);
     } else {
       return [];
     }
   }
 
-  public getParent(
-    element: AbsoluteTourStop | BrokenTourStop | "back",
-  ): vscode.ProviderResult<AbsoluteTourStop> {
+  public getParent(element: AbsoluteTourStop | BrokenTourStop | "back") {
     return undefined;
   }
 }

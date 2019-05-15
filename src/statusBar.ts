@@ -1,5 +1,5 @@
-import { AbsoluteTourStop } from "tourist";
 import * as vscode from "vscode";
+import { tourState } from "./globals";
 
 const statusBarItem = vscode.window.createStatusBarItem(
   vscode.StatusBarAlignment.Right,
@@ -7,17 +7,16 @@ const statusBarItem = vscode.window.createStatusBarItem(
 );
 
 export function init() {
-  setTourStop(undefined);
   statusBarItem.color = new vscode.ThemeColor("terminal.ansiRed");
-  statusBarItem.show();
 }
 
-export function setTourStop(stop: AbsoluteTourStop | undefined) {
-  if (stop) {
-    statusBarItem.text = `$(milestone) ${stop.title}`;
+export function refresh() {
+  if (tourState && tourState.currentStop) {
+    statusBarItem.text = `$(milestone) ${tourState.currentStop.title}`;
     statusBarItem.command = "tourist.gotoTourstop";
   } else {
     statusBarItem.text = `$(milestone) Start a tour`;
     statusBarItem.command = "tourist.startTour";
   }
+  statusBarItem.show();
 }

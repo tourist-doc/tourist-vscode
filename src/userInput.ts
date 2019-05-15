@@ -97,7 +97,7 @@ async function getTourFileURI(): Promise<vscode.Uri | undefined> {
  * @param tour The tour from which to pick a stop
  */
 export async function quickPickTourFile(): Promise<TourFile | undefined> {
-  const tourFiles = await globals.getWorkspaceTours(false);
+  const tourFiles = await globals.knownTours();
   const fromFile: vscode.QuickPickItem = { label: "Open .tour file" };
   const quickPickItems = tourFiles
     .map((tf) => new TourFileQuickPickItem(tf) as vscode.QuickPickItem)

@@ -8,21 +8,14 @@ import {
 import * as vscode from "vscode";
 
 import * as config from "./config";
-import {
-  processTourFile,
-  saveTour,
-  showDecorations,
-  showTourList,
-} from "./extension";
+import { processTourFile, saveTour, updateGUI } from "./extension";
 import * as globals from "./globals";
-import * as statusBar from "./statusBar";
 import { parseTourFile, TourFile } from "./tourFile";
 import {
   quickPickRepoName,
   quickPickTourFile,
   quickPickTourstop,
 } from "./userInput";
-import { TouristWebview } from "./webview";
 
 /**
  * Exports a function corresponding to every VSCode command we contribute.
@@ -163,12 +156,6 @@ export async function gotoTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
   if (stop && isNotBroken(stop)) {
     globals.tourState.currentStop = stop;
 
-    // In the TreeView, select the new tourstop
-    if (globals.treeView && globals.treeView.visible) {
-      // TODO: do not use `as any`, you heathen
-      (globals.treeView as any).reveal(stop);
-    }
-
     const file = vscode.Uri.file(stop.absPath);
     vscode.workspace.openTextDocument(file).then(
       (doc) => {
@@ -182,14 +169,8 @@ export async function gotoTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
                 editor.selection,
                 config.tourstopRevealLocation(),
               );
-              statusBar.setTourStop(stop);
-              if (globals.tourState) {
-                showDecorations(globals.tourState.tour);
-              }
+              updateGUI();
             }
-          })
-          .then(() => {
-            TouristWebview.refresh();
           });
       },
       (error: any) => {
@@ -208,11 +189,9 @@ export async function deleteTour(tf?: TourFile) {
     return;
   }
 
-  globals.forgetTour(tf);
-  if (!globals.tourState || globals.tourState.tourFile !== tf) {
-    showTourList();
-  }
   unlinkSync(tf.path.fsPath);
+  globals.forgetTour(tf);
+  updateGUI();
 }
 
 /**
@@ -279,7 +258,9 @@ export async function editTitle(
           }
         }
         await processTourFile(globals.tourState.tourFile);
-        TouristWebview.refresh();
+        if (stop === globals.tourState.currentStop) {
+          globals.tourState.currentStop = globals.tourState.tour.stops[idx];
+        }
       }
     }
   }
@@ -323,7 +304,9 @@ export async function editBody(
           }
         }
         await processTourFile(globals.tourState.tourFile);
-        TouristWebview.refresh();
+        if (stop === globals.tourState.currentStop) {
+          globals.tourState.currentStop = globals.tourState.tour.stops[idx];
+        }
       }
     }
   }
@@ -473,7 +456,6 @@ export async function startTour(uri?: vscode.Uri): Promise<void> {
 
   if (tf) {
     await processTourFile(tf);
-    TouristWebview.refresh();
   }
 }
 
@@ -481,9 +463,8 @@ export async function startTour(uri?: vscode.Uri): Promise<void> {
  * Stops the current tour, showing the list of tours in the TreeView
  */
 export async function stopTour(): Promise<void> {
-  showTourList();
-  statusBar.setTourStop(undefined);
-  TouristWebview.close();
+  globals.clearTourState();
+  updateGUI();
 }
 
 /**
@@ -536,7 +517,7 @@ export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
   try {
     await globals.tourist.rename(tf, name);
     await saveTour(tf);
-    await showTourList();
+    updateGUI();
   } catch (error) {
     switch (error.code) {
       case 200: // Repo not mapped to path

@@ -6,6 +6,7 @@ import * as commands from "./commands";
 import * as config from "./config";
 import { tourState } from "./globals";
 import { TourFile } from "./tourFile";
+import { updateGUI } from "./extension";
 
 interface TourTemplateArgs {
   tf: TourFile;
@@ -34,10 +35,10 @@ export class TouristWebview {
     this.tourStopTemplate = template(tourStopTemplateDoc.getText());
   }
 
+  /**
+   * Updates the webview to be consistent with globals.tourState
+   */
   public static refresh() {
-    this.getPanel().title = "";
-    this.getPanel().webview.html = "";
-
     if (tourState) {
       if (tourState.currentStop) {
         this.getPanel().title = tourState.currentStop.title;
@@ -54,6 +55,8 @@ export class TouristWebview {
           tf: tourState!.tourFile,
         });
       }
+    } else if (this.panel) {
+      TouristWebview.close();
     }
   }
 
@@ -110,11 +113,9 @@ export class TouristWebview {
             break;
           case "editBody":
             this.editingBody = true;
-            this.refresh();
             break;
           case "editBodyCancel":
             this.editingBody = false;
-            this.refresh();
             break;
           case "editBodySave":
             this.editingBody = false;
@@ -127,9 +128,9 @@ export class TouristWebview {
             break;
           case "backToTour":
             tourState!.currentStop = undefined;
-            this.refresh();
             break;
         }
+        updateGUI();
       });
       this.panel.onDidDispose(async (event) => {
         await commands.stopTour();
