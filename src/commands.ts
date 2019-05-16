@@ -92,7 +92,11 @@ export async function prevTourStop() {
 /**
  * Adds a new TourStop to the current Tour
  */
-export async function addTourStop(fileUri: vscode.Uri, title?: string) {
+export async function addTourStop(
+  fileUri: vscode.Uri,
+  title?: string,
+  mapMissingRepo = true,
+) {
   const editor = vscode.window.activeTextEditor;
   if (!globals.tourState) {
     vscode.window.showInformationMessage(
@@ -123,9 +127,11 @@ export async function addTourStop(fileUri: vscode.Uri, title?: string) {
         await mapRepo(error.repoName);
         break;
       case 201: // Path not mapped to repo
-        // TODO: maybe in this case, search upward to find .git folder?
-        await mapRepo();
-        await addTourStop(fileUri, title);
+        if (mapMissingRepo) {
+          // TODO: maybe in this case, search upward to find .git folder?
+          await mapRepo();
+          await addTourStop(fileUri, title, false);
+        }
         break;
       case 203: // Mismatched repo versions
         showError(error);
@@ -541,11 +547,14 @@ export async function mapRepo(repoName?: string): Promise<void> {
   }
 
   if (repoName) {
+    const editor = vscode.window.activeTextEditor;
     const path = await vscode.window.showOpenDialog({
       openLabel: `Map to '${repoName}'`,
       canSelectFiles: false,
       canSelectFolders: true,
       canSelectMany: false,
+      // TODO: defaultUri should really be the directory the file lives in
+      defaultUri: editor ? editor.document.uri : undefined,
     });
     if (path) {
       await globals.tourist.mapConfig(repoName, path[0].fsPath);
