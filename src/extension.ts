@@ -40,7 +40,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   await globals.init(context);
   statusBar.init();
-  TouristWebview.init(context);
+  await TouristWebview.init(context);
   commands.registerAll(context);
 
   updateGUI();

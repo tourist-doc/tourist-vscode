@@ -78,7 +78,7 @@ export class TouristWebview {
   /** A `doT` template that renders a TourFile */
   private static tourTemplate: (args: TourTemplateArgs) => string;
 
-  /** A `doT` template that renders a TourFile */
+  /** A `doT` template that renders a TourStop */
   private static tourStopTemplate: (args: TourStopTemplateArgs) => string;
 
   /** Whether the body is currently being edited (the TextArea is showing) */
