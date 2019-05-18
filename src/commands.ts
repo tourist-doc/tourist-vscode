@@ -214,8 +214,10 @@ export async function deleteTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
   if (stop) {
     const idx = globals.tourState.tour.stops.indexOf(stop);
     if (idx !== -1) {
+      let tf: TourFile;
       try {
         await globals.tourist.remove(globals.tourState.tourFile, idx);
+        tf = globals.tourState.tourFile;
       } catch (error) {
         switch (error.code) {
           case 0:
@@ -224,8 +226,27 @@ export async function deleteTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
             break;
         }
         console.error(error);
+        return;
       }
       await processTourFile(globals.tourState.tourFile);
+
+      // TODO: Adding a broken tourstop should be supported in tourist-core
+      if (isNotBroken(stop)) {
+        const buttonHit = await vscode.window.showInformationMessage(
+          `Deleted ${stop.title}`,
+          { modal: false },
+          { title: "undo" },
+        );
+        if (buttonHit && buttonHit.title === "undo") {
+          if (globals.tourState && tf === globals.tourState.tourFile) {
+            await globals.tourist.add(tf, stop, idx);
+            await processTourFile(tf);
+          } else {
+            // TODO: can we do better?
+            vscode.window.showErrorMessage("Undo failed. Sorry about that =(");
+          }
+        }
+      }
     }
   }
 }
