@@ -19,6 +19,7 @@
   <body>
     <h1>{{=it.tf.title}}</h1>
 
+    <h2>Stops</h2>
     {{? it.tf.stops.length === 0 }}
     <i>No stops yet! You can add one with tourist.addTourstop<i>
     {{?}}
@@ -26,10 +27,17 @@
     {{~it.tf.stops :stop:idx}}
     <a
       title="Goto Tourstop"
-      onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'})"
+      onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
       >{{=stop.title}}</a
     >
     <br />
+    {{~}}
+
+    <h2>Repositories</h2>
+    {{~it.tf.repositories :repo:idx}}
+    {{=repo.repository}} (<a title="Remap" onclick="vscode.postMessage(
+      {command: 'mapRepo', repo: '{{=repo.repository}}'}
+      );">Remap</a>)
     {{~}}
   </body>
 </html>

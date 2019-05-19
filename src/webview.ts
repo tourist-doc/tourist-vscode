@@ -4,9 +4,9 @@ import * as vscode from "vscode";
 
 import * as commands from "./commands";
 import * as config from "./config";
+import { updateGUI } from "./extension";
 import { tourState } from "./globals";
 import { TourFile } from "./tourFile";
-import { updateGUI } from "./extension";
 
 interface TourTemplateArgs {
   tf: TourFile;
@@ -103,6 +103,9 @@ export class TouristWebview {
             await commands.gotoTourStop(
               tourState!.tour.stops[message.stopIndex],
             );
+            break;
+          case "mapRepo":
+            await commands.mapRepo(message.repo);
             break;
 
           // TourStop webview

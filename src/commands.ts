@@ -566,14 +566,21 @@ export async function mapRepo(repoName?: string): Promise<void> {
   }
 
   if (repoName) {
-    const editor = vscode.window.activeTextEditor;
+    const currentMapping = globals.tourist.config[repoName];
+    let defaultUri = currentMapping
+      ? vscode.Uri.file(currentMapping)
+      : undefined;
+    if (defaultUri === undefined && vscode.window.activeTextEditor) {
+      // TODO: in this casedefaultUri should really be the directory the file lives in
+      defaultUri = vscode.window.activeTextEditor.document.uri;
+    }
+
     const path = await vscode.window.showOpenDialog({
       openLabel: `Map to '${repoName}'`,
       canSelectFiles: false,
       canSelectFolders: true,
       canSelectMany: false,
-      // TODO: defaultUri should really be the directory the file lives in
-      defaultUri: editor ? editor.document.uri : undefined,
+      defaultUri,
     });
     if (path) {
       await globals.tourist.mapConfig(repoName, path[0].fsPath);
