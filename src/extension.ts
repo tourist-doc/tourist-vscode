@@ -52,6 +52,38 @@ export async function activate(context: vscode.ExtensionContext) {
     ),
   );
 
+  vscode.workspace.onDidChangeTextDocument((evt) => {
+    let anyChanged = false;
+    if (globals.tourState) {
+      for (const stop of globals.tourState.tour.stops) {
+        if (
+          isNotBroken(stop) &&
+          util.pathsEqual(stop.absPath, evt.document.fileName)
+        ) {
+          for (const change of evt.contentChanges) {
+            if (change.range.end.line < stop.line) {
+              const linesAdded = change.text.split("\n").length - 1;
+              const numLinesRemoved =
+                change.range.end.line - change.range.start.line;
+              const lineNumberDelta = linesAdded - numLinesRemoved;
+              if (lineNumberDelta !== 0) {
+                stop.line += lineNumberDelta;
+                anyChanged = true;
+                if (stop.line < 1) {
+                  console.error("Oops, looks like something went wrong");
+                  stop.line = 1;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    if (anyChanged) {
+      updateGUI();
+    }
+  });
+
   const tourFileWatcher = vscode.workspace.createFileSystemWatcher("**/*.tour");
   tourFileWatcher.onDidDelete(async (deletedUri) => {
     const tf = await findWithUri(deletedUri);
@@ -63,7 +95,11 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export function updateGUI() {
-  showDecorations();
+  try {
+    showDecorations();
+  } catch (e) {
+    console.error(`Oh no! Something went wrong: ${e}`);
+  }
   treeView.refresh();
   TouristWebview.refresh();
   statusBar.refresh();
@@ -82,35 +118,35 @@ export function showDecorations() {
   }
 
   const current = globals.tourState.currentStop;
-  vscode.window.visibleTextEditors.forEach((editor) => {
+  for (const editor of vscode.window.visibleTextEditors) {
+    let activeTourStops = [] as vscode.Range[];
     if (
       current &&
       isNotBroken(current) &&
       util.pathsEqual(current.absPath, editor.document.fileName)
     ) {
-      editor.setDecorations(activeTourstopDecorationType, [
+      activeTourStops = [
         editor.document.lineAt(new vscode.Position(current.line - 1, 0)).range,
-      ]);
-    } else {
-      editor.setDecorations(activeTourstopDecorationType, []);
+      ];
     }
 
-    editor.setDecorations(
-      inactiveTourstopDecorationType,
-      globals
-        .tourState!.tour.stops.filter(
-          (stop) =>
-            stop !== current &&
-            isNotBroken(stop) &&
-            util.pathsEqual(stop.absPath, editor.document.fileName),
-        )
-        .map((stop) =>
+    const inactiveTourStops = globals
+      .tourState!.tour.stops.filter(
+        (stop) =>
+          stop !== current &&
+          isNotBroken(stop) &&
+          util.pathsEqual(stop.absPath, editor.document.fileName),
+      )
+      .map(
+        (stop) =>
           editor.document.lineAt(
             new vscode.Position(isNotBroken(stop) ? stop.line - 1 : 0, 0),
-          ),
-        ),
-    );
-  });
+          ).range,
+      );
+
+    editor.setDecorations(activeTourstopDecorationType, activeTourStops);
+    editor.setDecorations(inactiveTourstopDecorationType, inactiveTourStops);
+  }
 }
 
 /**
