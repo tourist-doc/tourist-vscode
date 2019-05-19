@@ -172,10 +172,11 @@ export async function gotoTourStop(
 
     const file = vscode.Uri.file(stop.absPath);
     const doc = await vscode.workspace.openTextDocument(file);
-    const editor = await vscode.window.showTextDocument(
-      doc,
-      vscode.ViewColumn.One,
-    );
+    const viewCol =
+      config.webviewColumn() === vscode.ViewColumn.One
+        ? vscode.ViewColumn.Two
+        : vscode.ViewColumn.One;
+    const editor = await vscode.window.showTextDocument(doc, viewCol);
     const pos = new vscode.Position(stop.line - 1, 0);
     editor.selection = new vscode.Selection(pos, pos);
     editor.revealRange(editor.selection, config.tourstopRevealLocation());
