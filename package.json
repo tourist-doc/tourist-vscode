@@ -114,8 +114,17 @@
         "category": "Tourist"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "tourist",
+          "title": "Tourist",
+          "icon": "resources/baseline-explore-24px.svg"
+        }
+      ]
+    },
     "views": {
-      "explorer": [
+      "tourist": [
         {
           "id": "touristView",
           "name": "Tourist"
