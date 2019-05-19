@@ -69,6 +69,10 @@ export class TouristWebview {
     }
   }
 
+  public static setEditing(editing: boolean) {
+    this.editingBody = editing;
+  }
+
   /** The panel that contains the webview */
   private static panel?: vscode.WebviewPanel;
 

@@ -16,6 +16,7 @@ import {
   quickPickTourFile,
   quickPickTourstop,
 } from "./userInput";
+import { TouristWebview } from "./webview";
 
 /**
  * Exports a function corresponding to every VSCode command we contribute.
@@ -115,12 +116,14 @@ export async function addTourStop(
     return;
   }
 
+  const stop = {
+    title,
+    absPath: editor.document.fileName,
+    line: editor.selection.active.line + 1,
+  };
+
   try {
-    await globals.tourist.add(globals.tourState.tourFile, {
-      title,
-      absPath: editor.document.fileName,
-      line: editor.selection.active.line + 1,
-    });
+    await globals.tourist.add(globals.tourState.tourFile, stop);
   } catch (error) {
     switch (error.code) {
       case 200: // Repo not mapped to path
@@ -146,12 +149,17 @@ export async function addTourStop(
     console.error(error);
   }
   await processTourFile(globals.tourState.tourFile);
+  const stops = globals.tourState.tour.stops;
+  await gotoTourStop(stops[stops.length - 1], true);
 }
 
 /**
  * Goes to the given tourstop in the active editor
  */
-export async function gotoTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
+export async function gotoTourStop(
+  stop?: AbsoluteTourStop | BrokenTourStop,
+  editing = false,
+) {
   if (!globals.tourState) {
     return;
   }
@@ -163,27 +171,16 @@ export async function gotoTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
     globals.tourState.currentStop = stop;
 
     const file = vscode.Uri.file(stop.absPath);
-    vscode.workspace.openTextDocument(file).then(
-      (doc) => {
-        vscode.window
-          .showTextDocument(doc, vscode.ViewColumn.One)
-          .then((editor) => {
-            if (stop && isNotBroken(stop)) {
-              const pos = new vscode.Position(stop.line - 1, 0);
-              editor.selection = new vscode.Selection(pos, pos);
-              editor.revealRange(
-                editor.selection,
-                config.tourstopRevealLocation(),
-              );
-              updateGUI();
-            }
-          });
-      },
-      (error: any) => {
-        console.error(error);
-        vscode.window.showErrorMessage(`Unable to open ${file.fsPath}`);
-      },
+    const doc = await vscode.workspace.openTextDocument(file);
+    const editor = await vscode.window.showTextDocument(
+      doc,
+      vscode.ViewColumn.One,
     );
+    const pos = new vscode.Position(stop.line - 1, 0);
+    editor.selection = new vscode.Selection(pos, pos);
+    editor.revealRange(editor.selection, config.tourstopRevealLocation());
+    TouristWebview.setEditing(editing);
+    updateGUI();
   }
 }
 
@@ -235,9 +232,9 @@ export async function deleteTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
         const buttonHit = await vscode.window.showInformationMessage(
           `Deleted ${stop.title}`,
           { modal: false },
-          { title: "undo" },
+          { title: "Undo" },
         );
-        if (buttonHit && buttonHit.title === "undo") {
+        if (buttonHit && buttonHit.title === "Undo") {
           if (globals.tourState && tf === globals.tourState.tourFile) {
             await globals.tourist.add(tf, stop, idx);
             await processTourFile(tf);
