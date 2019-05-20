@@ -8,7 +8,7 @@ import {
 import * as vscode from "vscode";
 
 import * as config from "./config";
-import { processTourFile, saveTour, updateGUI } from "./extension";
+import { context, processTourFile, saveTour, updateGUI } from "./extension";
 import * as globals from "./globals";
 import { parseTourFile, TourFile } from "./tourFile";
 import {
@@ -43,16 +43,10 @@ const commands = {
   "tourist.unmapRepo": unmapRepo,
 };
 
-// TODO: it'd be best to not keep this here. Could stick it in Extension or
-//       Globals, but I'm not crazy about that either.
-let context: vscode.ExtensionContext | undefined;
-
 /**
  * Registers each command with the `vscode` API, called on activation.
  */
-export function registerAll(ctx: vscode.ExtensionContext) {
-  context = ctx;
-
+export function registerAll() {
   for (const [cmdName, cmdFn] of Object.entries(commands)) {
     vscode.commands.registerCommand(cmdName, cmdFn);
   }

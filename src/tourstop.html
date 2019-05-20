@@ -4,10 +4,13 @@
       a {
         cursor: pointer;
       }
-      #footer {
+      #header {
         user-select: none;
       }
       #body {
+        font-size: webviewFontSizepx;
+      }
+      #body-textarea {
         width: 80%;
         height: 200px;
         align-content: center;
@@ -20,23 +23,7 @@
   </head>
 
   <body>
-    <h1>{{=it.title}}</h1>
-    {{?it.editingBody}}
-    <textarea id="body">{{=it.body}}</textarea>
-    <br />
-    <a
-      title="Save"
-      onclick='vscode.postMessage({command: "editBodySave", newBody: document.getElementById("body").value})'
-      >Save</a
-    >
-    |
-    <a title="Cancel" onclick='vscode.postMessage({command: "editBodyCancel"})'
-      >Cancel</a
-    >
-
-    {{??}} {{=it.body}}
-    <hr />
-    <div id="footer">
+    <div id="header">
       <a
         title="Previous tourstop"
         onclick='vscode.postMessage({command: "prevTourstop"});'
@@ -67,6 +54,27 @@
         >< Back to tour</a
       >
     </div>
+
+    <hr />
+
+    <h1>{{=it.title}}</h1>
+    {{?it.editingBody}}
+
+    <textarea id="body-textarea">{{=it.body}}</textarea>
+    <br />
+    <a
+      title="Save"
+      onclick='vscode.postMessage({command: "editBodySave", newBody: document.getElementById("body").value})'
+      >Save</a
+    >
+    |
+    <a title="Cancel" onclick='vscode.postMessage({command: "editBodyCancel"})'
+      >Cancel</a
+    >
+    {{??}}
+
+    <div id="body">{{=it.body}}</div>
+
     {{?}}
   </body>
 </html>

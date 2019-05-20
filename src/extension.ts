@@ -12,6 +12,8 @@ import * as treeView from "./treeView";
 import * as util from "./util";
 import { TouristWebview } from "./webview";
 
+export let context: vscode.ExtensionContext | undefined;
+
 /** The text decoration shown on the active tourstop */
 const activeTourstopDecorationType = vscode.window.createTextEditorDecorationType(
   {
@@ -35,17 +37,19 @@ const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationT
 /**
  * The entry point to the extension. Currently, called on startup.
  */
-export async function activate(context: vscode.ExtensionContext) {
+export async function activate(ctx: vscode.ExtensionContext) {
+  context = ctx;
+
   vscode.workspace.onDidChangeConfiguration(configChanged);
 
-  await globals.init(context);
+  await globals.init();
   statusBar.init();
-  await TouristWebview.init(context);
-  commands.registerAll(context);
+  await TouristWebview.init();
+  commands.registerAll();
 
   updateGUI();
 
-  context.subscriptions.push(
+  ctx.subscriptions.push(
     vscode.languages.registerCodeLensProvider(
       { scheme: "file" },
       new TouristCodeLensProvider(),
@@ -163,8 +167,11 @@ export async function processTourFile(tf: TourFile) {
   updateGUI();
 }
 
-function configChanged(evt: vscode.ConfigurationChangeEvent) {
+async function configChanged(evt: vscode.ConfigurationChangeEvent) {
   if (evt.affectsConfiguration("tourist.showDecorations")) {
     showDecorations();
+  } else if (evt.affectsConfiguration("tourist.webviewFontSize")) {
+    await TouristWebview.init();
+    updateGUI();
   }
 }

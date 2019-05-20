@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 
 import * as commands from "./commands";
 import * as config from "./config";
-import { updateGUI } from "./extension";
+import { context, updateGUI } from "./extension";
 import { tourState } from "./globals";
 import { TourFile } from "./tourFile";
 
@@ -16,6 +16,7 @@ interface TourStopTemplateArgs {
   title: string;
   body: string;
   editingBody: boolean;
+  bodyFontSize: number;
 }
 
 /**
@@ -23,16 +24,23 @@ interface TourStopTemplateArgs {
  * the assumption that for now, only one extension-wide webview will exist.
  */
 export class TouristWebview {
-  public static async init(ctx: vscode.ExtensionContext) {
+  public static async init() {
     const tourTemplateDoc = await vscode.workspace.openTextDocument(
-      ctx.asAbsolutePath("src/tour.html"),
+      context!.asAbsolutePath("src/tour.html"),
     );
-    this.tourTemplate = template(tourTemplateDoc.getText());
+    const t = tourTemplateDoc
+      .getText()
+      .replace(/webviewFontSize/g, config.webviewFontSize().toString());
+    this.tourTemplate = template(t);
 
     const tourStopTemplateDoc = await vscode.workspace.openTextDocument(
-      ctx.asAbsolutePath("src/tourstop.html"),
+      context!.asAbsolutePath("src/tourstop.html"),
     );
-    this.tourStopTemplate = template(tourStopTemplateDoc.getText());
+    this.tourStopTemplate = template(
+      tourStopTemplateDoc
+        .getText()
+        .replace(/webviewFontSize/g, config.webviewFontSize().toString()),
+    );
   }
 
   /**
@@ -48,6 +56,7 @@ export class TouristWebview {
             ? tourState.currentStop.body || ""
             : this.mdConverter.makeHtml(tourState.currentStop.body || ""),
           editingBody: this.editingBody,
+          bodyFontSize: config.webviewFontSize(),
         });
       } else {
         this.getPanel().title = tourState!.tourFile.title;

@@ -50,7 +50,7 @@ export function tourstopRevealLocation(): TextEditorRevealType {
  * See https://code.visualstudio.com/api/references/vscode-api#ViewColumn
  */
 export function webviewColumn(): ViewColumn {
-  // TODO: consider limiting the options to sane ones: 1, 2, 3, Active, Beside?
+  // TODO: consider limiting the options to sane ones: 1, 2, 3, Active, Beside? (or even just Left or Right)
   switch (
     workspace
       .getConfiguration()
@@ -89,4 +89,10 @@ export function gotoFirstTourstopOnTourStart(): boolean {
   return workspace
     .getConfiguration()
     .get<boolean>("tourist.gotoFirstTourstopOnTourStart", true);
+}
+
+export function webviewFontSize(): number {
+  return workspace
+    .getConfiguration()
+    .get<number>("tourist.webviewFontSize", 14);
 }

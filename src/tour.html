@@ -4,10 +4,13 @@
       a {
         cursor: pointer;
       }
-      #body {
-        width: 80%;
-        height: 200px;
-        align-content: center;
+      #tour {
+        font-size: webviewFontSizepx;
+        margin: 40px;
+      }
+      #repo {
+        font-size: webviewFontSizepx;
+        margin: 40px;
       }
     </style>
 
@@ -21,23 +24,27 @@
 
     <h2>Stops</h2>
     {{? it.tf.stops.length === 0 }}
-    <i>No stops yet! You can add one with tourist.addTourstop<i>
+      <i>No stops yet! You can add one with tourist.addTourstop<i>
     {{?}}
 
     {{~it.tf.stops :stop:idx}}
-    <a
-      title="Goto Tourstop"
-      onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
-      >{{=stop.title}}</a
-    >
-    <br />
+      <span id="tour">
+        <a
+          title="Goto Tourstop"
+          onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
+          >{{=stop.title}}</a
+        >
+      </span>
+      <br />
     {{~}}
 
     <h2>Repositories</h2>
     {{~it.tf.repositories :repo:idx}}
-    {{=repo.repository}} (<a title="Remap" onclick="vscode.postMessage(
-      {command: 'mapRepo', repo: '{{=repo.repository}}'}
-      );">Remap</a>)
+    <span id="repo">
+      {{=repo.repository}} (<a title="Remap" onclick="vscode.postMessage(
+        {command: 'mapRepo', repo: '{{=repo.repository}}'}
+        );">Remap</a>)
+    </span>
     {{~}}
   </body>
 </html>

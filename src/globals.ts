@@ -1,5 +1,7 @@
 import { AbsoluteTourStop, BrokenTourStop, Tour, Tourist } from "tourist";
 import * as vscode from "vscode";
+
+import { context } from "./extension";
 import { parseTourFile, TourFile } from "./tourFile";
 
 /**
@@ -75,8 +77,8 @@ export class TourState {
   }
 }
 
-export async function init(context: vscode.ExtensionContext) {
-  const touristJSON = context.globalState.get<string>("touristInstance");
+export async function init() {
+  const touristJSON = context!.globalState.get<string>("touristInstance");
   if (touristJSON) {
     tourist = Tourist.deserialize(touristJSON);
   }

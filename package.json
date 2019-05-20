@@ -244,6 +244,11 @@
           "type": "boolean",
           "description": "Whether starting a tour automatically goes to the first tour stop.",
           "default": "true"
+        },
+        "tourist.webviewFontSize": {
+          "type": "number",
+          "description": "The font size, in pixel, used in the webview.",
+          "default": 14
         }
       }
     }
