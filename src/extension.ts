@@ -170,7 +170,10 @@ export async function processTourFile(tf: TourFile) {
 async function configChanged(evt: vscode.ConfigurationChangeEvent) {
   if (evt.affectsConfiguration("tourist.showDecorations")) {
     showDecorations();
-  } else if (evt.affectsConfiguration("tourist.webviewFontSize")) {
+  } else if (
+    evt.affectsConfiguration("tourist.webviewFont") ||
+    evt.affectsConfiguration("tourist.webviewFontSize")
+  ) {
     await TouristWebview.init();
     updateGUI();
   }

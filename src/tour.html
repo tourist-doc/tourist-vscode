@@ -1,6 +1,9 @@
 <html>
   <head>
     <style>
+      * {
+        font-family: webviewFont;
+      }
       a {
         cursor: pointer;
       }
@@ -12,39 +15,67 @@
         font-size: webviewFontSizepx;
         margin: 40px;
       }
+      #no-stops {
+        font-size: webviewFontSizepx;
+        font-style: italic;
+      }
+      #description {
+        font-size: webviewFontSizepx;
+      }
     </style>
 
     <script>
       const vscode = acquireVsCodeApi();
     </script>
   </head>
-
   <body>
-    <h1>{{=it.tf.title}}</h1>
+    <h1>
+      {{=it.tf.title}}
+      <a
+        title="Edit title"
+        onclick='vscode.postMessage({command: "editTitle"});'
+        >edit</a
+      >
+    </h1>
+    <h2>Description</h2>
+    <div
+      id="description"
+      oncontextmenu="vscode.postMessage({command: 'gotoTourstop', stopIndex: '0'});"
+    >
+      {{=it.tf.description}}
+    </div>
 
     <h2>Stops</h2>
     {{? it.tf.stops.length === 0 }}
-      <i>No stops yet! You can add one with tourist.addTourstop<i>
+    <div id="no-stops">
+      No stops yet! You can add one with tourist.addTourstop
+    </div>
     {{?}}
 
     {{~it.tf.stops :stop:idx}}
-      <span id="tour">
-        <a
-          title="Goto Tourstop"
-          onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
-          >{{=stop.title}}</a
-        >
-      </span>
-      <br />
+    <span id="tour">
+      <a
+        title="Goto Tourstop"
+        onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
+        >{{=stop.title}}</a
+      >
+    </span>
+    <br />
     {{~}}
 
+    {{? it.tf.repositories.length > 0 }}
     <h2>Repositories</h2>
     {{~it.tf.repositories :repo:idx}}
     <span id="repo">
-      {{=repo.repository}} (<a title="Remap" onclick="vscode.postMessage(
-        {command: 'mapRepo', repo: '{{=repo.repository}}'}
-        );">Remap</a>)
+      {{=repo.repository}} (<a
+        title="Remap"
+        onclick="vscode.postMessage(
+          {command: 'mapRepo', repo: '{{=repo.repository}}'}
+          );"
+        >Remap</a
+      >)
     </span>
     {{~}}
+    {{?}}
   </body>
 </html>

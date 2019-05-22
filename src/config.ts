@@ -91,6 +91,26 @@ export function gotoFirstTourstopOnTourStart(): boolean {
     .get<boolean>("tourist.gotoFirstTourstopOnTourStart", true);
 }
 
+/**
+ * The font to be used in the webview
+ */
+export function webviewFont(): string {
+  const fontFromCfg = workspace
+    .getConfiguration()
+    .get<string>("tourist.webviewFont");
+  if (fontFromCfg) {
+    if (fontFromCfg === "editor") {
+      return workspace.getConfiguration().get<string>("editor.fontFamily")!;
+    }
+    return fontFromCfg;
+  }
+
+  return "";
+}
+
+/**
+ * The font size to be used in the webview
+ */
 export function webviewFontSize(): number {
   return workspace
     .getConfiguration()

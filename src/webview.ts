@@ -16,7 +16,6 @@ interface TourStopTemplateArgs {
   title: string;
   body: string;
   editingBody: boolean;
-  bodyFontSize: number;
 }
 
 /**
@@ -30,7 +29,8 @@ export class TouristWebview {
     );
     const t = tourTemplateDoc
       .getText()
-      .replace(/webviewFontSize/g, config.webviewFontSize().toString());
+      .replace(/webviewFontSize/g, config.webviewFontSize().toString())
+      .replace(/webviewFont/g, config.webviewFont());
     this.tourTemplate = template(t);
 
     const tourStopTemplateDoc = await vscode.workspace.openTextDocument(
@@ -39,7 +39,8 @@ export class TouristWebview {
     this.tourStopTemplate = template(
       tourStopTemplateDoc
         .getText()
-        .replace(/webviewFontSize/g, config.webviewFontSize().toString()),
+        .replace(/webviewFontSize/g, config.webviewFontSize().toString())
+        .replace(/webviewFont/g, config.webviewFont()),
     );
   }
 
@@ -56,7 +57,6 @@ export class TouristWebview {
             ? tourState.currentStop.body || ""
             : this.mdConverter.makeHtml(tourState.currentStop.body || ""),
           editingBody: this.editingBody,
-          bodyFontSize: config.webviewFontSize(),
         });
       } else {
         this.getPanel().title = tourState!.tourFile.title;
@@ -107,6 +107,7 @@ export class TouristWebview {
       );
       this.panel.webview.onDidReceiveMessage(async (message: any) => {
         switch (message.command) {
+          // TODO: This comment implies a code smell. Break this class into two
           // TourFile webview
           case "gotoTourstop":
             await commands.gotoTourStop(
@@ -125,7 +126,11 @@ export class TouristWebview {
             await commands.prevTourStop();
             break;
           case "editTitle":
-            await commands.editTitle(tourState!.currentStop);
+            if (tourState!.currentStop) {
+              await commands.editTitle(tourState!.currentStop);
+            } else {
+              await commands.renameTour(tourState!.tourFile);
+            }
             break;
           case "editBody":
             this.editingBody = true;

@@ -1,6 +1,10 @@
 <html>
   <head>
     <style>
+      * {
+        margin: 10px;
+        font-family: webviewFont;
+      }
       a {
         cursor: pointer;
       }
@@ -25,6 +29,13 @@
   <body>
     <div id="header">
       <a
+        title="Back to tour"
+        onclick='vscode.postMessage({command: "backToTour"});'
+        >< Back to tour</a
+      >
+      <br />
+      <br />
+      <a
         title="Previous tourstop"
         onclick='vscode.postMessage({command: "prevTourstop"});'
         >Previous tourstop</a
@@ -35,36 +46,29 @@
         onclick='vscode.postMessage({command: "nextTourstop"});'
         >Next tourstop</a
       >
-
-      <br />
-      <a
-        title="Edit title"
-        onclick='vscode.postMessage({command: "editTitle"});'
-        >Edit title</a
-      >
-
-      <br />
-      <a title="Edit body" onclick='vscode.postMessage({command: "editBody"});'
-        >Edit body</a
-      >
-      <br />
-      <a
-        title="Back to tour"
-        onclick='vscode.postMessage({command: "backToTour"});'
-        >< Back to tour</a
-      >
     </div>
 
     <hr />
 
-    <h1>{{=it.title}}</h1>
+    <h1>
+      {{=it.title}}
+      <a
+        title="Edit title"
+        onclick='vscode.postMessage({command: "editTitle"});'
+        >edit</a
+      >
+    </h1>
     {{?it.editingBody}}
 
-    <textarea id="body-textarea">{{=it.body}}</textarea>
+    <textarea
+      id="body-textarea"
+      placeholder="Type some information about this stop - you can use markdown too!"
+      >{{=it.body}}</textarea
+    >
     <br />
     <a
       title="Save"
-      onclick='vscode.postMessage({command: "editBodySave", newBody: document.getElementById("body").value})'
+      onclick='vscode.postMessage({command: "editBodySave", newBody: document.getElementById("body-textarea").value})'
       >Save</a
     >
     |
@@ -73,7 +77,12 @@
     >
     {{??}}
 
-    <div id="body">{{=it.body}}</div>
+    <div id="body">
+      {{=it.body}}
+      <a title="Edit body" onclick='vscode.postMessage({command: "editBody"});'
+        >Edit body</a
+      >
+    </div>
 
     {{?}}
   </body>

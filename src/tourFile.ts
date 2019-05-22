@@ -13,6 +13,7 @@ export interface TourFile {
   repositories: RepoState[];
   stops: TourStop[];
   title: string;
+  description: string;
   version: string;
   path: Uri;
 }

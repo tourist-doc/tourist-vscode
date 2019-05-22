@@ -497,20 +497,23 @@ export async function refreshTour(tf?: TourFile): Promise<void> {
     return;
   }
 
-  try {
-    await globals.tourist.refresh(tf);
-    await processTourFile(tf);
-  } catch (error) {
-    switch (error.code) {
-      case 200: // Repo not mapped to path
-        await mapRepo(error.repoName);
-      case 300: // No repo version
-      default:
-        showError(error, false);
-        break;
+  for (const repo of tf.repositories) {
+    try {
+      await globals.tourist.refresh(tf, repo.repository);
+    } catch (error) {
+      switch (error.code) {
+        case 200: // Repo not mapped to path
+          await mapRepo(error.repoName);
+        case 300: // No repo version
+        default:
+          showError(error, false);
+          break;
+      }
+      vscode.window.showErrorMessage(`Error code ${error.code} thrown`);
     }
-    vscode.window.showErrorMessage(`Error code ${error.code} thrown`);
   }
+
+  await processTourFile(tf);
 }
 
 /**
@@ -617,7 +620,7 @@ export async function newTour(): Promise<void> {
     title +
     ".tour";
   if (title !== undefined) {
-    const _tf = await globals.tourist.init(title);
+    const _tf = await globals.tourist.init(title, "This is a description");
     const tf = {
       path: vscode.Uri.file(path),
       ..._tf,
