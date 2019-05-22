@@ -44,6 +44,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   await globals.init();
   statusBar.init();
+  treeView.init();
   await TouristWebview.init();
   commands.registerAll();
 

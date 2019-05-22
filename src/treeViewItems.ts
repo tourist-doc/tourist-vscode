@@ -1,5 +1,6 @@
 import { AbsoluteTourStop, BrokenTourStop } from "tourist";
 import * as vscode from "vscode";
+
 import { TourFile } from "./tourFile";
 
 /**
@@ -39,19 +40,5 @@ export class TourStopTreeItem extends vscode.TreeItem {
     this.contextValue = "stop";
     this.tooltip = tourstop.body || "";
     this.tourstop = tourstop;
-  }
-}
-
-/**
- * Controls how a back button is displayed in the TreeView
- */
-export class BackButtonTreeItem extends vscode.TreeItem {
-  constructor() {
-    super("< Back to tour list");
-    this.contextValue = "back";
-    this.command = {
-      title: "back",
-      command: "tourist.stopTour",
-    };
   }
 }

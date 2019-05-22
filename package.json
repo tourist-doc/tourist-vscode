@@ -126,8 +126,12 @@
     "views": {
       "tourist": [
         {
-          "id": "touristView",
-          "name": "Tourist"
+          "id": "tourList",
+          "name": "Tours"
+        },
+        {
+          "id": "stopList",
+          "name": "Tour Stops"
         }
       ]
     },

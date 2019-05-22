@@ -3,33 +3,7 @@ import * as vscode from "vscode";
 
 import { knownTours, tourState } from "./globals";
 import { TourFile } from "./tourFile";
-import {
-  BackButtonTreeItem,
-  TourFileTreeItem,
-  TourStopTreeItem,
-} from "./treeViewItems";
-
-let treeView: vscode.TreeView<
-  TourFile | AbsoluteTourStop | BrokenTourStop | "back"
->;
-
-export function refresh() {
-  if (tourState) {
-    treeView = vscode.window.createTreeView<
-      AbsoluteTourStop | BrokenTourStop | "back"
-    >("touristView", {
-      treeDataProvider: new TourStopTreeView(),
-    });
-    if (tourState.currentStop) {
-      // In the TreeView, select the new tourstop
-      treeView.reveal(tourState.currentStop);
-    }
-  } else {
-    treeView = vscode.window.createTreeView<TourFile>("touristView", {
-      treeDataProvider: new TourFileTreeView(),
-    });
-  }
-}
+import { TourFileTreeItem, TourStopTreeItem } from "./treeViewItems";
 
 /**
  * A wrapper around a list of TourFiles which provides data to the GUI
@@ -60,36 +34,59 @@ export class TourFileTreeView implements vscode.TreeDataProvider<TourFile> {
  * A wrapper around a list of TourStops which provides data to the GUI
  */
 export class TourStopTreeView
-  implements
-    vscode.TreeDataProvider<AbsoluteTourStop | BrokenTourStop | "back"> {
+  implements vscode.TreeDataProvider<AbsoluteTourStop | BrokenTourStop> {
   public onDidChangeTreeData?:
-    | vscode.Event<
-        AbsoluteTourStop | BrokenTourStop | "back" | null | undefined
-      >
+    | vscode.Event<AbsoluteTourStop | BrokenTourStop | null | undefined>
     | undefined;
 
   public getTreeItem(
-    stop: AbsoluteTourStop | BrokenTourStop | "back",
-  ): TourStopTreeItem | BackButtonTreeItem {
-    if (stop === "back") {
-      return new BackButtonTreeItem();
-    } else {
-      return new TourStopTreeItem(stop);
-    }
+    stop: AbsoluteTourStop | BrokenTourStop,
+  ): TourStopTreeItem {
+    return new TourStopTreeItem(stop);
   }
 
   public getChildren(
-    stop?: AbsoluteTourStop | BrokenTourStop | "back" | undefined,
-  ): Array<AbsoluteTourStop | BrokenTourStop | "back"> {
+    stop?: AbsoluteTourStop | BrokenTourStop | undefined,
+  ): Array<AbsoluteTourStop | BrokenTourStop> {
     if (stop === undefined && tourState && tourState.tour) {
-      const back: Array<AbsoluteTourStop | BrokenTourStop | "back"> = ["back"];
-      return back.concat(tourState.tour.stops);
+      return tourState.tour.stops;
     } else {
       return [];
     }
   }
 
-  public getParent(element: AbsoluteTourStop | BrokenTourStop | "back") {
+  public getParent(element: AbsoluteTourStop | BrokenTourStop) {
     return undefined;
   }
 }
+
+export function init() {
+  tourProvider = new TourFileTreeView();
+  stopProvider = new TourStopTreeView();
+  refresh();
+}
+
+export function refresh() {
+  // TODO: This can be done once, then updated via an event emitter
+  tourTreeView = vscode.window.createTreeView<TourFile>("tourList", {
+    treeDataProvider: tourProvider,
+  });
+  stopTreeView = vscode.window.createTreeView<
+    AbsoluteTourStop | BrokenTourStop
+  >("stopList", {
+    treeDataProvider: stopProvider,
+  });
+
+  // In the TreeViews, select the current tour and tourstop
+  if (tourState) {
+    tourTreeView.reveal(tourState.tourFile);
+    if (tourState.currentStop) {
+      stopTreeView.reveal(tourState.currentStop);
+    }
+  }
+}
+
+let tourProvider: TourFileTreeView;
+let stopProvider: TourStopTreeView;
+let tourTreeView: vscode.TreeView<TourFile>;
+let stopTreeView: vscode.TreeView<AbsoluteTourStop | BrokenTourStop>;

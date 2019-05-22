@@ -496,6 +496,9 @@ export async function startTour(uri?: vscode.Uri): Promise<void> {
   const tf = uri ? await parseTourFile(uri.fsPath) : await quickPickTourFile();
 
   if (tf) {
+    // Clear currentStop
+    globals.clearTourState();
+
     await processTourFile(tf);
   }
 }
