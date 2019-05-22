@@ -9,6 +9,7 @@
         cursor: pointer;
       }
       #header {
+        font-size: webviewFontSizepx;
         user-select: none;
       }
       #body {
@@ -18,6 +19,9 @@
         width: 80%;
         height: 200px;
         align-content: center;
+      }
+      #body-controls {
+        font-size: webviewFontSizepx;
       }
     </style>
 
@@ -33,7 +37,6 @@
         onclick='vscode.postMessage({command: "backToTour"});'
         >< Back to tour</a
       >
-      <br />
       <br />
       <a
         title="Previous tourstop"
@@ -66,15 +69,19 @@
       >{{=it.body}}</textarea
     >
     <br />
-    <a
-      title="Save"
-      onclick='vscode.postMessage({command: "editBodySave", newBody: document.getElementById("body-textarea").value})'
-      >Save</a
-    >
-    |
-    <a title="Cancel" onclick='vscode.postMessage({command: "editBodyCancel"})'
-      >Cancel</a
-    >
+    <span id="body-controls">
+      <a
+        title="Save"
+        onclick='vscode.postMessage({command: "editBodySave", newBody: document.getElementById("body-textarea").value})'
+        >Save</a
+      >
+      |
+      <a
+        title="Cancel"
+        onclick='vscode.postMessage({command: "editBodyCancel"})'
+        >Cancel</a
+      >
+    </span>
     {{??}}
 
     <div id="body">

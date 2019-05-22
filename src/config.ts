@@ -50,35 +50,14 @@ export function tourstopRevealLocation(): TextEditorRevealType {
  * See https://code.visualstudio.com/api/references/vscode-api#ViewColumn
  */
 export function webviewColumn(): ViewColumn {
-  // TODO: consider limiting the options to sane ones: 1, 2, 3, Active, Beside? (or even just Left or Right)
   switch (
-    workspace
-      .getConfiguration()
-      .get<number | string>("tourist.webviewColumn", "Beside")
+    workspace.getConfiguration().get<string>("tourist.webviewColumn", "Left")
   ) {
-    case 1:
+    case "Left":
       return ViewColumn.One;
-    case 2:
-      return ViewColumn.Two;
-    case 3:
-      return ViewColumn.Three;
-    case 4:
-      return ViewColumn.Four;
-    case 5:
-      return ViewColumn.Five;
-    case 6:
-      return ViewColumn.Six;
-    case 7:
-      return ViewColumn.Seven;
-    case 8:
-      return ViewColumn.Eight;
-    case 9:
-      return ViewColumn.Nine;
-    case "Active":
-      return ViewColumn.Active;
-    case "Beside":
+    case "Right":
     default:
-      return ViewColumn.Beside;
+      return ViewColumn.Two;
   }
 }
 

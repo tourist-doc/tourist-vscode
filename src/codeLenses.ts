@@ -32,9 +32,6 @@ export class TouristCodeLensProvider implements vscode.CodeLensProvider {
                 }),
               );
             }
-          } else {
-            // TODO: handle broken stop
-            vscode.window.showErrorMessage("Your tour is broken! =(");
           }
         },
       );

@@ -1,4 +1,5 @@
-import { unlinkSync } from "fs";
+import { unlink } from "fs-extra";
+import { dirname } from "path";
 import {
   AbsoluteTourStop,
   BrokenTourStop,
@@ -16,6 +17,7 @@ import {
   quickPickTourFile,
   quickPickTourstop,
 } from "./userInput";
+import { findRepoRoot } from "./util";
 import { TouristWebview } from "./webview";
 
 /**
@@ -125,8 +127,19 @@ export async function addTourStop(
         break;
       case 201: // Path not mapped to repo
         if (mapMissingRepo) {
-          // TODO: maybe in this case, search upward to find .git folder?
-          await mapRepo();
+          // Search upward to find the .git folder, if we can
+          const repoPath = await findRepoRoot(fileUri.fsPath);
+          if (repoPath) {
+            const pathComponents = repoPath.path.split(/\/|\\/);
+            await mapRepo(
+              pathComponents[pathComponents.length - 1],
+              repoPath.fsPath,
+              true,
+            );
+          } else {
+            await mapRepo();
+          }
+
           await addTourStop(fileUri, title, false);
         }
         break;
@@ -187,7 +200,7 @@ export async function deleteTour(tf?: TourFile) {
     return;
   }
 
-  unlinkSync(tf.path.fsPath);
+  await unlink(tf.path.fsPath);
   globals.forgetTour(tf);
   updateGUI();
 }
@@ -222,7 +235,6 @@ export async function deleteTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
       }
       await processTourFile(globals.tourState.tourFile);
 
-      // TODO: Adding a broken tourstop should be supported in tourist-core
       if (isNotBroken(stop)) {
         const buttonHit = await vscode.window.showInformationMessage(
           `Deleted ${stop.title}`,
@@ -420,7 +432,6 @@ export async function moveTourstopDown(
 /**
  * Changes a TourStop's location
  */
-// TODO: this should probably be renamed, since it has nothing to do with moveTourstopUp/Down
 export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
   if (!globals.tourState) {
     return;
@@ -432,13 +443,14 @@ export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
   if (stop) {
     const editor = vscode.window.activeTextEditor;
     if (editor) {
+      const newLocation = editor.selection.active;
       try {
         await globals.tourist.move(
           globals.tourState.tourFile,
           globals.tourState.tour.stops.indexOf(stop),
           {
             absPath: editor.document.fileName,
-            line: editor.selection.active.line + 1,
+            line: newLocation.line + 1,
           },
         );
       } catch (error) {
@@ -447,8 +459,18 @@ export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
             await mapRepo(error.repoName);
             break;
           case 201: // Path not mapped to repo
-            // TODO: maybe in this case, search upward to find .git folder?
-            await mapRepo();
+            // Search upward to find the .git folder, if we can
+            const repoPath = await findRepoRoot(editor.document.fileName);
+            if (repoPath) {
+              const pathComponents = repoPath.path.split(/\/|\\/);
+              await mapRepo(
+                pathComponents[pathComponents.length - 1],
+                repoPath.fsPath,
+                true,
+              );
+            } else {
+              await mapRepo();
+            }
             break;
           case 203: // Mismatched repo versions
             showError(error);
@@ -555,32 +577,45 @@ export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
 /**
  * Maps a name used in the .tour file to a repository path on disk
  */
-export async function mapRepo(repoName?: string): Promise<void> {
-  if (!repoName) {
+export async function mapRepo(
+  repoName?: string,
+  repoPath?: string,
+  verify = false,
+): Promise<void> {
+  if (!repoName || verify) {
     repoName = await vscode.window.showInputBox({
       prompt: "What's the name of the repository?",
+      value: repoName,
     });
   }
 
   if (repoName) {
     const currentMapping = globals.tourist.config[repoName];
-    let defaultUri = currentMapping
-      ? vscode.Uri.file(currentMapping)
-      : undefined;
-    if (defaultUri === undefined && vscode.window.activeTextEditor) {
-      // TODO: in this casedefaultUri should really be the directory the file lives in
-      defaultUri = vscode.window.activeTextEditor.document.uri;
+    let defaultUri: vscode.Uri | undefined;
+    if (currentMapping) {
+      defaultUri = currentMapping ? vscode.Uri.file(currentMapping) : undefined;
+    } else if (defaultUri === undefined && repoPath) {
+      defaultUri = vscode.Uri.file(repoPath);
+    } else if (vscode.window.activeTextEditor) {
+      defaultUri = vscode.Uri.file(
+        dirname(vscode.window.activeTextEditor.document.uri.path),
+      );
     }
 
-    const path = await vscode.window.showOpenDialog({
-      openLabel: `Map to '${repoName}'`,
-      canSelectFiles: false,
-      canSelectFolders: true,
-      canSelectMany: false,
-      defaultUri,
-    });
-    if (path) {
-      await globals.tourist.mapConfig(repoName, path[0].fsPath);
+    if (!repoPath || verify) {
+      const repoFolders = await vscode.window.showOpenDialog({
+        openLabel: `Map to '${repoName}'`,
+        canSelectFiles: false,
+        canSelectFolders: true,
+        canSelectMany: false,
+        defaultUri,
+      });
+      if (repoFolders) {
+        repoPath = repoFolders[0].fsPath;
+      }
+    }
+    if (repoPath) {
+      await globals.tourist.mapConfig(repoName, repoPath);
       context!.globalState.update(
         "touristInstance",
         globals.tourist.serialize(),
@@ -601,8 +636,7 @@ export async function unmapRepo(): Promise<void> {
 /**
  * Creates a new Tour, saving the .tour file to disk
  */
-// TODO: accept fully qualified path as an argument
-export async function newTour(): Promise<void> {
+export async function newTour(path?: vscode.Uri): Promise<void> {
   const folderName = vscode.workspace.rootPath
     ? vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
     : "My Tour";
@@ -610,23 +644,33 @@ export async function newTour(): Promise<void> {
     prompt: "Tour name:",
     value: folderName,
   });
-  // TODO: preferably let them pick a save location
-  // TODO: this is pretty brittle...
-  const path =
-    (vscode.workspace.workspaceFolders
-      ? vscode.workspace.workspaceFolders[0].uri.fsPath
-      : "") +
-    "/" +
-    title +
-    ".tour";
-  if (title !== undefined) {
-    const _tf = await globals.tourist.init(title, "This is a description");
-    const tf = {
-      path: vscode.Uri.file(path),
-      ..._tf,
+  if (!title) {
+    return;
+  }
+
+  if (!path) {
+    const defaultUri = vscode.Uri.file(
+      (vscode.workspace.workspaceFolders
+        ? vscode.workspace.workspaceFolders[0].uri.fsPath
+        : "") +
+        "/" +
+        title +
+        ".tour",
+    );
+    path = await vscode.window.showSaveDialog({ defaultUri });
+  }
+
+  if (path) {
+    const tf = await globals.tourist.init(
+      title,
+      "This is the tour description.",
+    );
+    const tfWithPath = {
+      path,
+      ...tf,
     };
-    globals.newTourFile(tf);
-    await processTourFile(tf);
+    globals.newTourFile(tfWithPath);
+    await processTourFile(tfWithPath);
   }
 }
 
