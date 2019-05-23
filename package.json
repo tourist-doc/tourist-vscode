@@ -248,6 +248,11 @@
           "type": "number",
           "description": "The font size, in pixel, used in the webview.",
           "default": 14
+        },
+        "tourist.tourDirectories": {
+          "type": "array",
+          "description": "The directories where you store your .tour files.",
+          "default": []
         }
       }
     }

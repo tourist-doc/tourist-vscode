@@ -1,6 +1,9 @@
 import { AbsoluteTourStop, BrokenTourStop, Tour, Tourist } from "tourist";
 import * as vscode from "vscode";
 
+import { readdir } from "fs-extra";
+import { join } from "path";
+import { tourDirectories } from "./config";
 import { context } from "./extension";
 import { parseTourFile, TourFile } from "./tourFile";
 
@@ -14,7 +17,7 @@ export let tourist = new Tourist();
 /** The state of the active tour */
 export let tourState: TourState | undefined;
 
-let knownTourFiles: TourFile[];
+const knownTourFiles = [] as TourFile[];
 
 /**
  * Sets the active tour file to `tf`, its path to `path`, and updates related state
@@ -84,6 +87,7 @@ export async function init() {
   }
 
   await findWorkspaceTours();
+  await findOtherTours();
 }
 
 export function clearTourState() {
@@ -92,16 +96,28 @@ export function clearTourState() {
 
 /**
  * Finds, parses, and returns all the TourFiles found in the current workspace
- * @param update Whether to update the list from disk
  */
 async function findWorkspaceTours() {
-  const uris = await vscode.workspace.findFiles("**/*.tour");
-  knownTourFiles = [];
-
-  for (const uri of uris) {
+  for (const uri of await vscode.workspace.findFiles("**/*.tour")) {
     const tf = await parseTourFile(uri.fsPath);
     if (tf) {
       knownTourFiles.push(tf);
+    }
+  }
+}
+
+/**
+ * Finds, parses, and returns all the TourFiles found in directories listed in `tourDirectories`
+ */
+async function findOtherTours() {
+  for (const dirPath of await tourDirectories()) {
+    for (const tourPath of await readdir(dirPath)) {
+      if (tourPath.endsWith(".tour")) {
+        const tf = await parseTourFile(join(dirPath, tourPath));
+        if (tf) {
+          knownTourFiles.push(tf);
+        }
+      }
     }
   }
 }

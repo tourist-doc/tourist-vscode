@@ -95,3 +95,12 @@ export function webviewFontSize(): number {
     .getConfiguration()
     .get<number>("tourist.webviewFontSize", 14);
 }
+
+/**
+ * The directories in which we look for .tour files
+ */
+export function tourDirectories(): string[] {
+  return workspace
+    .getConfiguration()
+    .get<string[]>("tourist.tourDirectories", []);
+}
