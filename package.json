@@ -136,6 +136,13 @@
       ]
     },
     "menus": {
+      "explorer/context": [
+        {
+          "command": "tourist.startTour",
+          "group": "Tourist",
+          "when": "resourceFilename =~ /.+\\.tour/"
+        }
+      ],
       "editor/context": [
         {
           "command": "tourist.addTourstop",
