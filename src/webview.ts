@@ -42,6 +42,8 @@ export class TouristWebview {
         .replace(/webviewFontSize/g, config.webviewFontSize().toString())
         .replace(/webviewFont/g, config.webviewFont()),
     );
+
+    this.mdConverter.setFlavor("github");
   }
 
   /**
