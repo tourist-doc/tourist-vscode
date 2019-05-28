@@ -57,6 +57,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
     ),
   );
 
+  // When a change is made above a tourstop, change the in-memory representation
+  // of the tourstop to offset the change.
   vscode.workspace.onDidChangeTextDocument((evt) => {
     let anyChanged = false;
     if (globals.tourState) {

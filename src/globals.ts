@@ -6,6 +6,7 @@ import { join } from "path";
 import { tourDirectories } from "./config";
 import { context } from "./extension";
 import { parseTourFile, TourFile } from "./tourFile";
+import { pathsEqual } from "./util";
 
 /**
  * Global state and resources
@@ -86,8 +87,7 @@ export async function init() {
     tourist = Tourist.deserialize(touristJSON);
   }
 
-  await findWorkspaceTours();
-  await findOtherTours();
+  await findKnownTours();
 }
 
 export function clearTourState() {
@@ -96,26 +96,31 @@ export function clearTourState() {
 
 /**
  * Finds, parses, and returns all the TourFiles found in the current workspace
+ * and in the directories listed in `tourDirectories`
  */
-async function findWorkspaceTours() {
+async function findKnownTours() {
+  const paths = new Set<vscode.Uri>();
   for (const uri of await vscode.workspace.findFiles("**/*.tour")) {
-    const tf = await parseTourFile(uri.fsPath);
-    if (tf) {
-      knownTourFiles.push(tf);
-    }
+    newTourFile(await parseTourFile(uri.fsPath));
+    paths.add(uri);
   }
-}
 
-/**
- * Finds, parses, and returns all the TourFiles found in directories listed in `tourDirectories`
- */
-async function findOtherTours() {
   for (const dirPath of await tourDirectories()) {
     for (const tourPath of await readdir(dirPath)) {
       if (tourPath.endsWith(".tour")) {
         const tf = await parseTourFile(join(dirPath, tourPath));
         if (tf) {
-          knownTourFiles.push(tf);
+          let isDupe = false;
+          for (const uri of paths) {
+            if (pathsEqual(tf.path.fsPath, uri.fsPath)) {
+              isDupe = true;
+              break;
+            }
+          }
+          if (!isDupe) {
+            newTourFile(tf);
+            paths.add(tf.path);
+          }
         }
       }
     }
@@ -130,6 +135,8 @@ export function forgetTour(tf: TourFile) {
   knownTourFiles.splice(knownTourFiles!.indexOf(tf), 1);
 }
 
-export function newTourFile(tf: TourFile) {
-  knownTourFiles.push(tf);
+export function newTourFile(tf?: TourFile) {
+  if (tf) {
+    knownTourFiles.push(tf);
+  }
 }
