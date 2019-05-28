@@ -23,6 +23,10 @@
       #body-controls {
         font-size: webviewFontSizepx;
       }
+      .edit-button {
+        font-size: webviewFontSizepx;
+        font-weight: normal;
+      }
     </style>
 
     <script>
@@ -56,7 +60,8 @@
     <h1>
       {{=it.title}}
       <a
-        title="Edit title"
+        class="edit-button"
+        title="Edit"
         onclick='vscode.postMessage({command: "editTitle"});'
         >edit</a
       >

@@ -153,6 +153,13 @@
           "group": "Tourist"
         }
       ],
+      "view/title": [
+        {
+          "command": "tourist.newTour",
+          "when": "view == tourList",
+          "group": "navigation"
+        }
+      ],
       "view/item/context": [
         {
           "command": "tourist.editTitle",

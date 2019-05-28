@@ -577,6 +577,29 @@ export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
   }
 }
 
+export async function editDescription(tf?: TourFile, description?: string) {
+  if (!tf) {
+    tf = await quickPickTourFile();
+  }
+  if (!tf) {
+    return;
+  }
+
+  if (description === undefined) {
+    description = await vscode.window.showInputBox({
+      prompt: "New description:",
+      value: tf.description,
+    });
+  }
+  if (description === undefined) {
+    return;
+  }
+
+  await globals.tourist.editDescription(tf, description);
+  await saveTour(tf);
+  updateGUI();
+}
+
 /**
  * Maps a name used in the .tour file to a repository path on disk
  */

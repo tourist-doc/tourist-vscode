@@ -22,6 +22,10 @@
       #description {
         font-size: webviewFontSizepx;
       }
+      .edit-button {
+        font-size: webviewFontSizepx;
+        font-weight: normal;
+      }
     </style>
 
     <script>
@@ -32,12 +36,21 @@
     <h1>
       {{=it.tf.title}}
       <a
-        title="Edit title"
+        class="edit-button"
+        title="Edit"
         onclick='vscode.postMessage({command: "editTitle"});'
         >edit</a
       >
     </h1>
-    <h2>Description</h2>
+    <h2>
+      Description
+      <a
+        class="edit-button"
+        title="Edit"
+        onclick='vscode.postMessage({command: "editDescription"});'
+        >edit</a
+      >
+    </h2>
     <div
       id="description"
       oncontextmenu="vscode.postMessage({command: 'gotoTourstop', stopIndex: '0'});"

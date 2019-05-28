@@ -119,6 +119,9 @@ export class TouristWebview {
           case "mapRepo":
             await commands.mapRepo(message.repo);
             break;
+          case "editDescription":
+            await commands.editDescription(tourState!.tourFile);
+            break;
 
           // TourStop webview
           case "nextTourstop":
