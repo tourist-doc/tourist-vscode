@@ -93,7 +93,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const tourFileWatcher = vscode.workspace.createFileSystemWatcher("**/*.tour");
   tourFileWatcher.onDidDelete(async (deletedUri) => {
-    const tf = await findWithUri(deletedUri);
+    const tf = findWithUri(deletedUri);
     if (tf) {
       globals.forgetTour(tf);
       updateGUI();
@@ -164,7 +164,8 @@ export function showDecorations() {
  * Writes active TourFile to disk
  */
 export async function saveTour(tf: TourFile) {
-  await fs.writeFileSync(tf.path.fsPath, globals.tourist.serializeTourFile(tf));
+  const tourFileJSON = globals.tourist.serializeTourFile(tf);
+  await fs.writeFileSync(tf.path.fsPath, tourFileJSON);
   console.log(`Saved ${tf.title} at ${tf.path.fsPath}`);
 }
 

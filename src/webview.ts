@@ -2,20 +2,22 @@ import { template } from "dot";
 import * as showdown from "showdown";
 import * as vscode from "vscode";
 
+import { AbsoluteTourStop, BrokenTourStop } from "tourist";
 import * as commands from "./commands";
 import * as config from "./config";
-import { context, updateGUI } from "./extension";
-import { tourState } from "./globals";
-import { TourFile } from "./tourFile";
+import { context, updateGUI, processTourFile } from "./extension";
+import { tourState, tourist } from "./globals";
+import { TourFile, findWithID } from "./tourFile";
+import { quickPickTourFile, quickPickTourstop } from "./userInput";
 
 interface TourTemplateArgs {
   tf: TourFile;
 }
 
 interface TourStopTemplateArgs {
-  title: string;
-  body: string;
-  editingBody: boolean;
+  stop: AbsoluteTourStop | BrokenTourStop;
+  bodyHTML: string;
+  editingBody?: string;
 }
 
 /**
@@ -54,10 +56,8 @@ export class TouristWebview {
       if (tourState.currentStop) {
         this.getPanel().title = tourState.currentStop.title;
         this.getPanel().webview.html = this.tourStopTemplate!({
-          title: tourState.currentStop.title,
-          body: this.editingBody
-            ? tourState.currentStop.body || ""
-            : this.mdConverter.makeHtml(tourState.currentStop.body || ""),
+          stop: tourState.currentStop,
+          bodyHTML: this.mdConverter.makeHtml(tourState.currentStop.body || ""),
           editingBody: this.editingBody,
         });
       } else {
@@ -81,7 +81,7 @@ export class TouristWebview {
   }
 
   public static setEditing(editing: boolean) {
-    this.editingBody = editing;
+    this.editingBody = editing ? tourState!.currentStop!.body : undefined;
   }
 
   /** The panel that contains the webview */
@@ -97,7 +97,7 @@ export class TouristWebview {
   private static tourStopTemplate: (args: TourStopTemplateArgs) => string;
 
   /** Whether the body is currently being edited (the TextArea is showing) */
-  private static editingBody: boolean = false;
+  private static editingBody?: string;
 
   private static getPanel(): vscode.WebviewPanel {
     if (this.panel === undefined) {
@@ -108,6 +108,7 @@ export class TouristWebview {
         { enableScripts: true },
       );
       this.panel.webview.onDidReceiveMessage(async (message: any) => {
+        let tf;
         switch (message.command) {
           // TODO: This comment implies a code smell. Break this class into two
           // TourFile webview
@@ -138,13 +139,13 @@ export class TouristWebview {
             }
             break;
           case "editBody":
-            this.editingBody = true;
+            this.setEditing(true);
             break;
           case "editBodyCancel":
-            this.editingBody = false;
+            this.setEditing(false);
             break;
           case "editBodySave":
-            this.editingBody = false;
+            this.setEditing(false);
             if (
               tourState!.currentStop !== undefined &&
               message.newBody !== undefined
@@ -154,6 +155,26 @@ export class TouristWebview {
             break;
           case "backToTour":
             tourState!.currentStop = undefined;
+            break;
+          case "gotoChildStop":
+            tf = findWithID(message.tourId);
+            if (tf) {
+              // TODO: startTour reads and parses the URI. We already have the TourFile
+              await commands.startTour(tf.path);
+            }
+            break;
+          case "linkStop":
+            tf = await quickPickTourFile();
+            if (tf) {
+              const idx = tourState!.tour.stops.indexOf(
+                tourState!.currentStop!,
+              );
+              tourist.link(tourState!.tourFile, idx, {
+                tourId: tf.id,
+                stopNum: 0,
+              });
+              await processTourFile(tourState!.tourFile);
+            }
             break;
         }
         updateGUI();

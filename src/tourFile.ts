@@ -10,6 +10,7 @@ import { pathsEqual } from "./util";
  * A subtype of tourist::TourFile that holds a file path
  */
 export interface TourFile {
+  id: string;
   repositories: RepoState[];
   stops: TourStop[];
   title: string;
@@ -44,9 +45,19 @@ export async function parseTourFile(
   }
 }
 
-export async function findWithUri(uri: Uri): Promise<TourFile | undefined> {
+export function findWithUri(uri: Uri): TourFile | undefined {
   for (const tf of globals.knownTours()) {
     if (pathsEqual(tf.path.path, uri.path)) {
+      return tf;
+    }
+  }
+
+  return undefined;
+}
+
+export function findWithID(id: string): TourFile | undefined {
+  for (const tf of globals.knownTours()) {
+    if (tf.id === id) {
       return tf;
     }
   }

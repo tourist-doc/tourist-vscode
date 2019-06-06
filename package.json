@@ -17,6 +17,14 @@
   ],
   "main": "./dist/extension",
   "contributes": {
+    "languages": [
+      {
+        "id": "json",
+        "extensions": [
+          ".tour"
+        ]
+      }
+    ],
     "commands": [
       {
         "command": "tourist.gotoTourstop",

@@ -112,10 +112,11 @@ export async function addTourStop(
     return;
   }
 
-  const stop = {
+  const stop: AbsoluteTourStop = {
     title,
     absPath: editor.document.fileName,
     line: editor.selection.active.line + 1,
+    childStops: [{ tourId: "tourist", stopNum: 0 }],
   };
 
   try {

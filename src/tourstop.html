@@ -23,6 +23,9 @@
       #body-controls {
         font-size: webviewFontSizepx;
       }
+      #child-stops {
+        font-size: webviewFontSizepx;
+      }
       .edit-button {
         font-size: webviewFontSizepx;
         font-weight: normal;
@@ -58,7 +61,7 @@
     <hr />
 
     <h1>
-      {{=it.title}}
+      {{=it.stop.title}}
       <a
         class="edit-button"
         title="Edit"
@@ -66,36 +69,53 @@
         >edit</a
       >
     </h1>
-    {{?it.editingBody}}
+    {{?it.editingBody !== undefined}}
 
     <textarea
       id="body-textarea"
       placeholder="Type some information about this stop - you can use markdown too!"
-      >{{=it.body}}</textarea
+      >{{=it.editingBody}}</textarea
     >
     <br />
     <span id="body-controls">
       <a
         title="Save"
-        onclick='vscode.postMessage({command: "editBodySave", newBody: document.getElementById("body-textarea").value})'
+        onclick='vscode.postMessage({command: "editBodySave", newBody: document.getElementById("body-textarea").value});'
         >Save</a
       >
       |
       <a
         title="Cancel"
-        onclick='vscode.postMessage({command: "editBodyCancel"})'
+        onclick='vscode.postMessage({command: "editBodyCancel"});'
         >Cancel</a
       >
     </span>
     {{??}}
 
     <div id="body">
-      {{=it.body}}
+      {{=it.bodyHTML}}
       <a title="Edit body" onclick='vscode.postMessage({command: "editBody"});'
         >Edit body</a
       >
     </div>
 
     {{?}}
+
+    <div id="child-stops">
+      <h2>Linked stops</h2>
+      {{~it.stop.childStops :stop:idx}}
+      <a
+        title="{{=stop.tourId}}"
+        onclick="vscode.postMessage({command: 'gotoChildStop', tourId: '{{=stop.tourId}}'});"
+        >{{=stop.tourId}}</a
+      >
+      <br />
+      {{~}}
+      <a
+        title="Link a stop"
+        onclick="vscode.postMessage({command: 'linkStop'});"
+        >Link a stop</a
+      >
+    </div>
   </body>
 </html>
