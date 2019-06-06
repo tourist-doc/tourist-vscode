@@ -60,12 +60,18 @@ export class TourStopTreeView
   }
 }
 
+/**
+ * Called at extension startup
+ */
 export function init() {
   tourProvider = new TourFileTreeView();
   stopProvider = new TourStopTreeView();
   refresh();
 }
 
+/**
+ * Updates the TreeView in the GUI to reflect the current global state
+ */
 export function refresh() {
   // TODO: This can be done once, then updated via an event emitter
   tourTreeView = vscode.window.createTreeView<TourFile>("tourList", {

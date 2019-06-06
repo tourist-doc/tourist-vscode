@@ -192,6 +192,9 @@ export async function gotoTourStop(
   }
 }
 
+/**
+ * Deletes a tour and its .tour file on disk.
+ */
 export async function deleteTour(tf?: TourFile) {
   if (!tf) {
     tf = await quickPickTourFile();
@@ -577,6 +580,9 @@ export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
   }
 }
 
+/**
+ * Changes the description of a tour file
+ */
 export async function editDescription(tf?: TourFile, description?: string) {
   if (!tf) {
     tf = await quickPickTourFile();
@@ -650,8 +656,13 @@ export async function mapRepo(
   }
 }
 
-export async function unmapRepo(): Promise<void> {
-  const repoName = await quickPickRepoName();
+/**
+ * Removes the association between a repo ID and its repository
+ */
+export async function unmapRepo(repoName?: string): Promise<void> {
+  if (repoName === undefined) {
+    repoName = await quickPickRepoName();
+  }
 
   if (repoName) {
     await globals.tourist.unmapConfig(repoName);
@@ -725,13 +736,32 @@ export async function addBreakpoints(): Promise<void> {
   vscode.debug.addBreakpoints(breakpoints);
 }
 
+/**
+ * Displays an error to the user
+ * @param error The error to be reported
+ * @param expected Whether this error "should" EVER happen. `false` if it implies
+ *                 a programming error - it's logged as an error and directs the
+ *                 user to submit a bug report.
+ */
 export function showError(error: TouristError, expected = true) {
   if (expected) {
     console.warn(error.message);
+    vscode.window.showErrorMessage(error.message);
   } else {
     console.error(
       `Hit an unexpected error. code: ${error.code}, message: ${error.message}`,
     );
+    vscode.window
+      .showErrorMessage(error.message, "Report to extension author")
+      .then((choice) => {
+        if (choice === "Report to extension author") {
+          vscode.commands.executeCommand(
+            "vscode.open",
+            vscode.Uri.parse(
+              "https://github.com/hgoldstein95/tourist-vscode/issues/new",
+            ),
+          );
+        }
+      });
   }
-  vscode.window.showErrorMessage(error.message);
 }

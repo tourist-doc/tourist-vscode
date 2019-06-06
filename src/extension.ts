@@ -101,7 +101,11 @@ export async function activate(ctx: vscode.ExtensionContext) {
   });
 }
 
+/**
+ * Updates the whole GUI to reflect global state
+ */
 export function updateGUI() {
+  // TODO: consider making smarter to only update what needs to be updated
   try {
     showDecorations();
   } catch (e) {
@@ -164,12 +168,20 @@ export async function saveTour(tf: TourFile) {
   console.log(`Saved ${tf.title} at ${tf.path.fsPath}`);
 }
 
+/**
+ * Updates global state and the GUI to reflect a given tour file
+ * @param tf The TourFile
+ */
 export async function processTourFile(tf: TourFile) {
   await globals.setTourFile(tf);
   await saveTour(globals.tourState!.tourFile);
   updateGUI();
 }
 
+/**
+ * Called when the user updates their configuration
+ * @param evt The event
+ */
 async function configChanged(evt: vscode.ConfigurationChangeEvent) {
   if (evt.affectsConfiguration("tourist.showDecorations")) {
     showDecorations();

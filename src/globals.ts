@@ -63,13 +63,20 @@ export class TourState {
   /**
    * Moves the current stop forward and returns it
    *
-   * Returns undefined if there is no current stop or if the current stop is the last one
+   * @returns undefined if there is no current stop or if the current stop is the last one
    */
   public nextTourStop(): AbsoluteTourStop | BrokenTourStop | undefined {
     return this.stopAtOffset(1);
   }
 
-  private stopAtOffset(offset: number) {
+  /**
+   * Returns the stop `offset` away from the current stop
+   * @param offset The number of stops away. Positive=right, negative=left
+   * @returns A tourstop or `undefined` if out of bounds
+   */
+  private stopAtOffset(
+    offset: number,
+  ): AbsoluteTourStop | BrokenTourStop | undefined {
     if (this.currentStop) {
       const stopIdx = this.tour.stops.indexOf(this.currentStop) + offset;
       if (stopIdx >= 0 && stopIdx < this.tour.stops.length) {
@@ -81,6 +88,9 @@ export class TourState {
   }
 }
 
+/**
+ * Called on extension startup
+ */
 export async function init() {
   const touristJSON = context!.globalState.get<string>("touristInstance");
   if (touristJSON) {
@@ -90,6 +100,9 @@ export async function init() {
   await findKnownTours();
 }
 
+/**
+ * Clears all current tour state, effectively stopping the tour
+ */
 export function clearTourState() {
   tourState = undefined;
 }
@@ -127,14 +140,25 @@ async function findKnownTours() {
   }
 }
 
+/**
+ * Returns a list of all known tour files
+ */
 export function knownTours(): TourFile[] {
   return knownTourFiles;
 }
 
+/**
+ * Remove a tour file from the known list
+ * @param tf The tour to forget
+ */
 export function forgetTour(tf: TourFile) {
   knownTourFiles.splice(knownTourFiles!.indexOf(tf), 1);
 }
 
+/**
+ * Adds a tour file to the known list
+ * @param tf The tour to keep track of
+ */
 export function newTourFile(tf?: TourFile) {
   if (tf) {
     knownTourFiles.push(tf);
