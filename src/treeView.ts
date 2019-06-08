@@ -3,7 +3,12 @@ import * as vscode from "vscode";
 
 import { knownTours, tourState } from "./globals";
 import { TourFile } from "./tourFile";
-import { TourFileTreeItem, TourStopTreeItem } from "./treeViewItems";
+import {
+  TourFileTreeItem,
+  TourStopTreeItem,
+  RepoTreeItem,
+} from "./treeViewItems";
+import { RepoState } from "tourist/src/types";
 
 /**
  * A wrapper around a list of TourFiles which provides data to the GUI
@@ -48,7 +53,7 @@ export class TourStopTreeView
   public getChildren(
     stop?: AbsoluteTourStop | BrokenTourStop | undefined,
   ): Array<AbsoluteTourStop | BrokenTourStop> {
-    if (stop === undefined && tourState && tourState.tour) {
+    if (stop === undefined && tourState) {
       return tourState.tour.stops;
     } else {
       return [];
@@ -60,12 +65,35 @@ export class TourStopTreeView
   }
 }
 
+export class RepoTreeView implements vscode.TreeDataProvider<RepoState> {
+  public onDidChangeTreeData?:
+    | vscode.Event<RepoState | null | undefined>
+    | undefined;
+
+  public getTreeItem(repo: RepoState): RepoTreeItem {
+    return new RepoTreeItem(repo);
+  }
+
+  public getChildren(repo?: RepoState | undefined): RepoState[] {
+    if (repo === undefined && tourState) {
+      return tourState.tourFile.repositories;
+    } else {
+      return [];
+    }
+  }
+
+  public getParent(element: RepoState) {
+    return undefined;
+  }
+}
+
 /**
  * Called at extension startup
  */
 export function init() {
   tourProvider = new TourFileTreeView();
   stopProvider = new TourStopTreeView();
+  repoProvider = new RepoTreeView();
   refresh();
 }
 
@@ -82,6 +110,9 @@ export function refresh() {
   >("stopList", {
     treeDataProvider: stopProvider,
   });
+  repoTreeView = vscode.window.createTreeView<RepoState>("repoList", {
+    treeDataProvider: repoProvider,
+  });
 
   // In the TreeViews, select the current tour and tourstop
   if (tourState) {
@@ -94,5 +125,7 @@ export function refresh() {
 
 let tourProvider: TourFileTreeView;
 let stopProvider: TourStopTreeView;
+let repoProvider: RepoTreeView;
 let tourTreeView: vscode.TreeView<TourFile>;
 let stopTreeView: vscode.TreeView<AbsoluteTourStop | BrokenTourStop>;
+let repoTreeView: vscode.TreeView<RepoState>;

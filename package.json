@@ -140,6 +140,10 @@
         {
           "id": "stopList",
           "name": "Tour Stops"
+        },
+        {
+          "id": "repoList",
+          "name": "Repositories"
         }
       ]
     },

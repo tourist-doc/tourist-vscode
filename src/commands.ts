@@ -274,7 +274,7 @@ export async function editTitle(
 
   if (stop) {
     const title = await vscode.window.showInputBox({
-      prompt: "New title:",
+      prompt: "What's the new title?",
       value: stop.title,
     });
     if (title !== undefined) {
@@ -318,7 +318,7 @@ export async function editBody(
   if (stop) {
     if (body === undefined) {
       body = await vscode.window.showInputBox({
-        prompt: "New body:",
+        prompt: "What's the new body?",
         value: stop.body,
       });
     }
@@ -557,7 +557,7 @@ export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
   }
   if (name === undefined) {
     name = await vscode.window.showInputBox({
-      prompt: "New title:",
+      prompt: "What's the new title?",
       value: tf.title,
     });
   }
@@ -594,7 +594,7 @@ export async function editDescription(tf?: TourFile, description?: string) {
 
   if (description === undefined) {
     description = await vscode.window.showInputBox({
-      prompt: "New description:",
+      prompt: "What's the new description?",
       value: tf.description,
     });
   }
@@ -679,7 +679,7 @@ export async function newTour(path?: vscode.Uri): Promise<void> {
     ? vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
     : "My Tour";
   const title = await vscode.window.showInputBox({
-    prompt: "Tour name:",
+    prompt: "What's the name of the new tour?",
     value: folderName,
   });
   if (!title) {

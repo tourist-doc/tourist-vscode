@@ -2,6 +2,7 @@ import { AbsoluteTourStop, BrokenTourStop } from "tourist";
 import * as vscode from "vscode";
 
 import { TourFile } from "./tourFile";
+import { RepoState } from "tourist/src/types";
 
 /**
  * Controls how a `TourFile` is displayed in the TreeView
@@ -40,5 +41,17 @@ export class TourStopTreeItem extends vscode.TreeItem {
     this.contextValue = "stop";
     this.tooltip = tourstop.body || "";
     this.tourstop = tourstop;
+  }
+}
+
+export class RepoTreeItem extends vscode.TreeItem {
+  constructor(repo: RepoState) {
+    super(repo.repository);
+    this.command = {
+      title: "mapRepo",
+      command: "tourist.mapRepo",
+      arguments: [repo.repository],
+    };
+    this.tooltip = `${repo.repository} - ${repo.commit}`;
   }
 }
