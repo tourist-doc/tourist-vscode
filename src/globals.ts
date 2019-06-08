@@ -7,7 +7,6 @@ import { tourDirectories } from "./config";
 import { context } from "./extension";
 import { parseTourFile, TourFile } from "./tourFile";
 import { pathsEqual } from "./util";
-import { isUndefined } from "util";
 
 /**
  * Global state and resources

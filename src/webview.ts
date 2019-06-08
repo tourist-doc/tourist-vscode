@@ -27,7 +27,7 @@ interface TourStopTemplateArgs {
 export class TouristWebview {
   public static async init() {
     const tourTemplateDoc = await vscode.workspace.openTextDocument(
-      context!.asAbsolutePath("src/tour.html"),
+      context!.asAbsolutePath("dist/tour.html"),
     );
     const t = tourTemplateDoc
       .getText()
@@ -36,7 +36,7 @@ export class TouristWebview {
     this.tourTemplate = template(t);
 
     const tourStopTemplateDoc = await vscode.workspace.openTextDocument(
-      context!.asAbsolutePath("src/tourstop.html"),
+      context!.asAbsolutePath("dist/tourstop.html"),
     );
     this.tourStopTemplate = template(
       tourStopTemplateDoc

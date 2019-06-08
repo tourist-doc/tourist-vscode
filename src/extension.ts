@@ -38,6 +38,8 @@ const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationT
  * The entry point to the extension. Currently, called on startup.
  */
 export async function activate(ctx: vscode.ExtensionContext) {
+  console.error("Tourist started.");
+
   context = ctx;
 
   vscode.workspace.onDidChangeConfiguration(configChanged);
