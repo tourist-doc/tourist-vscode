@@ -7,6 +7,7 @@ import { tourDirectories } from "./config";
 import { context } from "./extension";
 import { parseTourFile, TourFile } from "./tourFile";
 import { pathsEqual } from "./util";
+import { isUndefined } from "util";
 
 /**
  * Global state and resources
@@ -112,30 +113,41 @@ export function clearTourState() {
  * and in the directories listed in `tourDirectories`
  */
 async function findKnownTours() {
-  const paths = new Set<vscode.Uri>();
+  const known = new Set<vscode.Uri>();
+
+  const isDupe = (tfUri: vscode.Uri) => {
+    for (const knownUri of known) {
+      if (pathsEqual(tfUri.fsPath, knownUri.fsPath)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Find .tour files in the current workspace
   for (const uri of await vscode.workspace.findFiles("**/*.tour")) {
-    newTourFile(await parseTourFile(uri.fsPath));
-    paths.add(uri);
+    known.add(uri);
   }
 
+  // Find .tour files in each of the tour directories specified in config
   for (const dirPath of await tourDirectories()) {
     for (const tourPath of await readdir(dirPath)) {
-      if (tourPath.endsWith(".tour")) {
-        const tf = await parseTourFile(join(dirPath, tourPath));
-        if (tf) {
-          let isDupe = false;
-          for (const uri of paths) {
-            if (pathsEqual(tf.path.fsPath, uri.fsPath)) {
-              isDupe = true;
-              break;
-            }
-          }
-          if (!isDupe) {
-            newTourFile(tf);
-            paths.add(tf.path);
-          }
-        }
+      const uri = vscode.Uri.file(join(dirPath, tourPath));
+      if (tourPath.endsWith(".tour") && !isDupe(uri)) {
+        known.add(uri);
       }
+    }
+  }
+
+  const tfPromises = [] as Array<Promise<TourFile | undefined>>;
+  for (const uri of known) {
+    tfPromises.push(parseTourFile(uri.fsPath));
+  }
+
+  // Parse in parallel, then add them to known tours
+  for (const tf of await Promise.all(tfPromises)) {
+    if (tf) {
+      newTourFile(tf);
     }
   }
 }

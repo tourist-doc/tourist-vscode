@@ -68,7 +68,7 @@
     {{~it.tf.stops :stop:idx}}
     <span id="tour">
       <a
-        title="Goto Tourstop"
+        title="{{=stop.title}}"
         onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
         >{{=stop.title}}</a
       >
@@ -81,7 +81,7 @@
     {{~it.tf.repositories :repo:idx}}
     <span id="repo">
       {{=repo.repository}} (<a
-        title="Remap"
+        title="Remap {{=repo.repository}}"
         onclick="vscode.postMessage(
           {command: 'mapRepo', repo: '{{=repo.repository}}'}
           );"

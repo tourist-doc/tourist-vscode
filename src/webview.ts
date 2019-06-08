@@ -5,10 +5,10 @@ import * as vscode from "vscode";
 import { AbsoluteTourStop, BrokenTourStop } from "tourist";
 import * as commands from "./commands";
 import * as config from "./config";
-import { context, updateGUI, processTourFile } from "./extension";
-import { tourState, tourist } from "./globals";
-import { TourFile, findWithID } from "./tourFile";
-import { quickPickTourFile, quickPickTourstop } from "./userInput";
+import { context, processTourFile, updateGUI } from "./extension";
+import { tourist, tourState } from "./globals";
+import { findWithID, TourFile } from "./tourFile";
+import { quickPickTourFile } from "./userInput";
 
 interface TourTemplateArgs {
   tf: TourFile;
