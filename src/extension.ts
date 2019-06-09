@@ -62,6 +62,16 @@ export async function activate(ctx: vscode.ExtensionContext) {
   // When a change is made above a tourstop, change the in-memory representation
   // of the tourstop to offset the change.
   vscode.workspace.onDidChangeTextDocument((evt) => {
+    const activeEditor = vscode.window.activeTextEditor;
+    if (
+      evt.document.fileName.endsWith(".tour") &&
+      activeEditor &&
+      activeEditor.document === evt.document
+    ) {
+      vscode.window.showWarningMessage(
+        "It's not recommended that you edit .tour files directly.",
+      );
+    }
     let anyChanged = false;
     if (globals.tourState) {
       for (const stop of globals.tourState.tour.stops) {

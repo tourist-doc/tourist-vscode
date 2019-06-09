@@ -98,7 +98,7 @@ async function parseTourFile(tfUri: Uri): Promise<TourFile | undefined> {
       case 400: // Invalid JSON string
       case 401: // Invalid tour file
       default:
-        showError(error);
+        showError(error, false);
         break;
     }
     return undefined;

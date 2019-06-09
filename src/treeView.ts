@@ -4,9 +4,9 @@ import * as vscode from "vscode";
 import { knownTours, tourState } from "./globals";
 import { TourFile } from "./tourFile";
 import {
+  RepoTreeItem,
   TourFileTreeItem,
   TourStopTreeItem,
-  RepoTreeItem,
 } from "./treeViewItems";
 import { RepoState } from "tourist/src/types";
 
@@ -110,7 +110,7 @@ export function refresh() {
   >("stopList", {
     treeDataProvider: stopProvider,
   });
-  repoTreeView = vscode.window.createTreeView<RepoState>("repoList", {
+  vscode.window.createTreeView<RepoState>("repoList", {
     treeDataProvider: repoProvider,
   });
 
@@ -128,4 +128,3 @@ let stopProvider: TourStopTreeView;
 let repoProvider: RepoTreeView;
 let tourTreeView: vscode.TreeView<TourFile>;
 let stopTreeView: vscode.TreeView<AbsoluteTourStop | BrokenTourStop>;
-let repoTreeView: vscode.TreeView<RepoState>;

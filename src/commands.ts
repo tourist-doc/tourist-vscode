@@ -759,7 +759,7 @@ export function showError(error: TouristError, expected = true) {
           vscode.commands.executeCommand(
             "vscode.open",
             vscode.Uri.parse(
-              "https://github.com/hgoldstein95/tourist-vscode/issues/new",
+              `https://github.com/hgoldstein95/tourist-vscode/issues/new?title=${error.message}&labels=bug`,
             ),
           );
         }
