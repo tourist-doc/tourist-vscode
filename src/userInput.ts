@@ -2,7 +2,7 @@ import { AbsoluteTourStop, BrokenTourStop, isNotBroken, Tour } from "tourist";
 import * as vscode from "vscode";
 
 import * as globals from "./globals";
-import { parseTourFile, TourFile } from "./tourFile";
+import { findWithUri, TourFile } from "./tourFile";
 
 /**
  * Controls how tourstops are displayed in QuickPicks
@@ -113,7 +113,7 @@ export async function quickPickTourFile(): Promise<TourFile | undefined> {
   } else if (item) {
     const uri = await getTourFileURI();
     if (uri) {
-      return parseTourFile(uri.fsPath);
+      return findWithUri(uri);
     }
   }
 

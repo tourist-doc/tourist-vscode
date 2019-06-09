@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import { writeFile } from "fs-extra";
 import { isNotBroken } from "tourist";
 import * as vscode from "vscode";
 
@@ -7,7 +7,7 @@ import * as commands from "./commands";
 import * as config from "./config";
 import * as globals from "./globals";
 import * as statusBar from "./statusBar";
-import { findWithUri, TourFile } from "./tourFile";
+import { findWithUri, resolve, TourFile } from "./tourFile";
 import * as treeView from "./treeView";
 import * as util from "./util";
 import { TouristWebview } from "./webview";
@@ -38,7 +38,7 @@ const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationT
  * The entry point to the extension. Currently, called on startup.
  */
 export async function activate(ctx: vscode.ExtensionContext) {
-  console.error("Tourist started.");
+  console.info("Tourist started activate()");
 
   context = ctx;
 
@@ -47,7 +47,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   await globals.init();
   statusBar.init();
   treeView.init();
-  await TouristWebview.init();
+  TouristWebview.init();
   commands.registerAll();
 
   updateGUI();
@@ -95,12 +95,14 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const tourFileWatcher = vscode.workspace.createFileSystemWatcher("**/*.tour");
   tourFileWatcher.onDidDelete(async (deletedUri) => {
-    const tf = findWithUri(deletedUri);
+    const tf = await findWithUri(deletedUri);
     if (tf) {
       globals.forgetTour(tf);
       updateGUI();
     }
   });
+
+  console.info("Tourist finished activate()");
 }
 
 /**
@@ -167,18 +169,24 @@ export function showDecorations() {
  */
 export async function saveTour(tf: TourFile) {
   const tourFileJSON = globals.tourist.serializeTourFile(tf);
-  await fs.writeFileSync(tf.path.fsPath, tourFileJSON);
-  console.log(`Saved ${tf.title} at ${tf.path.fsPath}`);
+  await writeFile(tf.path.fsPath, tourFileJSON);
+  console.info(`Saved ${tf.title} at ${tf.path.fsPath}`);
 }
 
 /**
  * Updates global state and the GUI to reflect a given tour file
  * @param tf The TourFile
  */
-export async function processTourFile(tf: TourFile) {
-  await globals.setTourFile(tf);
-  await saveTour(globals.tourState!.tourFile);
-  updateGUI();
+export async function processTourFile(tf: TourFile, save = true) {
+  console.debug(`Processing TourFile ${tf.id}, save=${save}`);
+  const tour = await resolve(tf, save);
+  if (tour) {
+    await globals.setTour(tf, tour);
+    if (save) {
+      saveTour(tf);
+    }
+    updateGUI();
+  }
 }
 
 /**

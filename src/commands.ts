@@ -11,7 +11,7 @@ import * as vscode from "vscode";
 import * as config from "./config";
 import { context, processTourFile, saveTour, updateGUI } from "./extension";
 import * as globals from "./globals";
-import { parseTourFile, TourFile } from "./tourFile";
+import { findWithUri, TourFile } from "./tourFile";
 import {
   quickPickRepoName,
   quickPickTourFile,
@@ -116,7 +116,7 @@ export async function addTourStop(
     title,
     absPath: editor.document.fileName,
     line: editor.selection.active.line + 1,
-    childStops: [{ tourId: "tourist", stopNum: 0 }],
+    childStops: [],
   };
 
   try {
@@ -497,13 +497,13 @@ export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
  * Starts a Tour from a .tour file
  */
 export async function startTour(uri?: vscode.Uri): Promise<void> {
-  const tf = uri ? await parseTourFile(uri.fsPath) : await quickPickTourFile();
+  const tf = await (uri ? findWithUri(uri) : quickPickTourFile());
 
   if (tf) {
     // Clear currentStop
     globals.clearTourState();
 
-    await processTourFile(tf);
+    await processTourFile(tf, false);
   }
 }
 
@@ -753,7 +753,7 @@ export function showError(error: TouristError, expected = true) {
       `Hit an unexpected error. code: ${error.code}, message: ${error.message}`,
     );
     vscode.window
-      .showErrorMessage(error.message, "Report to extension author")
+      .showErrorMessage(error.message, "Report bug")
       .then((choice) => {
         if (choice === "Report to extension author") {
           vscode.commands.executeCommand(

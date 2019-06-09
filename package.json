@@ -68,7 +68,7 @@
       },
       {
         "command": "tourist.moveTourstop",
-        "title": "Move a tour stop to a different location in a file",
+        "title": "Move a tour stop",
         "category": "Tourist"
       },
       {

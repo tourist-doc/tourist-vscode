@@ -1,5 +1,5 @@
 import { TourStop } from "tourist";
-import { RepoState } from "tourist/src/types";
+import { RepoState, Tour } from "tourist/src/types";
 import { Uri, workspace } from "vscode";
 
 import { showError } from "./commands";
@@ -19,42 +19,58 @@ export interface TourFile {
   path: Uri;
 }
 
+// TODO: consider moving caching into tourist-core
+const tourCache: Map<TourFile, Tour> = new Map();
+
 /**
- * Parses a TourFile from a location on disk
- * @param path The path to the TourFile
+ * Resolves a TourFile to a Tour, with a cache to avoid unnecessary work
+ * @param tf The TourFile to resolve
+ * @param force If true, will bypass the cache and call tourist.resolve()
  */
-export async function parseTourFile(
-  tfPath: string,
-): Promise<TourFile | undefined> {
-  const doc = await workspace.openTextDocument(tfPath);
+export async function resolve(
+  tf: TourFile,
+  force = false,
+): Promise<Tour | undefined> {
+  if (!force && tourCache.has(tf)) {
+    return tourCache.get(tf);
+  }
   try {
-    const tf = globals.tourist.deserializeTourFile(doc.getText());
-    return {
-      path: Uri.file(tfPath),
-      ...tf,
-    };
+    const tour = await globals.tourist.resolve(tf);
+    tourCache.set(tf, tour);
+    return tour;
   } catch (error) {
     switch (error.code) {
-      case 400: // Invalid JSON string
-      case 401: // Invalid tour file
+      case 200: // Repo not mapped
+        // TODO: in addition, add a button to map the repo
+        showError(error);
+        break;
       default:
         showError(error, false);
         break;
     }
-    return undefined;
   }
 }
 
-export function findWithUri(uri: Uri): TourFile | undefined {
+/**
+ * Finds the tour with the given URI, if one exists. Reads from disk if necessary.
+ * @param uri The TourFile URI
+ */
+export async function findWithUri(uri: Uri): Promise<TourFile | undefined> {
   for (const tf of globals.knownTours()) {
     if (pathsEqual(tf.path.path, uri.path)) {
       return tf;
     }
   }
 
-  return undefined;
+  const tf = await parseTourFile(uri);
+  globals.newTourFile(tf);
+  return tf;
 }
 
+/**
+ * Returns the tour with the given id, if one is known.
+ * @param id A TourFile ID
+ */
 export function findWithID(id: string): TourFile | undefined {
   for (const tf of globals.knownTours()) {
     if (tf.id === id) {
@@ -63,4 +79,28 @@ export function findWithID(id: string): TourFile | undefined {
   }
 
   return undefined;
+}
+
+/**
+ * Parses a TourFile from a location on disk
+ * @param path The path to the TourFile
+ */
+async function parseTourFile(tfUri: Uri): Promise<TourFile | undefined> {
+  const doc = await workspace.openTextDocument(tfUri);
+  try {
+    const tf = globals.tourist.deserializeTourFile(doc.getText());
+    return {
+      path: tfUri,
+      ...tf,
+    };
+  } catch (error) {
+    switch (error.code) {
+      case 400: // Invalid JSON string
+      case 401: // Invalid tour file
+      default:
+        showError(error);
+        break;
+    }
+    return undefined;
+  }
 }

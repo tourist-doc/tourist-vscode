@@ -5,7 +5,7 @@ import { readdir } from "fs-extra";
 import { join } from "path";
 import { tourDirectories } from "./config";
 import { context } from "./extension";
-import { parseTourFile, TourFile } from "./tourFile";
+import { findWithUri, resolve, TourFile } from "./tourFile";
 import { pathsEqual } from "./util";
 
 /**
@@ -23,13 +23,13 @@ const knownTourFiles = [] as TourFile[];
 /**
  * Sets the active tour file to `tf`, its path to `path`, and updates related state
  */
-export async function setTourFile(tf: TourFile) {
-  const tour = await tourist.resolve(tf);
-  if (tourState === undefined) {
-    tourState = new TourState(tf, tour);
-  } else {
+export async function setTour(tf: TourFile, tour: Tour) {
+  // TODO: if the tour changed, we should make sure tourState.currentStop = undefined
+  if (tourState) {
     tourState.tourFile = tf;
     tourState.tour = tour;
+  } else {
+    tourState = new TourState(tf, tour);
   }
 }
 
@@ -140,7 +140,7 @@ async function findKnownTours() {
 
   const tfPromises = [] as Array<Promise<TourFile | undefined>>;
   for (const uri of known) {
-    tfPromises.push(parseTourFile(uri.fsPath));
+    tfPromises.push(findWithUri(uri));
   }
 
   // Parse in parallel, then add them to known tours
