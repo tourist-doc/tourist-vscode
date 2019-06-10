@@ -22,6 +22,10 @@
       #description {
         font-size: webviewFontSizepx;
       }
+      #no-description {
+        font-size: webviewFontSizepx;
+        font-style: italic;
+      }
       .edit-button {
         font-size: webviewFontSizepx;
         font-weight: normal;
@@ -56,6 +60,11 @@
       oncontextmenu="vscode.postMessage({command: 'gotoTourstop', stopIndex: '0'});"
     >
       {{=it.tf.description}}
+      {{? !it.tf.description }}
+      <div id="no-description">
+        You can add a short description to your tour here!
+      </div>
+      {{?}}
     </div>
 
     <h2>Stops</h2>

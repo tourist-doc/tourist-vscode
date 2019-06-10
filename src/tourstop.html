@@ -15,6 +15,10 @@
       #body {
         font-size: webviewFontSizepx;
       }
+      #no-body {
+        font-size: webviewFontSizepx;
+        font-style: italic;
+      }
       #body-textarea {
         width: 80%;
         height: 200px;
@@ -94,8 +98,16 @@
 
     <div id="body">
       {{=it.bodyHTML}}
-      <a title="Edit body" onclick='vscode.postMessage({command: "editBody"});'
-        >Edit body</a
+      {{? !it.bodyHTML }}
+      <div id="no-body">
+        Put some information about this stop here - you can use markdown too!
+      </div>
+      {{?}}
+      <a
+        class="edit-button"
+        title="Edit"
+        onclick='vscode.postMessage({command: "editBody"});'
+        >edit</a
       >
     </div>
 

@@ -699,10 +699,7 @@ export async function newTour(path?: vscode.Uri): Promise<void> {
   }
 
   if (path) {
-    const tf = await globals.tourist.init(
-      title,
-      "This is the tour description.",
-    );
+    const tf = await globals.tourist.init(title, "");
     const tfWithPath = {
       path,
       ...tf,
