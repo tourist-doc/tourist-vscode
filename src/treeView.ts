@@ -13,10 +13,9 @@ import { RepoState } from "tourist/src/types";
 /**
  * A wrapper around a list of TourFiles which provides data to the GUI
  */
-export class TourFileTreeView implements vscode.TreeDataProvider<TourFile> {
-  public onDidChangeTreeData?:
-    | vscode.Event<TourFile | null | undefined>
-    | undefined;
+class TourFileTreeView implements vscode.TreeDataProvider<TourFile> {
+  public readonly onDidChangeTreeData: vscode.Event<null> =
+    changeTreeViewEvent.event;
 
   public getTreeItem(tf: TourFile): vscode.TreeItem {
     return new TourFileTreeItem(tf);
@@ -38,11 +37,10 @@ export class TourFileTreeView implements vscode.TreeDataProvider<TourFile> {
 /**
  * A wrapper around a list of TourStops which provides data to the GUI
  */
-export class TourStopTreeView
+class TourStopTreeView
   implements vscode.TreeDataProvider<AbsoluteTourStop | BrokenTourStop> {
-  public onDidChangeTreeData?:
-    | vscode.Event<AbsoluteTourStop | BrokenTourStop | null | undefined>
-    | undefined;
+  public readonly onDidChangeTreeData: vscode.Event<null> =
+    changeTreeViewEvent.event;
 
   public getTreeItem(
     stop: AbsoluteTourStop | BrokenTourStop,
@@ -65,10 +63,9 @@ export class TourStopTreeView
   }
 }
 
-export class RepoTreeView implements vscode.TreeDataProvider<RepoState> {
-  public onDidChangeTreeData?:
-    | vscode.Event<RepoState | null | undefined>
-    | undefined;
+class RepoTreeView implements vscode.TreeDataProvider<RepoState> {
+  public readonly onDidChangeTreeData: vscode.Event<null> =
+    changeTreeViewEvent.event;
 
   public getTreeItem(repo: RepoState): RepoTreeItem {
     return new RepoTreeItem(repo);
@@ -91,9 +88,18 @@ export class RepoTreeView implements vscode.TreeDataProvider<RepoState> {
  * Called at extension startup
  */
 export function init() {
-  tourProvider = new TourFileTreeView();
-  stopProvider = new TourStopTreeView();
-  repoProvider = new RepoTreeView();
+  tourTreeView = vscode.window.createTreeView<TourFile>("tourList", {
+    treeDataProvider: new TourFileTreeView(),
+  });
+  stopTreeView = vscode.window.createTreeView<
+    AbsoluteTourStop | BrokenTourStop
+  >("stopList", {
+    treeDataProvider: new TourStopTreeView(),
+  });
+  vscode.window.createTreeView<RepoState>("repoList", {
+    treeDataProvider: new RepoTreeView(),
+  });
+
   refresh();
 }
 
@@ -101,19 +107,7 @@ export function init() {
  * Updates the TreeView in the GUI to reflect the current global state
  */
 export function refresh() {
-  // TODO: This can be done once, then updated via an event emitter
-  tourTreeView = vscode.window.createTreeView<TourFile>("tourList", {
-    treeDataProvider: tourProvider,
-  });
-  stopTreeView = vscode.window.createTreeView<
-    AbsoluteTourStop | BrokenTourStop
-  >("stopList", {
-    treeDataProvider: stopProvider,
-  });
-  vscode.window.createTreeView<RepoState>("repoList", {
-    treeDataProvider: repoProvider,
-  });
-
+  changeTreeViewEvent.fire();
   // In the TreeViews, select the current tour and tourstop
   if (tourState) {
     tourTreeView.reveal(tourState.tourFile);
@@ -123,8 +117,6 @@ export function refresh() {
   }
 }
 
-let tourProvider: TourFileTreeView;
-let stopProvider: TourStopTreeView;
-let repoProvider: RepoTreeView;
 let tourTreeView: vscode.TreeView<TourFile>;
 let stopTreeView: vscode.TreeView<AbsoluteTourStop | BrokenTourStop>;
+const changeTreeViewEvent = new vscode.EventEmitter<null>();
