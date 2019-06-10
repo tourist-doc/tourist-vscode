@@ -205,7 +205,7 @@ export async function deleteTour(tf?: TourFile) {
     return;
   }
 
-  await unlink(tf.path.fsPath);
+  unlink(tf.path.fsPath);
   globals.forgetTour(tf);
   updateGUI();
 }

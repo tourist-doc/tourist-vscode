@@ -14,6 +14,9 @@ export function refresh() {
   if (tourState && tourState.currentStop) {
     statusBarItem.text = `$(milestone) ${tourState.currentStop.title}`;
     statusBarItem.command = "tourist.gotoTourstop";
+  } else if (tourState) {
+    statusBarItem.text = `$(milestone) ${tourState.tourFile.title}`;
+    statusBarItem.command = "tourist.startTour";
   } else {
     statusBarItem.text = `$(milestone) Start a tour`;
     statusBarItem.command = "tourist.startTour";

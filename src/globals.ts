@@ -114,15 +114,6 @@ export function clearTourState() {
 async function findKnownTours() {
   const known = new Set<vscode.Uri>();
 
-  const isDupe = (tfUri: vscode.Uri) => {
-    for (const knownUri of known) {
-      if (pathsEqual(tfUri.fsPath, knownUri.fsPath)) {
-        return true;
-      }
-    }
-    return false;
-  };
-
   // Find .tour files in the current workspace
   for (const uri of await vscode.workspace.findFiles("**/*.tour")) {
     known.add(uri);
@@ -132,7 +123,7 @@ async function findKnownTours() {
   for (const dirPath of await tourDirectories()) {
     for (const tourPath of await readdir(dirPath)) {
       const uri = vscode.Uri.file(join(dirPath, tourPath));
-      if (tourPath.endsWith(".tour") && !isDupe(uri)) {
+      if (tourPath.endsWith(".tour")) {
         known.add(uri);
       }
     }
@@ -171,7 +162,16 @@ export function forgetTour(tf: TourFile) {
  * @param tf The tour to keep track of
  */
 export function newTourFile(tf?: TourFile) {
-  if (tf) {
+  const isDupe = (tfUri: vscode.Uri) => {
+    for (const _tf of knownTourFiles) {
+      if (pathsEqual(tfUri.fsPath, _tf.path.fsPath)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  if (tf && !isDupe(tf.path)) {
     knownTourFiles.push(tf);
   }
 }
