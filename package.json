@@ -68,7 +68,7 @@
       },
       {
         "command": "tourist.moveTourstop",
-        "title": "Move a tour stop",
+        "title": "Move tour stop",
         "category": "Tourist"
       },
       {
@@ -119,6 +119,11 @@
       {
         "command": "tourist.addBreakpoints",
         "title": "Add a breakpoint for all tourstops",
+        "category": "Tourist"
+      },
+      {
+        "command": "tourist.openTourFile",
+        "title": "Open .tour file",
         "category": "Tourist"
       }
     ],
@@ -207,6 +212,10 @@
         },
         {
           "command": "tourist.refreshTour",
+          "when": "viewItem == tour"
+        },
+        {
+          "command": "tourist.openTourFile",
           "when": "viewItem == tour"
         }
       ]

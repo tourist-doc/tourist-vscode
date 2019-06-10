@@ -37,6 +37,7 @@ const commands = {
   "tourist.moveTourstopUp": moveTourstopUp,
   "tourist.newTour": newTour,
   "tourist.nextTourstop": nextTourStop,
+  "tourist.openTourFile": openTourFile,
   "tourist.prevTourstop": prevTourStop,
   "tourist.refreshTour": refreshTour,
   "tourist.renameTour": renameTour,
@@ -707,6 +708,11 @@ export async function newTour(path?: vscode.Uri): Promise<void> {
     globals.newTourFile(tfWithPath);
     await processTourFile(tfWithPath, true);
   }
+}
+
+export async function openTourFile(tf: TourFile) {
+  const doc = await vscode.workspace.openTextDocument(tf.path.fsPath);
+  await vscode.window.showTextDocument(doc, config.webviewColumn());
 }
 
 /**
