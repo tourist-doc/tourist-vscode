@@ -2,7 +2,7 @@ import { writeFile } from "fs-extra";
 import { isNotBroken } from "tourist";
 import * as vscode from "vscode";
 
-import { TouristCodeLensProvider } from "./codeLenses";
+import * as codeLenses from "./codeLenses";
 import * as commands from "./commands";
 import * as config from "./config";
 import * as globals from "./globals";
@@ -55,7 +55,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.languages.registerCodeLensProvider(
       { scheme: "file" },
-      new TouristCodeLensProvider(),
+      codeLenses.provider,
     ),
   );
 
@@ -128,6 +128,7 @@ export function updateGUI() {
   treeView.refresh();
   TouristWebview.refresh();
   statusBar.refresh();
+  codeLenses.provider.refresh();
 }
 
 /**
@@ -175,7 +176,7 @@ export function showDecorations() {
 }
 
 /**
- * Writes active TourFile to disk
+ * Writes given TourFile to disk
  */
 export async function saveTour(tf: TourFile) {
   const tourFileJSON = globals.tourist.serializeTourFile(tf);
@@ -206,6 +207,8 @@ export async function processTourFile(tf: TourFile, save = true) {
 async function configChanged(evt: vscode.ConfigurationChangeEvent) {
   if (evt.affectsConfiguration("tourist.showDecorations")) {
     showDecorations();
+  } else if (evt.affectsConfiguration("tourist.useCodeLens")) {
+    codeLenses.provider.refresh();
   } else if (
     evt.affectsConfiguration("tourist.webviewFont") ||
     evt.affectsConfiguration("tourist.webviewFontSize")

@@ -8,7 +8,13 @@ import * as util from "./util";
 /**
  * Provides CodeLenses for each tourstop in the active tour
  */
-export class TouristCodeLensProvider implements vscode.CodeLensProvider {
+class TouristCodeLensProvider implements vscode.CodeLensProvider {
+  // tslint:disable-next-line: variable-name
+  private _onDidChangeCodeLenses = new vscode.EventEmitter<void>();
+  // tslint:disable-next-line: member-ordering
+  public readonly onDidChangeCodeLenses: vscode.Event<void> = this
+    ._onDidChangeCodeLenses.event;
+
   public provideCodeLenses(
     document: vscode.TextDocument,
     token: vscode.CancellationToken,
@@ -43,7 +49,13 @@ export class TouristCodeLensProvider implements vscode.CodeLensProvider {
   public resolveCodeLens(
     codeLens: vscode.CodeLens,
     token: vscode.CancellationToken,
-  ): vscode.ProviderResult<vscode.CodeLens> {
+  ): vscode.CodeLens {
     return codeLens;
   }
+
+  public refresh() {
+    this._onDidChangeCodeLenses.fire();
+  }
 }
+
+export const provider = new TouristCodeLensProvider();
