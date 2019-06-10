@@ -50,8 +50,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
   TouristWebview.init();
   commands.registerAll();
 
-  updateGUI();
-
   ctx.subscriptions.push(
     vscode.languages.registerCodeLensProvider(
       { scheme: "file" },
@@ -125,10 +123,10 @@ export function updateGUI() {
   } catch (e) {
     console.error(`Oh no! Something went wrong: ${e}`);
   }
-  treeView.refresh();
   TouristWebview.refresh();
   statusBar.refresh();
   codeLenses.provider.refresh();
+  treeView.refresh();
 }
 
 /**

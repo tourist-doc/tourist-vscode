@@ -81,7 +81,7 @@ export class TouristWebview {
   }
 
   public static setEditing(editing: boolean) {
-    this.editingBody = editing ? tourState!.currentStop!.body : undefined;
+    this.editingBody = editing ? tourState!.currentStop!.body || "" : undefined;
   }
 
   /** The panel that contains the webview */

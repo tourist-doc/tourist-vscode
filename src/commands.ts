@@ -705,7 +705,7 @@ export async function newTour(path?: vscode.Uri): Promise<void> {
       ...tf,
     };
     globals.newTourFile(tfWithPath);
-    await processTourFile(tfWithPath);
+    await processTourFile(tfWithPath, true);
   }
 }
 
