@@ -96,18 +96,23 @@ export async function addTourStop(
   mapMissingRepo = true,
 ) {
   const editor = vscode.window.activeTextEditor;
-  if (!globals.tourState) {
-    vscode.window.showInformationMessage(
-      "You need to start a tour before adding a stop",
-    );
-    return;
-  } else if (!editor) {
+  if (!editor) {
     vscode.window.showInformationMessage("No editor is active");
+    return;
+  } else if (!globals.tourState) {
+    await startTour();
+  }
+
+  if (!globals.tourState) {
     return;
   }
 
   if (title === undefined) {
-    title = await vscode.window.showInputBox({ prompt: "Stop title:" });
+    // TODO: this loses focus
+    title = await vscode.window.showInputBox({
+      prompt: "Stop title:",
+      ignoreFocusOut: true,
+    });
   }
   if (title === undefined) {
     return;

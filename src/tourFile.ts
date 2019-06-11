@@ -1,6 +1,6 @@
 import { TourStop } from "tourist";
 import { RepoState, Tour } from "tourist/src/types";
-import { Uri, workspace } from "vscode";
+import { ProgressLocation, Uri, window, workspace } from "vscode";
 
 import { showError } from "./commands";
 import * as globals from "./globals";
@@ -35,7 +35,13 @@ export async function resolve(
     return tourCache.get(tf);
   }
   try {
-    const tour = await globals.tourist.resolve(tf);
+    // TODO: ProgressLocation.Window wasn't working for me, but that's what we want.
+    const tour = await window.withProgress<Tour>(
+      { location: ProgressLocation.Notification, title: "Processing tour..." },
+      async (progress) => {
+        return globals.tourist.resolve(tf);
+      },
+    );
     tourCache.set(tf, tour);
     return tour;
   } catch (error) {

@@ -50,7 +50,7 @@ export async function quickPickTourstop(
   );
   const item = await vscode.window.showQuickPick<TourstopQuickPickItem>(
     quickPickItems,
-    { canPickMany: false },
+    { canPickMany: false, placeHolder: "Tour stop" },
   );
   return item ? item.tourstop : undefined;
 }
@@ -105,7 +105,7 @@ export async function quickPickTourFile(): Promise<TourFile | undefined> {
 
   const item = await vscode.window.showQuickPick<vscode.QuickPickItem>(
     quickPickItems,
-    { canPickMany: false },
+    { canPickMany: false, placeHolder: "Tour file" },
   );
 
   if (item instanceof TourFileQuickPickItem) {
@@ -129,6 +129,9 @@ export async function quickPickRepoName(): Promise<string | undefined> {
       description: globals.tourist.config[repoName],
     });
   }
-  const item = await vscode.window.showQuickPick(items);
+  const item = await vscode.window.showQuickPick(items, {
+    canPickMany: false,
+    placeHolder: "Repository",
+  });
   return item ? item.label : undefined;
 }
