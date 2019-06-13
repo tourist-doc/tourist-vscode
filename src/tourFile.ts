@@ -35,9 +35,11 @@ export async function resolve(
     return tourCache.get(tf);
   }
   try {
-    // TODO: ProgressLocation.Window wasn't working for me, but that's what we want.
     const tour = await window.withProgress<Tour>(
-      { location: ProgressLocation.Notification, title: "Processing tour..." },
+      {
+        location: ProgressLocation.Notification,
+        title: `Processing ${tf.title}`,
+      },
       async (progress) => {
         return globals.tourist.resolve(tf);
       },

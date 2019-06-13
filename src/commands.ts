@@ -49,6 +49,7 @@ const commands = {
   "tourist.renameTour": renameTour,
   "tourist.startTour": startTour,
   "tourist.stopTour": stopTour,
+  "tourist.toggleWebview": toggleWebview,
   "tourist.unmapRepo": unmapRepo,
 };
 
@@ -755,6 +756,19 @@ export async function addBreakpoints(): Promise<void> {
   }
 
   vscode.debug.addBreakpoints(breakpoints);
+}
+
+/**
+ * Toggles between hiding and showing the webview
+ */
+export async function toggleWebview() {
+  const touristCfg = vscode.workspace.getConfiguration("tourist");
+
+  touristCfg.update(
+    "showWebview",
+    !touristCfg.get("showWebview"),
+    vscode.ConfigurationTarget.Workspace,
+  );
 }
 
 /**

@@ -125,6 +125,11 @@
         "command": "tourist.openTourFile",
         "title": "Open .tour file",
         "category": "Tourist"
+      },
+      {
+        "command": "tourist.toggleWebview",
+        "title": "Toggle webview",
+        "category": "Tourist"
       }
     ],
     "viewsContainers": {
