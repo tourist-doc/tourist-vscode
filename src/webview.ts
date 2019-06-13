@@ -52,6 +52,11 @@ export class TouristWebview {
    * Updates the webview to be consistent with globals.tourState
    */
   public static refresh() {
+    if (!config.showWebview()) {
+      TouristWebview.close();
+      return;
+    }
+
     if (tourState) {
       if (tourState.currentStop) {
         this.getPanel().title = tourState.currentStop.title;
@@ -88,7 +93,9 @@ export class TouristWebview {
   private static panel?: vscode.WebviewPanel;
 
   /** An object that converts markdown into HTML */
-  private static mdConverter = new showdown.Converter();
+  private static mdConverter = new showdown.Converter({
+    simplifiedAutoLink: true,
+  });
 
   /** A `doT` template that renders a TourFile */
   private static tourTemplate: (args: TourTemplateArgs) => string;
@@ -169,6 +176,7 @@ export class TouristWebview {
               const idx = tourState!.tour.stops.indexOf(
                 tourState!.currentStop!,
               );
+
               tourist.link(tourState!.tourFile, idx, {
                 tourId: tf.id,
                 stopNum: 0,

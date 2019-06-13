@@ -242,12 +242,12 @@
         "tourist.useCodeLens": {
           "type": "boolean",
           "description": "Whether a code lens should be placed at each tourstop.",
-          "default": "true"
+          "default": true
         },
         "tourist.showDecorations": {
           "type": "boolean",
           "description": "Whether a text decoration should be placed at each tourstop.",
-          "default": "true"
+          "default": true
         },
         "tourist.tourstopRevealLocation": {
           "type": "string",
@@ -272,7 +272,7 @@
         "tourist.gotoFirstTourstopOnTourStart": {
           "type": "boolean",
           "description": "Whether starting a tour automatically goes to the first tour stop.",
-          "default": "true"
+          "default": true
         },
         "tourist.webviewFont": {
           "type": "string",
@@ -288,6 +288,11 @@
           "type": "array",
           "description": "The directories where you store your .tour files.",
           "default": []
+        },
+        "tourist.showWebview": {
+          "type": "boolean",
+          "description": "Whether to show the webview",
+          "default": true
         }
       }
     }

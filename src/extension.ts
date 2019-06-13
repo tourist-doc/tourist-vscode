@@ -34,6 +34,14 @@ const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationT
   },
 );
 
+export const newTourstopDecorationType = vscode.window.createTextEditorDecorationType(
+  {
+    backgroundColor: new vscode.ThemeColor("merge.currentHeaderBackground"),
+    overviewRulerColor: new vscode.ThemeColor("merge.currentHeaderBackground"),
+    isWholeLine: true,
+  },
+);
+
 /**
  * The entry point to the extension. Currently, called on startup.
  */
@@ -213,5 +221,7 @@ async function configChanged(evt: vscode.ConfigurationChangeEvent) {
   ) {
     await TouristWebview.init();
     updateGUI();
+  } else if (evt.affectsConfiguration("tourist.showWebview")) {
+    TouristWebview.refresh();
   }
 }

@@ -104,3 +104,7 @@ export function tourDirectories(): string[] {
     .getConfiguration()
     .get<string[]>("tourist.tourDirectories", []);
 }
+
+export function showWebview(): boolean {
+  return workspace.getConfiguration().get<boolean>("tourist.showWebview", true);
+}
