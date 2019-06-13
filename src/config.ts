@@ -108,3 +108,10 @@ export function tourDirectories(): string[] {
 export function showWebview(): boolean {
   return workspace.getConfiguration().get<boolean>("tourist.showWebview", true);
 }
+
+// TODO: Consider making this a part of TourState, with "open for writing" and "open for reading" different commands
+export function showEditControls(): boolean {
+  return workspace
+    .getConfiguration()
+    .get<boolean>("tourist.showEditControls", true);
+}

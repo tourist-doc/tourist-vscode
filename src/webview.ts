@@ -12,12 +12,14 @@ import { quickPickTourFile } from "./userInput";
 
 interface TourTemplateArgs {
   tf: TourFile;
+  showEditControls: boolean;
 }
 
 interface TourStopTemplateArgs {
   stop: AbsoluteTourStop | BrokenTourStop;
   bodyHTML: string;
   editingBody?: string;
+  showEditControls: boolean;
 }
 
 /**
@@ -60,15 +62,18 @@ export class TouristWebview {
     if (tourState) {
       if (tourState.currentStop) {
         this.getPanel().title = tourState.currentStop.title;
-        this.getPanel().webview.html = this.tourStopTemplate!({
+        const x = this.tourStopTemplate!({
           stop: tourState.currentStop,
           bodyHTML: this.mdConverter.makeHtml(tourState.currentStop.body || ""),
           editingBody: this.editingBody,
+          showEditControls: config.showEditControls(),
         });
+        this.getPanel().webview.html = x;
       } else {
         this.getPanel().title = tourState!.tourFile.title;
         this.getPanel().webview.html = this.tourTemplate!({
           tf: tourState!.tourFile,
+          showEditControls: config.showEditControls(),
         });
       }
     } else if (this.panel) {

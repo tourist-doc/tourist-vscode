@@ -293,6 +293,11 @@
           "type": "boolean",
           "description": "Whether to show the webview",
           "default": true
+        },
+        "tourist.showEditControls": {
+          "type": "boolean",
+          "description": "Whether to show edit controls",
+          "default": true
         }
       }
     }

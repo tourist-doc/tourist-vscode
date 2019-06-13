@@ -219,9 +219,11 @@ async function configChanged(evt: vscode.ConfigurationChangeEvent) {
     evt.affectsConfiguration("tourist.webviewFont") ||
     evt.affectsConfiguration("tourist.webviewFontSize")
   ) {
-    await TouristWebview.init();
-    updateGUI();
+    TouristWebview.init();
+    TouristWebview.refresh();
   } else if (evt.affectsConfiguration("tourist.showWebview")) {
+    TouristWebview.refresh();
+  } else if (evt.affectsConfiguration("tourist.showEditControls")) {
     TouristWebview.refresh();
   }
 }
