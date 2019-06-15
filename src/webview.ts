@@ -62,13 +62,15 @@ export class TouristWebview {
     if (tourState) {
       if (tourState.currentStop) {
         this.getPanel().title = tourState.currentStop.title;
-        const x = this.tourStopTemplate!({
+        const body = this.mdConverter.makeHtml(
+          tourState.currentStop.body || "",
+        );
+        this.getPanel().webview.html = this.tourStopTemplate!({
           stop: tourState.currentStop,
-          bodyHTML: this.mdConverter.makeHtml(tourState.currentStop.body || ""),
+          bodyHTML: body,
           editingBody: this.editingBody,
           showEditControls: config.showEditControls(),
         });
-        this.getPanel().webview.html = x;
       } else {
         this.getPanel().title = tourState!.tourFile.title;
         this.getPanel().webview.html = this.tourTemplate!({
