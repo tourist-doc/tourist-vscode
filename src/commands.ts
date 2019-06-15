@@ -11,10 +11,10 @@ import * as vscode from "vscode";
 import * as config from "./config";
 import {
   context,
+  newTourstopDecorationType,
   processTourFile,
   saveTour,
   updateGUI,
-  newTourstopDecorationType,
 } from "./extension";
 import * as globals from "./globals";
 import { findWithUri, TourFile } from "./tourFile";

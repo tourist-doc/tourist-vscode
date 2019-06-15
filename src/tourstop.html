@@ -46,6 +46,20 @@
   </head>
 
   <body>
+    <script>
+      window.onload = () => {
+        document
+          .getElementById("body-textarea")
+          .addEventListener("keydown", (e) => {
+            if (e.keyCode === 13 && e.ctrlKey) {
+              vscode.postMessage({
+                command: "editBodySave",
+                newBody: document.getElementById("body-textarea").value,
+              });
+            }
+          });
+      };
+    </script>
     <div id="header">
       <a
         title="Back to tour"
