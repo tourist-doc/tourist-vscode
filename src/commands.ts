@@ -127,6 +127,8 @@ export async function addTourStop(
     return;
   }
 
+  await editor.document.save();
+
   const stop: AbsoluteTourStop = {
     title,
     absPath: editor.document.fileName,
@@ -466,6 +468,7 @@ export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
   if (stop) {
     const editor = vscode.window.activeTextEditor;
     if (editor) {
+      await editor.document.save();
       const newLocation = editor.selection.active;
       try {
         await globals.tourist.move(
