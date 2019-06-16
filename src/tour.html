@@ -78,6 +78,11 @@
     {{~it.tf.stops :stop:idx}}
     <span id="tour">
       <a
+        title="Delete stop"
+        onclick="vscode.postMessage({command: 'deleteStop', stopIndex: '{{=idx}}'})"
+        >❌</a
+      >
+      <a
         title="{{=stop.title}}"
         onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
         >{{=stop.title}}</a

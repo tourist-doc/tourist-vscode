@@ -93,7 +93,7 @@ export function webviewFont(): string {
 export function webviewFontSize(): number {
   return workspace
     .getConfiguration()
-    .get<number>("tourist.webviewFontSize", 14);
+    .get<number>("tourist.webviewFontSize", 15);
 }
 
 /**

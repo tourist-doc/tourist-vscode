@@ -191,6 +191,10 @@ export class TouristWebview {
               await processTourFile(tourState!.tourFile);
             }
             break;
+          case "deleteStop":
+            await commands.deleteTourStop(
+              tourState!.tour.stops[message.stopIndex],
+            );
         }
         updateGUI();
       });

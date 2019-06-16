@@ -63,23 +63,21 @@
       <a
         title="Back to tour"
         onclick='vscode.postMessage({command: "backToTour"});'
-        >< Back to tour</a
+        >🡠 Back to tour</a
       >
       <br />
       <a
         title="Previous tourstop"
         onclick='vscode.postMessage({command: "prevTourstop"});'
-        >Previous tourstop</a
+        >🡠 Previous</a
       >
       |
       <a
         title="Next tourstop"
         onclick='vscode.postMessage({command: "nextTourstop"});'
-        >Next tourstop</a
+        >Next 🡢</a
       >
     </div>
-
-    <hr />
 
     <h1>
       {{=it.stop.title}}
@@ -136,7 +134,6 @@
 
     <div id="child-stops">
       {{? it.showEditControls || it.stop.childStops.length > 0 }}
-      <hr />
       <h2>Linked stops</h2>
       {{?}}
 
