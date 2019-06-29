@@ -465,7 +465,10 @@ export async function moveTourstopDown(
 /**
  * Changes a TourStop's location
  */
-export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
+export async function moveTourstop(
+  uri: vscode.Uri,
+  stop?: AbsoluteTourStop | BrokenTourStop,
+) {
   if (!globals.tourState) {
     return;
   }
@@ -479,14 +482,11 @@ export async function moveTourstop(stop?: AbsoluteTourStop | BrokenTourStop) {
       await editor.document.save();
       const newLocation = editor.selection.active;
       try {
-        await globals.tourist.move(
-          globals.tourState.tourFile,
-          globals.tourState.tour.stops.indexOf(stop),
-          {
-            absPath: editor.document.fileName,
-            line: newLocation.line + 1,
-          },
-        );
+        const stopIdx = globals.tourState.tour.stops.indexOf(stop);
+        await globals.tourist.move(globals.tourState.tourFile, stopIdx, {
+          absPath: editor.document.fileName,
+          line: newLocation.line + 1,
+        });
       } catch (error) {
         switch (error.code) {
           case 200: // Repo not mapped to path
@@ -791,7 +791,7 @@ export async function toggleWebview() {
  */
 export function showError(error: TouristError, expected = true) {
   if (expected) {
-    console.warn(error.message);
+    console.warn(`${error.message} (code: ${error.code})`);
     vscode.window.showErrorMessage(error.message);
   } else {
     console.error(

@@ -23,8 +23,11 @@
         margin: 40px;
       }
       .tourstop {
-        font-size: webviewFontSizepx;
+        font-size: 20px;
         margin: 40px;
+      }
+      .delete-stop {
+        font-size: 12px;
       }
       .error {
         font-size: webviewFontSizepx;
@@ -83,6 +86,7 @@
     {{~it.tf.stops :stop:idx}}
     <span class="tourstop">
       <a
+        class="delete-stop"
         title="Delete stop"
         onclick="vscode.postMessage({command: 'deleteStop', stopIndex: '{{=idx}}'})"
         >❌</a
