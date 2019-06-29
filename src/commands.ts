@@ -191,8 +191,11 @@ export async function gotoTourStop(
   if (stop === undefined) {
     stop = await quickPickTourstop();
   }
+  if (!stop) {
+    return;
+  }
 
-  if (stop && isNotBroken(stop)) {
+  if (isNotBroken(stop)) {
     globals.tourState.currentStop = stop;
 
     const file = vscode.Uri.file(stop.absPath);
@@ -207,6 +210,11 @@ export async function gotoTourStop(
     editor.revealRange(editor.selection, config.tourstopRevealLocation());
     TouristWebview.setEditing(editing);
     updateGUI();
+  } else {
+    // TODO: show changes from last good commit to now (requires FileSystemProvider...):
+    // vscode.commands.executeCommand("vscode.diff", uri1, uri2);
+
+    vscode.window.showInformationMessage("Tour stop is broken");
   }
 }
 

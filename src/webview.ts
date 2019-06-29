@@ -13,6 +13,7 @@ import { quickPickTourFile } from "./userInput";
 interface TourTemplateArgs {
   tf: TourFile;
   showEditControls: boolean;
+  errors: string[];
 }
 
 interface TourStopTemplateArgs {
@@ -53,7 +54,7 @@ export class TouristWebview {
   /**
    * Updates the webview to be consistent with globals.tourState
    */
-  public static refresh() {
+  public static async refresh() {
     if (!config.showWebview()) {
       TouristWebview.close();
       return;
@@ -76,6 +77,7 @@ export class TouristWebview {
         this.getPanel().webview.html = this.tourTemplate!({
           tf: tourState!.tourFile,
           showEditControls: config.showEditControls(),
+          errors: await tourist.check(tourState!.tourFile),
         });
       }
     } else if (this.panel) {

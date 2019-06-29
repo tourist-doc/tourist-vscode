@@ -1,8 +1,9 @@
-import { AbsoluteTourStop, BrokenTourStop } from "tourist";
+import { AbsoluteTourStop, BrokenTourStop, isNotBroken } from "tourist";
 import * as vscode from "vscode";
 
 import { TourFile } from "./tourFile";
 import { RepoState } from "tourist/src/types";
+import { exclamIcon } from "./resources";
 
 /**
  * Controls how a `TourFile` is displayed in the TreeView
@@ -41,6 +42,9 @@ export class TourStopTreeItem extends vscode.TreeItem {
     this.contextValue = "stop";
     this.tooltip = tourstop.body || "";
     this.tourstop = tourstop;
+    if (!isNotBroken(this.tourstop)) {
+      this.iconPath = exclamIcon;
+    }
   }
 }
 

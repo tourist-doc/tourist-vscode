@@ -6,6 +6,7 @@ import * as codeLenses from "./codeLenses";
 import * as commands from "./commands";
 import * as config from "./config";
 import * as globals from "./globals";
+import * as resources from "./resources";
 import * as statusBar from "./statusBar";
 import { findWithUri, resolve, TourFile } from "./tourFile";
 import * as treeView from "./treeView";
@@ -53,6 +54,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   vscode.workspace.onDidChangeConfiguration(configChanged);
 
   await globals.init();
+  resources.init(context);
   statusBar.init();
   treeView.init();
   TouristWebview.init();
@@ -124,14 +126,14 @@ export async function activate(ctx: vscode.ExtensionContext) {
 /**
  * Updates the whole GUI to reflect global state
  */
-export function updateGUI() {
+export async function updateGUI() {
   // TODO: consider making smarter to only update what needs to be updated
   try {
     showDecorations();
   } catch (e) {
     console.error(`Oh no! Something went wrong: ${e}`);
   }
-  TouristWebview.refresh();
+  await TouristWebview.refresh();
   statusBar.refresh();
   codeLenses.provider.refresh();
   treeView.refresh();

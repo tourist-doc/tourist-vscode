@@ -7,14 +7,6 @@
       a {
         cursor: pointer;
       }
-      #tour {
-        font-size: webviewFontSizepx;
-        margin: 40px;
-      }
-      #repo {
-        font-size: webviewFontSizepx;
-        margin: 40px;
-      }
       #no-stops {
         font-size: webviewFontSizepx;
         font-style: italic;
@@ -25,6 +17,19 @@
       #no-description {
         font-size: webviewFontSizepx;
         font-style: italic;
+      }
+      .repo {
+        font-size: webviewFontSizepx;
+        margin: 40px;
+      }
+      .tourstop {
+        font-size: webviewFontSizepx;
+        margin: 40px;
+      }
+      .error {
+        font-size: webviewFontSizepx;
+        color: red;
+        margin: 40px;
       }
       .edit-button {
         font-size: webviewFontSizepx;
@@ -76,17 +81,25 @@
     {{?}}
 
     {{~it.tf.stops :stop:idx}}
-    <span id="tour">
+    <span class="tourstop">
       <a
         title="Delete stop"
         onclick="vscode.postMessage({command: 'deleteStop', stopIndex: '{{=idx}}'})"
         >❌</a
       >
+      {{? stop.absPath === undefined }}
+      <a
+        title="This stop is broken. Move it to the correct location or delete it."
+        onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
+        >⚠ {{=stop.title}}</a
+      >
+      {{??}}
       <a
         title="{{=stop.title}}"
         onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
         >{{=stop.title}}</a
       >
+      {{?}}
     </span>
     <br />
     {{~}}
@@ -94,7 +107,7 @@
     {{? it.tf.repositories.length > 0 }}
     <h2>Repositories</h2>
     {{~it.tf.repositories :repo:idx}}
-    <span id="repo">
+    <span class="repo">
       {{=repo.repository}} (<a
         title="Remap {{=repo.repository}}"
         onclick="vscode.postMessage(
@@ -102,6 +115,16 @@
           );"
         >Remap</a
       >)
+    </span>
+    <br />
+    {{~}}
+    {{?}}
+
+    {{? it.errors.length > 0 }}
+    <h2>Errors</h2>
+    {{~it.errors :error:idx}}
+    <span class="error">
+      {{=error}}
     </span>
     <br />
     {{~}}
