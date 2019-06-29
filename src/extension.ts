@@ -15,34 +15,6 @@ import { TouristWebview } from "./webview";
 
 export let context: vscode.ExtensionContext | undefined;
 
-/** The text decoration shown on the active tourstop */
-const activeTourstopDecorationType = vscode.window.createTextEditorDecorationType(
-  {
-    backgroundColor: new vscode.ThemeColor("merge.incomingHeaderBackground"),
-    overviewRulerColor: new vscode.ThemeColor("merge.incomingHeaderBackground"),
-    isWholeLine: true,
-  },
-);
-
-/** The text decoration shown on inactive tourstops */
-const inactiveTourstopDecorationType = vscode.window.createTextEditorDecorationType(
-  {
-    backgroundColor: new vscode.ThemeColor("merge.incomingContentBackground"),
-    overviewRulerColor: new vscode.ThemeColor(
-      "merge.incomingContentBackground",
-    ),
-    isWholeLine: true,
-  },
-);
-
-export const newTourstopDecorationType = vscode.window.createTextEditorDecorationType(
-  {
-    backgroundColor: new vscode.ThemeColor("merge.currentHeaderBackground"),
-    overviewRulerColor: new vscode.ThemeColor("merge.currentHeaderBackground"),
-    isWholeLine: true,
-  },
-);
-
 /**
  * The entry point to the extension. Currently, called on startup.
  */
@@ -51,7 +23,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   context = ctx;
 
-  vscode.workspace.onDidChangeConfiguration(configChanged);
+  vscode.workspace.onDidChangeConfiguration(config.configChanged);
 
   await globals.init();
   resources.init(context);
@@ -145,8 +117,8 @@ export async function updateGUI() {
 export function showDecorations() {
   if (!globals.tourState || !config.showDecorations()) {
     vscode.window.visibleTextEditors.forEach((editor) => {
-      editor.setDecorations(activeTourstopDecorationType, []);
-      editor.setDecorations(inactiveTourstopDecorationType, []);
+      editor.setDecorations(config.activeTourstopDecorationType(), []);
+      editor.setDecorations(config.inactiveTourstopDecorationType(), []);
     });
     return;
   }
@@ -178,8 +150,14 @@ export function showDecorations() {
           ).range,
       );
 
-    editor.setDecorations(activeTourstopDecorationType, activeTourStops);
-    editor.setDecorations(inactiveTourstopDecorationType, inactiveTourStops);
+    editor.setDecorations(
+      config.activeTourstopDecorationType(),
+      activeTourStops,
+    );
+    editor.setDecorations(
+      config.inactiveTourstopDecorationType(),
+      inactiveTourStops,
+    );
   }
 }
 
@@ -205,27 +183,5 @@ export async function processTourFile(tf: TourFile, save = true) {
       saveTour(tf);
     }
     updateGUI();
-  }
-}
-
-/**
- * Called when the user updates their configuration
- * @param evt The event
- */
-async function configChanged(evt: vscode.ConfigurationChangeEvent) {
-  if (evt.affectsConfiguration("tourist.showDecorations")) {
-    showDecorations();
-  } else if (evt.affectsConfiguration("tourist.useCodeLens")) {
-    codeLenses.provider.refresh();
-  } else if (
-    evt.affectsConfiguration("tourist.webviewFont") ||
-    evt.affectsConfiguration("tourist.webviewFontSize")
-  ) {
-    TouristWebview.init();
-    TouristWebview.refresh();
-  } else if (evt.affectsConfiguration("tourist.showWebview")) {
-    TouristWebview.refresh();
-  } else if (evt.affectsConfiguration("tourist.showEditControls")) {
-    TouristWebview.refresh();
   }
 }

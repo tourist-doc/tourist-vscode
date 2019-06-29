@@ -9,13 +9,7 @@ import {
 import * as vscode from "vscode";
 
 import * as config from "./config";
-import {
-  context,
-  newTourstopDecorationType,
-  processTourFile,
-  saveTour,
-  updateGUI,
-} from "./extension";
+import { context, processTourFile, saveTour, updateGUI } from "./extension";
 import * as globals from "./globals";
 import { findWithUri, TourFile } from "./tourFile";
 import {
@@ -116,13 +110,15 @@ export async function addTourStop(
   }
 
   if (title === undefined) {
-    editor.setDecorations(newTourstopDecorationType, [editor.selection]);
+    editor.setDecorations(config.newTourstopDecorationType(), [
+      editor.selection,
+    ]);
     // TODO: this loses focus
     title = await vscode.window.showInputBox({
       prompt: "Stop title:",
       ignoreFocusOut: true,
     });
-    editor.setDecorations(newTourstopDecorationType, []);
+    editor.setDecorations(config.newTourstopDecorationType(), []);
   }
   if (title === undefined) {
     return;

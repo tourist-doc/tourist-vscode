@@ -311,6 +311,21 @@
           "type": "boolean",
           "description": "Whether to show edit controls",
           "default": true
+        },
+        "tourist.activeTourstopColor": {
+          "type": "string",
+          "description": "The color that the active tourstop is highlighted",
+          "default": "merge.incomingHeaderBackground"
+        },
+        "tourist.inactiveTourstopColor": {
+          "type": "string",
+          "description": "The color that inactive tourstops are highlighted",
+          "default": "merge.incomingContentBackground"
+        },
+        "tourist.newTourstopColor": {
+          "type": "string",
+          "description": "The color that a new tourstop is highlighted",
+          "default": "merge.currentHeaderBackground"
         }
       }
     }

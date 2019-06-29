@@ -1,4 +1,46 @@
-import { TextEditorRevealType, ViewColumn, workspace } from "vscode";
+import {
+  ConfigurationChangeEvent,
+  TextEditorDecorationType,
+  TextEditorRevealType,
+  ThemeColor,
+  ViewColumn,
+  window,
+  workspace,
+} from "vscode";
+import * as codeLenses from "./codeLenses";
+import { TouristWebview } from "./webview";
+
+let activeTourstopDecorationTypeCached: TextEditorDecorationType | undefined;
+let inactiveTourstopDecorationTypeCached: TextEditorDecorationType | undefined;
+let newTourstopDecorationTypeCached: TextEditorDecorationType | undefined;
+
+/**
+ * Called when the user updates their configuration
+ * @param evt The event
+ */
+export async function configChanged(evt: ConfigurationChangeEvent) {
+  if (evt.affectsConfiguration("tourist.showDecorations")) {
+    showDecorations();
+  } else if (evt.affectsConfiguration("tourist.useCodeLens")) {
+    codeLenses.provider.refresh();
+  } else if (
+    evt.affectsConfiguration("tourist.webviewFont") ||
+    evt.affectsConfiguration("tourist.webviewFontSize")
+  ) {
+    TouristWebview.init();
+    TouristWebview.refresh();
+  } else if (evt.affectsConfiguration("tourist.showWebview")) {
+    TouristWebview.refresh();
+  } else if (evt.affectsConfiguration("tourist.showEditControls")) {
+    TouristWebview.refresh();
+  } else if (evt.affectsConfiguration("tourist.activeTourstopColor")) {
+    activeTourstopDecorationTypeCached = undefined;
+  } else if (evt.affectsConfiguration("tourist.inactiveTourstopColor")) {
+    inactiveTourstopDecorationTypeCached = undefined;
+  } else if (evt.affectsConfiguration("tourist.newTourstopColor")) {
+    newTourstopDecorationTypeCached = undefined;
+  }
+}
 
 /**
  * Whether CodeLenses should be displayed at each tourstop
@@ -114,4 +156,69 @@ export function showEditControls(): boolean {
   return workspace
     .getConfiguration()
     .get<boolean>("tourist.showEditControls", true);
+}
+
+/** The text decoration shown on the active tourstop */
+export function activeTourstopDecorationType(): TextEditorDecorationType {
+  if (!activeTourstopDecorationTypeCached) {
+    const color = new ThemeColor(
+      workspace
+        .getConfiguration()
+        .get<string>(
+          "tourist.activeTourstopColor",
+          "merge.incomingHeaderBackground",
+        ),
+    );
+    activeTourstopDecorationTypeCached = window.createTextEditorDecorationType({
+      backgroundColor: color,
+      overviewRulerColor: color,
+      isWholeLine: true,
+    });
+  }
+
+  return activeTourstopDecorationTypeCached!;
+}
+
+/** The text decoration shown on inactive tourstops */
+export function inactiveTourstopDecorationType(): TextEditorDecorationType {
+  if (!inactiveTourstopDecorationTypeCached) {
+    const color = new ThemeColor(
+      workspace
+        .getConfiguration()
+        .get<string>(
+          "tourist.inactiveTourstopColor",
+          "merge.incomingContentBackground",
+        ),
+    );
+    inactiveTourstopDecorationTypeCached = window.createTextEditorDecorationType(
+      {
+        backgroundColor: color,
+        overviewRulerColor: color,
+        isWholeLine: true,
+      },
+    );
+  }
+
+  return inactiveTourstopDecorationTypeCached!;
+}
+
+/** The text decoration shown when adding a new stop */
+export function newTourstopDecorationType(): TextEditorDecorationType {
+  if (!newTourstopDecorationTypeCached) {
+    const color = new ThemeColor(
+      workspace
+        .getConfiguration()
+        .get<string>(
+          "tourist.newTourstopColor",
+          "merge.currentHeaderBackground",
+        ),
+    );
+    newTourstopDecorationTypeCached = window.createTextEditorDecorationType({
+      backgroundColor: color,
+      overviewRulerColor: color,
+      isWholeLine: true,
+    });
+  }
+
+  return newTourstopDecorationTypeCached!;
 }
