@@ -133,6 +133,11 @@
         "command": "tourist.toggleWebview",
         "title": "Toggle webview",
         "category": "Tourist"
+      },
+      {
+        "command": "tourist.linkTour",
+        "title": "Link a tour",
+        "category": "Tourist"
       }
     ],
     "viewsContainers": {

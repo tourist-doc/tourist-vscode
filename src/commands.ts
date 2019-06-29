@@ -37,6 +37,7 @@ const commands = {
   "tourist.editBody": editBody,
   "tourist.editTitle": editTitle,
   "tourist.gotoTourstop": gotoTourStop,
+  "tourist.linkTour": linkTour,
   "tourist.mapRepo": mapRepo,
   "tourist.moveTourstop": moveTourstop,
   "tourist.moveTourstopDown": moveTourstopDown,
@@ -742,6 +743,25 @@ export async function newTour(path?: vscode.Uri): Promise<void> {
 export async function openTourFile(tf: TourFile) {
   const doc = await vscode.workspace.openTextDocument(tf.path.fsPath);
   await vscode.window.showTextDocument(doc, config.webviewColumn());
+}
+
+export async function linkTour(tf?: TourFile) {
+  if (!tf) {
+    tf = await quickPickTourFile();
+  }
+  if (!tf) {
+    return;
+  }
+
+  const stops = globals.tourState!.tour.stops;
+  const currStop = globals.tourState!.currentStop!;
+  const idx = stops.indexOf(currStop);
+
+  globals.tourist.link(globals.tourState!.tourFile, idx, {
+    tourId: tf.id,
+    stopNum: 0,
+  });
+  await processTourFile(globals.tourState!.tourFile);
 }
 
 /**

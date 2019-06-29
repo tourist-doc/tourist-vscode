@@ -180,18 +180,7 @@ export class TouristWebview {
             }
             break;
           case "linkStop":
-            tf = await quickPickTourFile();
-            if (tf) {
-              const idx = tourState!.tour.stops.indexOf(
-                tourState!.currentStop!,
-              );
-
-              tourist.link(tourState!.tourFile, idx, {
-                tourId: tf.id,
-                stopNum: 0,
-              });
-              await processTourFile(tourState!.tourFile);
-            }
+            await commands.linkTour();
             break;
           case "deleteStop":
             await commands.deleteTourStop(
