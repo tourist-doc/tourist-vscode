@@ -77,13 +77,13 @@
     </div>
 
     <h2>Stops</h2>
-    {{? it.tf.stops.length === 0 }}
+    {{? it.tour.stops.length === 0 }}
     <div id="no-stops">
       No stops yet! You can add one with tourist.addTourstop
     </div>
     {{?}}
 
-    {{~it.tf.stops :stop:idx}}
+    {{~it.tour.stops :stop:idx}}
     <span class="tourstop">
       <a
         class="delete-stop"

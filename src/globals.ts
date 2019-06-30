@@ -163,8 +163,8 @@ export function forgetTour(tf: TourFile) {
  */
 export function newTourFile(tf?: TourFile) {
   const isDupe = (tfUri: vscode.Uri) => {
-    for (const _tf of knownTourFiles) {
-      if (pathsEqual(tfUri.fsPath, _tf.path.fsPath)) {
+    for (const knownTF of knownTourFiles) {
+      if (pathsEqual(tfUri.fsPath, knownTF.path.fsPath)) {
         return true;
       }
     }

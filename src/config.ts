@@ -28,11 +28,11 @@ export async function configChanged(evt: ConfigurationChangeEvent) {
     evt.affectsConfiguration("tourist.webviewFontSize")
   ) {
     TouristWebview.init();
-    TouristWebview.refresh();
+    await TouristWebview.refresh();
   } else if (evt.affectsConfiguration("tourist.showWebview")) {
-    TouristWebview.refresh();
+    await TouristWebview.refresh();
   } else if (evt.affectsConfiguration("tourist.showEditControls")) {
-    TouristWebview.refresh();
+    await TouristWebview.refresh();
   } else if (evt.affectsConfiguration("tourist.activeTourstopColor")) {
     activeTourstopDecorationTypeCached = undefined;
   } else if (evt.affectsConfiguration("tourist.inactiveTourstopColor")) {

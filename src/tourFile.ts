@@ -64,12 +64,13 @@ export async function resolve(
  * @param uri The TourFile URI
  */
 export async function findWithUri(uri: Uri): Promise<TourFile | undefined> {
-  for (const tf of globals.knownTours()) {
-    if (pathsEqual(tf.path.path, uri.path)) {
-      return tf;
+  for (const knownTF of globals.knownTours()) {
+    if (pathsEqual(knownTF.path.path, uri.path)) {
+      return knownTF;
     }
   }
 
+  // Read from disk
   const tf = await parseTourFile(uri);
   globals.newTourFile(tf);
   return tf;

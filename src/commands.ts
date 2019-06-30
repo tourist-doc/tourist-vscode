@@ -192,9 +192,11 @@ export async function gotoTourStop(
     return;
   }
 
-  if (isNotBroken(stop)) {
-    globals.tourState.currentStop = stop;
+  globals.tourState.currentStop = stop;
+  TouristWebview.setEditing(editing);
+  updateGUI();
 
+  if (isNotBroken(stop)) {
     const file = vscode.Uri.file(stop.absPath);
     const doc = await vscode.workspace.openTextDocument(file);
     const viewCol =
@@ -205,13 +207,9 @@ export async function gotoTourStop(
     const pos = new vscode.Position(stop.line - 1, 0);
     editor.selection = new vscode.Selection(pos, pos);
     editor.revealRange(editor.selection, config.tourstopRevealLocation());
-    TouristWebview.setEditing(editing);
-    updateGUI();
   } else {
     // TODO: show changes from last good commit to now (requires FileSystemProvider...):
     // vscode.commands.executeCommand("vscode.diff", uri1, uri2);
-
-    vscode.window.showInformationMessage("Tour stop is broken");
   }
 }
 

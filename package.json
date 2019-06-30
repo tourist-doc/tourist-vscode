@@ -354,6 +354,7 @@
     "ts-loader": "^6.0.4",
     "tslint": "^5.18.0",
     "typescript": "^2.6.1",
+    "vscode": "^1.1.35",
     "webpack": "^4.35.0",
     "webpack-cli": "^3.3.5"
   },
@@ -361,8 +362,7 @@
     "dot": "^1.1.2",
     "fs-extra": "^8.1.0",
     "showdown": "^1.9.0",
-    "tourist-core": "^0.1.0",
-    "vscode": "^1.1.35"
+    "tourist-core": "^0.1.0"
   },
   "prettier": {
     "arrowParens": "always",

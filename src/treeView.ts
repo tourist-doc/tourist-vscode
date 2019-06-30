@@ -1,6 +1,7 @@
 import { AbsoluteTourStop, BrokenTourStop } from "tourist-core";
 import * as vscode from "vscode";
 
+import { RepoState } from "tourist-core/src/types";
 import { knownTours, tourState } from "./globals";
 import { TourFile } from "./tourFile";
 import {
@@ -8,7 +9,6 @@ import {
   TourFileTreeItem,
   TourStopTreeItem,
 } from "./treeViewItems";
-import { RepoState } from "tourist-core/src/types";
 
 /**
  * A wrapper around a list of TourFiles which provides data to the GUI
