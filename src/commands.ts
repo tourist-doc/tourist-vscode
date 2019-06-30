@@ -5,7 +5,7 @@ import {
   BrokenTourStop,
   isNotBroken,
   TouristError,
-} from "tourist";
+} from "tourist-core";
 import * as vscode from "vscode";
 
 import * as config from "./config";

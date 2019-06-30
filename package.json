@@ -358,11 +358,11 @@
     "webpack-cli": "^3.3.5"
   },
   "dependencies": {
-    "vscode": "^1.1.35",
     "dot": "^1.1.2",
     "fs-extra": "^8.1.0",
     "showdown": "^1.9.0",
-    "tourist": "file:../tourist"
+    "tourist-core": "^0.1.0",
+    "vscode": "^1.1.35"
   },
   "prettier": {
     "arrowParens": "always",

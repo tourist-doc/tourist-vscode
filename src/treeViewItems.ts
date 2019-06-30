@@ -1,8 +1,8 @@
-import { AbsoluteTourStop, BrokenTourStop, isNotBroken } from "tourist";
+import { AbsoluteTourStop, BrokenTourStop, isNotBroken } from "tourist-core";
 import * as vscode from "vscode";
 
 import { TourFile } from "./tourFile";
-import { RepoState } from "tourist/src/types";
+import { RepoState } from "tourist-core/src/types";
 import { exclamIcon } from "./resources";
 
 /**

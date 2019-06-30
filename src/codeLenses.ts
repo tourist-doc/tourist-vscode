@@ -1,4 +1,4 @@
-import { AbsoluteTourStop, BrokenTourStop, isNotBroken } from "tourist";
+import { AbsoluteTourStop, BrokenTourStop, isNotBroken } from "tourist-core";
 import * as vscode from "vscode";
 
 import * as config from "./config";

@@ -2,7 +2,7 @@ import { template } from "dot";
 import * as showdown from "showdown";
 import * as vscode from "vscode";
 
-import { AbsoluteTourStop, BrokenTourStop } from "tourist";
+import { AbsoluteTourStop, BrokenTourStop } from "tourist-core";
 import * as commands from "./commands";
 import * as config from "./config";
 import { context, updateGUI } from "./extension";

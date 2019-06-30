@@ -1,5 +1,5 @@
 import { writeFile } from "fs-extra";
-import { isNotBroken } from "tourist";
+import { isNotBroken } from "tourist-core";
 import * as vscode from "vscode";
 
 import * as codeLenses from "./codeLenses";

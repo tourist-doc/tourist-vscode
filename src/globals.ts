@@ -1,4 +1,4 @@
-import { AbsoluteTourStop, BrokenTourStop, Tour, Tourist } from "tourist";
+import { AbsoluteTourStop, BrokenTourStop, Tour, Tourist } from "tourist-core";
 import * as vscode from "vscode";
 
 import { readdir } from "fs-extra";
