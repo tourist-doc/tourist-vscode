@@ -141,6 +141,7 @@ export async function addTourStop(
         await mapRepo(error.repoName);
         break;
       case 201: // Path not mapped to repo
+      case 204: // No known repository in this tree.
         if (mapMissingRepo) {
           // Search upward to find the .git folder, if we can
           const repoPath = await findRepoRoot(fileUri.fsPath);
@@ -488,6 +489,7 @@ export async function moveTourstop(
             await mapRepo(error.repoName);
             break;
           case 201: // Path not mapped to repo
+          case 204: // No known repository in this tree.
             // Search upward to find the .git folder, if we can
             const repoPath = await findRepoRoot(editor.document.fileName);
             if (repoPath) {
