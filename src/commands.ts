@@ -734,7 +734,14 @@ export async function newTour(path?: vscode.Uri): Promise<void> {
   }
 }
 
-export async function openTourFile(tf: TourFile) {
+export async function openTourFile(tf?: TourFile) {
+  if (!tf) {
+    tf = await quickPickTourFile();
+  }
+  if (!tf) {
+    return;
+  }
+
   const doc = await vscode.workspace.openTextDocument(tf.path.fsPath);
   await vscode.window.showTextDocument(doc, config.webviewColumn());
 }

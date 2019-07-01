@@ -126,7 +126,7 @@
       },
       {
         "command": "tourist.openTourFile",
-        "title": "Open .tour file",
+        "title": "Edit .tour file as JSON",
         "category": "Tourist"
       },
       {
