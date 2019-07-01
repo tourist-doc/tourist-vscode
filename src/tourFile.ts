@@ -10,6 +10,8 @@ import { pathsEqual } from "./util";
  * A subtype of tourist::TourFile that holds a file path
  */
 export interface TourFile {
+  protocolVersion: string;
+  generator?: number;
   id: string;
   repositories: RepoState[];
   stops: TourStop[];

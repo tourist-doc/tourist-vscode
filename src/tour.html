@@ -29,11 +29,6 @@
       .delete-stop {
         font-size: 12px;
       }
-      .error {
-        font-size: webviewFontSizepx;
-        color: red;
-        margin: 40px;
-      }
       .edit-button {
         font-size: webviewFontSizepx;
         font-weight: normal;
@@ -119,16 +114,6 @@
           );"
         >Remap</a
       >)
-    </span>
-    <br />
-    {{~}}
-    {{?}}
-
-    {{? it.errors.length > 0 }}
-    <h2>Errors</h2>
-    {{~it.errors :error:idx}}
-    <span class="error">
-      {{=error}}
     </span>
     <br />
     {{~}}

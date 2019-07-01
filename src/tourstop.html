@@ -33,6 +33,11 @@
         font-size: webviewFontSizepx;
         font-style: italic;
       }
+      .error {
+        font-size: webviewFontSizepx;
+        color: red;
+        margin: 40px;
+      }
       .edit-button {
         font-size: webviewFontSizepx;
         font-weight: normal;
@@ -160,5 +165,15 @@
         >Link a stop</a
       >
     </div>
+
+    {{? it.stop.errors }}
+    <h2>Errors</h2>
+    {{~it.stop.errors :error:idx}}
+    <span class="error">
+      {{=error}}
+    </span>
+    <br />
+    {{~}}
+    {{?}}
   </body>
 </html>

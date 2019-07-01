@@ -1,15 +1,15 @@
 import { template } from "dot";
-import { Tour, TourFile } from "tourist-core";
+import { Tour } from "tourist-core";
 import * as commands from "./commands";
 import * as config from "./config";
-import { tourist, tourState } from "./globals";
+import { tourState } from "./globals";
+import { TourFile } from "./tourFile";
 import { TouristWebview } from "./webview";
 
 interface TourTemplateArgs {
   tf: TourFile;
   tour: Tour;
   showEditControls: boolean;
-  errors: string[];
 }
 
 export class TourWebview {
@@ -30,7 +30,6 @@ export class TourWebview {
       tf: tourState!.tourFile,
       tour: tourState!.tour,
       showEditControls: config.showEditControls(),
-      errors: await tourist.check(tourState!.tourFile),
     });
   }
 
