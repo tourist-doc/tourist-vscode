@@ -104,15 +104,6 @@ export function webviewColumn(): ViewColumn {
 }
 
 /**
- * When startTour() is run, should gotoTourstop(firstStop) be run?
- */
-export function gotoFirstTourstopOnTourStart(): boolean {
-  return workspace
-    .getConfiguration()
-    .get<boolean>("tourist.gotoFirstTourstopOnTourStart", true);
-}
-
-/**
  * The font to be used in the webview
  */
 export function webviewFont(): string {
