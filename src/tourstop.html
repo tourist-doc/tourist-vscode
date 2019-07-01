@@ -13,6 +13,7 @@
       }
       #body {
         font-size: webviewFontSizepx;
+        margin-left: 20px;
       }
       #no-body {
         font-size: webviewFontSizepx;
@@ -32,15 +33,25 @@
       #no-linked {
         font-size: webviewFontSizepx;
         font-style: italic;
+        margin-left: 20px;
       }
       .error {
         font-size: webviewFontSizepx;
         color: red;
-        margin: 40px;
+        margin-left: 20px;
+        margin-top: 40px;
       }
       .edit-button {
         font-size: webviewFontSizepx;
         font-weight: normal;
+      }
+      .link-stop-button {
+        font-size: webviewFontSizepx;
+        font-weight: normal;
+        margin-left: 20px;
+      }
+      .child-stop {
+        margin-left: 20px;
       }
     </style>
 
@@ -150,6 +161,7 @@
 
       {{~it.stop.childStops :stop:idx}}
       <a
+        class="child-stop"
         title="{{=stop.tourId}}"
         onclick="vscode.postMessage({command: 'gotoChildStop', tourId: '{{=stop.tourId}}'});"
         >{{=stop.tourId}}</a
@@ -157,7 +169,7 @@
       <br />
       {{~}}
       <a
-        class="edit-button"
+        class="link-stop-button"
         title="Link a stop"
         onclick="vscode.postMessage({command: 'linkStop'});"
         {{?
