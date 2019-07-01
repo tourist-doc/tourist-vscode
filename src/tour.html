@@ -84,12 +84,6 @@
 
     {{~it.tour.stops :stop:idx}}
     <span class="tourstop">
-      <a
-        class="delete-stop"
-        title="Delete stop"
-        onclick="vscode.postMessage({command: 'deleteStop', stopIndex: '{{=idx}}'})"
-        >❌</a
-      >
       {{? stop.absPath === undefined }}
       <a
         title="This stop is broken. Move it to the correct location or delete it."
@@ -103,6 +97,12 @@
         >{{=stop.title}}</a
       >
       {{?}}
+      <a
+        class="delete-stop"
+        title="Delete stop"
+        onclick="vscode.postMessage({command: 'deleteStop', stopIndex: '{{=idx}}'})"
+        >🗑️</a
+      >
     </span>
     <br />
     {{~}}

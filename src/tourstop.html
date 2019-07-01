@@ -28,11 +28,17 @@
         font-size: webviewFontSizepx;
       }
       #child-stops {
+        margin-top: 120px;
         font-size: webviewFontSizepx;
       }
       #no-linked {
         font-size: webviewFontSizepx;
         font-style: italic;
+        margin-left: 20px;
+      }
+      #link-stop-button {
+        font-size: webviewFontSizepx;
+        font-weight: normal;
         margin-left: 20px;
       }
       .error {
@@ -44,11 +50,6 @@
       .edit-button {
         font-size: webviewFontSizepx;
         font-weight: normal;
-      }
-      .link-stop-button {
-        font-size: webviewFontSizepx;
-        font-weight: normal;
-        margin-left: 20px;
       }
       .child-stop {
         margin-left: 20px;
@@ -169,7 +170,7 @@
       <br />
       {{~}}
       <a
-        class="link-stop-button"
+        id="link-stop-button"
         title="Link a stop"
         onclick="vscode.postMessage({command: 'linkStop'});"
         {{?
