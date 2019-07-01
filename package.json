@@ -2,7 +2,7 @@
   "name": "tourist-vscode",
   "displayName": "Tourist",
   "description": "A tool for making and viewing guided tours of code bases.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "hgoldstein95",
   "repository": "github:hgoldstein95/tourist-vscode",
   "bugs": "https://github.com/hgoldstein95/tourist-vscode/issues/new",

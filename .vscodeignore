@@ -5,3 +5,4 @@ src/
 tsconfig.json
 tslint.json
 webpack.config.json
+**/*.vsix
