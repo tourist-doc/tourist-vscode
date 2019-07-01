@@ -44,6 +44,8 @@ export class TourWebview {
       case "editDescription":
         await commands.editDescription(tourState!.tourFile);
         break;
+      case "deleteStop":
+        await commands.deleteTourStop(tourState!.tour.stops[message.stopIndex]);
     }
 
     await TouristWebview.refresh();

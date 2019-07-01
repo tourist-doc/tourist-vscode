@@ -87,8 +87,6 @@ export class TourStopWebview {
       case "linkStop":
         await commands.linkTour();
         break;
-      case "deleteStop":
-        await commands.deleteTourStop(tourState!.tour.stops[message.stopIndex]);
     }
 
     await TouristWebview.refresh();
