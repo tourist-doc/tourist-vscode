@@ -105,6 +105,10 @@ export async function addTourStop(
     await startTour();
   }
 
+  if (!fileUri) {
+    fileUri = editor.document.uri;
+  }
+
   if (!globals.tourState) {
     return;
   }
