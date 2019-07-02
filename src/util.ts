@@ -1,5 +1,5 @@
 import { readdir } from "fs-extra";
-import { dirname, parse } from "path";
+import { dirname } from "path";
 import { Uri } from "vscode";
 
 /**
@@ -9,14 +9,9 @@ import { Uri } from "vscode";
  * Returns `true` if the paths are equal, `false` otherwise
  */
 export function pathsEqual(path1: string, path2: string) {
-  const x = parse(path1);
-  const y = parse(path2);
-
-  return (
-    x.root.toUpperCase() === y.root.toUpperCase() &&
-    x.dir === y.dir &&
-    x.base === y.base
-  );
+  const norm1 = path1.replace(/\\/g, "/");
+  const norm2 = path2.replace(/\\/g, "/");
+  return norm1.toLowerCase() === norm2.toLowerCase();
 }
 
 export async function findRepoRoot(path: string) {
