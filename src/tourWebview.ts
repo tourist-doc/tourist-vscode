@@ -9,6 +9,7 @@ import { TouristWebview } from "./webview";
 interface TourTemplateArgs {
   tf: TourFile;
   tour: Tour;
+  descriptionHTML: string;
   editingDescription?: string;
   showEditControls: boolean;
 }
@@ -30,9 +31,13 @@ export class TourWebview {
   public async update() {
     const panel = TouristWebview.getPanel();
     panel.title = tourState!.tourFile.title;
+    const description = TouristWebview.mdConverter.makeHtml(
+      tourState!.tourFile.description,
+    );
     panel.webview.html = this.template!({
       tf: tourState!.tourFile,
       tour: tourState!.tour,
+      descriptionHTML: description,
       editingDescription: this.editingDescription,
       showEditControls: config.showEditControls(),
     });

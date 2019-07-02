@@ -117,8 +117,8 @@
       id="description"
       oncontextmenu="vscode.postMessage({command: 'gotoTourstop', stopIndex: '0'});"
     >
-      {{=it.tf.description}}
-      {{? !it.tf.description }}
+      {{=it.descriptionHTML}}
+      {{? !it.descriptionHTML }}
       <div id="no-description">
         You can add a short description to your tour here!
       </div>
