@@ -20,6 +20,14 @@
         font-size: webviewFontSizepx;
         font-style: italic;
       }
+      #description-textarea {
+        width: 80%;
+        height: 200px;
+        align-content: center;
+      }
+      #description-controls {
+        font-size: webviewFontSizepx;
+      }
       .repo {
         font-size: webviewFontSizepx;
         margin-left: 20px;
@@ -36,7 +44,6 @@
       .edit-button {
         font-size: webviewFontSizepx;
         font-weight: normal;
-        display: none;
       }
     </style>
 
@@ -45,6 +52,22 @@
     </script>
   </head>
   <body>
+    <script>
+      window.onload = () => {
+        document
+          .getElementById("description-textarea")
+          .addEventListener("keydown", (e) => {
+            if (e.keyCode === 13 && e.ctrlKey) {
+              vscode.postMessage({
+                command: "editDescriptionSave",
+                newDescription: document.getElementById("description-textarea")
+                  .value,
+              });
+            }
+          });
+      };
+    </script>
+
     <h1>
       {{=it.tf.title}}
       <a
@@ -60,9 +83,36 @@
         class="edit-button"
         title="Edit"
         onclick='vscode.postMessage({command: "editDescription"});'
+        {{?
+        !it.showEditControls}}hidden{{?}}
         >edit</a
       >
     </h2>
+
+    {{?it.editingDescription !== undefined}}
+
+    <textarea
+      id="description-textarea"
+      placeholder="Type some information about this tour - you can use markdown too!"
+      >{{=it.editingDescription}}</textarea
+    >
+    <br />
+    <span id="description-controls">
+      <a
+        title="Save"
+        onclick='vscode.postMessage({command: "editDescriptionSave", newDescription: document.getElementById("description-textarea").value});'
+        >Save</a
+      >
+      |
+      <a
+        title="Cancel"
+        onclick='vscode.postMessage({command: "editDescriptionCancel"});'
+        >Cancel</a
+      >
+    </span>
+
+    {{??}}
+
     <div
       id="description"
       oncontextmenu="vscode.postMessage({command: 'gotoTourstop', stopIndex: '0'});"
@@ -74,6 +124,8 @@
       </div>
       {{?}}
     </div>
+
+    {{?}}
 
     <h2>Stops</h2>
     {{? it.tour.stops.length === 0 }}
