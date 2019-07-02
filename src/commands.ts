@@ -195,7 +195,6 @@ export async function gotoTourStop(
 
   globals.tourState.currentStop = stop;
   TouristWebview.setEditing(editing);
-  updateGUI();
 
   if (isNotBroken(stop)) {
     const file = vscode.Uri.file(stop.absPath);
@@ -212,6 +211,8 @@ export async function gotoTourStop(
     // TODO: show changes from last good commit to now (requires FileSystemProvider...):
     // vscode.commands.executeCommand("vscode.diff", uri1, uri2);
   }
+
+  updateGUI();
 }
 
 /**
