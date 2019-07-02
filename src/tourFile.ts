@@ -1,5 +1,11 @@
 import { TourStop } from "tourist-core";
-import { RepoState, Tour } from "tourist-core/src/types";
+import {
+  RepoState,
+  Tour,
+  AbsoluteTourStop,
+  BrokenError,
+  BrokenTourStop,
+} from "tourist-core/src/types";
 import { ProgressLocation, Uri, window, workspace } from "vscode";
 
 import { showError } from "./commands";
@@ -76,6 +82,12 @@ export async function findWithUri(uri: Uri): Promise<TourFile | undefined> {
   const tf = await parseTourFile(uri);
   globals.newTourFile(tf);
   return tf;
+}
+
+export function getStopIndex(stop: AbsoluteTourStop | BrokenTourStop) {
+  return globals.tourState!.tour.stops.findIndex((s) => {
+    return s.id === stop!.id;
+  });
 }
 
 /**

@@ -5,7 +5,7 @@ import { readdir } from "fs-extra";
 import { join } from "path";
 import { tourDirectories } from "./config";
 import { context } from "./extension";
-import { findWithUri, TourFile } from "./tourFile";
+import { findWithUri, TourFile, getStopIndex } from "./tourFile";
 import { pathsEqual } from "./util";
 
 /**
@@ -78,7 +78,7 @@ export class TourState {
     offset: number,
   ): AbsoluteTourStop | BrokenTourStop | undefined {
     if (this.currentStop) {
-      const stopIdx = this.tour.stops.indexOf(this.currentStop) + offset;
+      const stopIdx = getStopIndex(this.currentStop) + offset;
       if (stopIdx >= 0 && stopIdx < this.tour.stops.length) {
         return this.tour.stops[stopIdx];
       }
