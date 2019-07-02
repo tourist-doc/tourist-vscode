@@ -13,3 +13,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Text area now used for editing tour descriptions
 - Various bug fixes
 - Performance improvements
+
+## [0.2.1]
+
+- Fix bug with file path comparisons on Windows
