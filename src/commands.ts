@@ -409,9 +409,9 @@ export async function moveTourstopUp(stop?: AbsoluteTourStop | BrokenTourStop) {
             break;
         }
       }
-    }
 
-    await processTourFile(globals.tourState.tourFile);
+      await processTourFile(globals.tourState.tourFile);
+    }
   }
 }
 
@@ -430,7 +430,7 @@ export async function moveTourstopDown(
 
   if (stop) {
     const idx = getStopIndex(stop);
-    if (idx < globals.tourState.tour.stops.length && idx !== -1) {
+    if (idx < globals.tourState.tour.stops.length - 1 && idx !== -1) {
       const otherIdx = idx + 1;
       const newIndices = Array.from(
         Array(globals.tourState.tour.stops.length).keys(),
@@ -453,9 +453,9 @@ export async function moveTourstopDown(
             break;
         }
       }
-    }
 
-    await processTourFile(globals.tourState.tourFile);
+      await processTourFile(globals.tourState.tourFile);
+    }
   }
 }
 
