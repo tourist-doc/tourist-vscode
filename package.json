@@ -350,14 +350,14 @@
     "tslint": "^5.18.0",
     "typescript": "^3.5.2",
     "vscode": "^1.1.35",
-    "webpack": "^4.35.0",
+    "webpack": "^4.35.2",
     "webpack-cli": "^3.3.5"
   },
   "dependencies": {
     "dot": "^1.1.2",
     "fs-extra": "^8.1.0",
     "showdown": "^1.9.0",
-    "tourist-core": "^0.3.0"
+    "tourist-core": "^0.3.1"
   },
   "prettier": {
     "arrowParens": "always",
