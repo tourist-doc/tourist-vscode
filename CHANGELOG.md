@@ -7,3 +7,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.1.0]
 
 - Initial release
+
+## [0.2.0]
+
+- Text area now used for editing tour descriptions
+- Various bug fixes
+- Performance improvements
