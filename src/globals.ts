@@ -5,7 +5,7 @@ import { readdir } from "fs-extra";
 import { join } from "path";
 import { tourDirectories } from "./config";
 import { context } from "./extension";
-import { findWithUri, TourFile, getStopIndex } from "./tourFile";
+import { findWithUri, getStopIndex, TourFile } from "./tourFile";
 import { pathsEqual } from "./util";
 
 /**

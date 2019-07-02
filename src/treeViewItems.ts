@@ -1,9 +1,9 @@
 import { AbsoluteTourStop, BrokenTourStop, isNotBroken } from "tourist-core";
 import * as vscode from "vscode";
 
-import { TourFile } from "./tourFile";
 import { RepoState } from "tourist-core/src/types";
 import { exclamIcon } from "./resources";
+import { TourFile } from "./tourFile";
 
 /**
  * Controls how a `TourFile` is displayed in the TreeView

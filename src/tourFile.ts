@@ -1,10 +1,9 @@
 import { TourStop } from "tourist-core";
 import {
+  AbsoluteTourStop,
+  BrokenTourStop,
   RepoState,
   Tour,
-  AbsoluteTourStop,
-  BrokenError,
-  BrokenTourStop,
 } from "tourist-core/src/types";
 import { ProgressLocation, Uri, window, workspace } from "vscode";
 

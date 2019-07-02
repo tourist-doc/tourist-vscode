@@ -11,7 +11,7 @@ import * as vscode from "vscode";
 import * as config from "./config";
 import { context, processTourFile, saveTour, updateGUI } from "./extension";
 import * as globals from "./globals";
-import { findWithUri, TourFile, getStopIndex } from "./tourFile";
+import { findWithUri, getStopIndex, TourFile } from "./tourFile";
 import {
   quickPickRepoName,
   quickPickTourFile,
