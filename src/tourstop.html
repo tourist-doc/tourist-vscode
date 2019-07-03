@@ -168,7 +168,8 @@
           title="Edit body"
           onclick='vscode.postMessage({command: "editBody"});'
           {{?
-          !it.showEditControls}}hidden{{?}}
+          !it.showEditControls}}style="display: none;"
+          {{?}}
           >Edit</a
         >
       </div>
@@ -176,10 +177,10 @@
       {{?}}
     </div>
 
-    <hr size="1" />
-
     <div id="child-stops">
       {{? it.showEditControls || it.stop.childStops.length > 0 }}
+      <hr size="1" />
+
       <h2>Linked Stops</h2>
       {{?}}
 

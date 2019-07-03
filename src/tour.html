@@ -96,6 +96,8 @@
         class="edit-button"
         title="Edit"
         onclick='vscode.postMessage({command: "editTitle"});'
+        {{?
+        !it.showEditControls}}hidden{{?}}
         ><i class="material-icons">edit</i>
       </a>
     </h1>
@@ -176,6 +178,8 @@
         class="delete-stop"
         title="Delete stop"
         onclick="vscode.postMessage({command: 'deleteStop', stopIndex: '{{=idx}}'})"
+        {{?
+        !it.showEditControls}}hidden{{?}}
       >
         <i class="material-icons">
           delete
