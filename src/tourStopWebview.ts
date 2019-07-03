@@ -53,11 +53,7 @@ export class TourStopWebview {
         await commands.prevTourStop();
         break;
       case "editTitle":
-        if (tourState!.currentStop) {
-          await commands.editTitle(tourState!.currentStop);
-        } else {
-          await commands.renameTour(tourState!.tourFile);
-        }
+        await commands.editTitle(tourState!.currentStop);
         break;
       case "editBody":
         this.setEditing(true);

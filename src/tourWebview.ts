@@ -51,6 +51,9 @@ export class TourWebview {
 
   public async handleMessage(message: any) {
     switch (message.command) {
+      case "editTitle":
+        await commands.renameTour(tourState!.tourFile);
+        break;
       case "gotoTourstop":
         await commands.gotoTourStop(tourState!.tour.stops[message.stopIndex]);
         break;
