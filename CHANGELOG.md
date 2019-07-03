@@ -21,3 +21,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.2.2]
 
 - Treat tour descriptions as markdown
+
+## [0.3.0]
+
+- Improve GUI via icons, better spacing, etc.
+- Fix editing tour title from webview
+- Fix tourist.showEditControls setting
