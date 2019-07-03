@@ -28,7 +28,6 @@
         font-size: webviewFontSizepx;
       }
       #child-stops {
-        margin-top: 120px;
         font-size: webviewFontSizepx;
       }
       #no-linked {
@@ -41,6 +40,12 @@
         font-weight: normal;
         margin-left: 20px;
       }
+      .body-area {
+        margin-bottom: 120px;
+      }
+      .errors {
+        font-size: webviewFontSizepx;
+      }
       .error {
         font-size: webviewFontSizepx;
         color: red;
@@ -51,10 +56,28 @@
         font-size: webviewFontSizepx;
         font-weight: normal;
       }
+      .edit-button.text-edit-button {
+        margin-top: 10px;
+        display: inline-block;
+      }
+      .edit-button i {
+        font-size: calc(webviewFontSizepx - 2px) !important;
+        vertical-align: baseline;
+      }
       .child-stop {
         margin-left: 20px;
       }
+      .center-icon {
+        font-size: calc(webviewFontSizepx - 0px) !important;
+        display: inline-flex;
+        vertical-align: middle !important;
+        padding-bottom: 3px;
+      }
     </style>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
 
     <script>
       const vscode = acquireVsCodeApi();
@@ -80,19 +103,19 @@
       <a
         title="Back to tour"
         onclick='vscode.postMessage({command: "backToTour"});'
-        >🡠 Back to tour</a
+        ><i class="material-icons center-icon">home</i> Back to Tour Page</a
       >
       <br />
       <a
         title="Previous tourstop"
         onclick='vscode.postMessage({command: "prevTourstop"});'
-        >🡠 Previous</a
+        ><i class="material-icons center-icon">arrow_back</i> Previous</a
       >
       |
       <a
         title="Next tourstop"
         onclick='vscode.postMessage({command: "nextTourstop"});'
-        >Next 🡢</a
+        >Next <i class="material-icons center-icon">arrow_forward</i></a
       >
     </div>
 
@@ -104,56 +127,60 @@
         onclick='vscode.postMessage({command: "editTitle"});'
         {{?
         !it.showEditControls}}hidden{{?}}
-        >edit</a
+        ><i class="material-icons">edit</i></a
       >
     </h1>
 
-    {{?it.editingBody !== undefined}}
+    <div class="body-area">
+      {{?it.editingBody !== undefined}}
 
-    <textarea
-      id="body-textarea"
-      placeholder="Type some information about this stop - you can use markdown too!"
-      >{{=it.editingBody}}</textarea
-    >
-    <br />
-    <span id="body-controls">
-      <a
-        title="Save"
-        onclick='vscode.postMessage({command: "editBodySave", newBody: document.getElementById("body-textarea").value});'
-        >Save</a
+      <textarea
+        id="body-textarea"
+        placeholder="Type some information about this stop - you can use markdown too!"
+        >{{=it.editingBody}}</textarea
       >
-      |
-      <a
-        title="Cancel"
-        onclick='vscode.postMessage({command: "editBodyCancel"});'
-        >Cancel</a
-      >
-    </span>
+      <br />
+      <span id="body-controls">
+        <a
+          title="Save"
+          onclick='vscode.postMessage({command: "editBodySave", newBody: document.getElementById("body-textarea").value});'
+          >Save</a
+        >
+        |
+        <a
+          title="Cancel"
+          onclick='vscode.postMessage({command: "editBodyCancel"});'
+          >Cancel</a
+        >
+      </span>
 
-    {{??}}
+      {{??}}
 
-    <div id="body">
-      {{=it.bodyHTML}}
-      {{? !it.bodyHTML }}
-      <div id="no-body">
-        Put some information about this stop here - you can use markdown too!
+      <div id="body">
+        {{=it.bodyHTML}}
+        {{? !it.bodyHTML }}
+        <div id="no-body">
+          Put some information about this stop here - you can use markdown too!
+        </div>
+        {{?}}
+        <a
+          class="edit-button text-edit-button"
+          title="Edit body"
+          onclick='vscode.postMessage({command: "editBody"});'
+          {{?
+          !it.showEditControls}}hidden{{?}}
+          >Edit</a
+        >
       </div>
+
       {{?}}
-      <a
-        class="edit-button"
-        title="Edit body"
-        onclick='vscode.postMessage({command: "editBody"});'
-        {{?
-        !it.showEditControls}}hidden{{?}}
-        >edit</a
-      >
     </div>
 
-    {{?}}
+    <hr size="1" />
 
     <div id="child-stops">
       {{? it.showEditControls || it.stop.childStops.length > 0 }}
-      <h2>Linked stops</h2>
+      <h2>Linked Stops</h2>
       {{?}}
 
       {{? it.showEditControls && it.stop.childStops.length === 0 }}
@@ -173,22 +200,24 @@
       {{~}}
       <a
         id="link-stop-button"
-        title="Link a stop"
+        title="Link a Stop"
         onclick="vscode.postMessage({command: 'linkStop'});"
         {{?
         !it.showEditControls}}hidden{{?}}
-        >Link a stop</a
+        >Link a Stop</a
       >
     </div>
 
     {{? it.stop.errors }}
-    <h2>Errors</h2>
-    {{~it.stop.errors :error:idx}}
-    <span class="error">
-      {{=error}}
-    </span>
-    <br />
-    {{~}}
+    <div class="errors">
+      <h2>Errors</h2>
+      {{~it.stop.errors :error:idx}}
+      <span class="error">
+        {{=error}}
+      </span>
+      <br />
+      {{~}}
+    </div>
     {{?}}
   </body>
 </html>

@@ -34,18 +34,40 @@
         margin-top: 40px;
       }
       .tourstop {
-        font-size: 20px;
-        margin-left: 20px;
-        margin-top: 40px;
+        font-size: webviewFontSizepx;
       }
-      .delete-stop {
-        font-size: 12px;
+      .delete-stop i {
+        font-size: calc(webviewFontSizepx - 2px) !important;
+        margin-left: 10px;
+        vertical-align: middle !important;
+        display: inline-flex;
+        padding-bottom: 3px;
       }
       .edit-button {
         font-size: webviewFontSizepx;
         font-weight: normal;
       }
+      .edit-button i {
+        font-size: calc(webviewFontSizepx - 2px) !important;
+        vertical-align: baseline;
+      }
+      .warning-symbol {
+        font-size: calc(webviewFontSizepx - 2px) !important;
+        color: red;
+        opacity: 0.7;
+        margin-right: 5px;
+        vertical-align: middle !important;
+        display: inline-flex;
+        padding-bottom: 3px;
+      }
+      .warning-symbol.hidden {
+        opacity: 0;
+      }
     </style>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
 
     <script>
       const vscode = acquireVsCodeApi();
@@ -74,8 +96,8 @@
         class="edit-button"
         title="Edit"
         onclick='vscode.postMessage({command: "editTitle"});'
-        >edit</a
-      >
+        ><i class="material-icons">edit</i>
+      </a>
     </h1>
     <h2>
       Description
@@ -85,7 +107,7 @@
         onclick='vscode.postMessage({command: "editDescription"});'
         {{?
         !it.showEditControls}}hidden{{?}}
-        >edit</a
+        ><i class="material-icons">edit</i></a
       >
     </h2>
 
@@ -140,21 +162,25 @@
       <a
         title="This stop is broken. Move it to the correct location or delete it."
         onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
-        >⚠ {{=stop.title}}</a
-      >
+        ><i class="material-icons warning-symbol">warning</i> {{=stop.title}}
+      </a>
       {{??}}
       <a
         title="{{=stop.title}}"
         onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
-        >{{=stop.title}}</a
+        ><i class="material-icons warning-symbol hidden">warning</i>
+        {{=stop.title}}</a
       >
       {{?}}
       <a
         class="delete-stop"
         title="Delete stop"
         onclick="vscode.postMessage({command: 'deleteStop', stopIndex: '{{=idx}}'})"
-        >🗑️</a
       >
+        <i class="material-icons">
+          delete
+        </i>
+      </a>
     </span>
     <br />
     {{~}}
@@ -168,7 +194,7 @@
         onclick="vscode.postMessage(
           {command: 'mapRepo', repo: '{{=repo.repository}}'}
           );"
-        >Remap</a
+        >remap</a
       >)
     </span>
     <br />
