@@ -2,7 +2,7 @@
   "name": "tourist-vscode",
   "displayName": "Tourist",
   "description": "A tool for making and viewing guided tours of code bases.",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "publisher": "tourist",
   "repository": "github:hgoldstein95/tourist-vscode",
   "bugs": "https://github.com/hgoldstein95/tourist-vscode/issues/new",
@@ -357,7 +357,7 @@
     "dot": "^1.1.2",
     "fs-extra": "^8.1.0",
     "showdown": "^1.9.0",
-    "tourist-core": "^0.4.5"
+    "tourist-core": "^0.4.6"
   },
   "prettier": {
     "arrowParens": "always",

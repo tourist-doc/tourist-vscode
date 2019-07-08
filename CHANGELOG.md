@@ -27,3 +27,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Improve GUI via icons, better spacing, etc.
 - Fix editing tour title from webview
 - Fix tourist.showEditControls setting
+
+## [0.3.1]
+
+- Fix obscure bug caused by extra fields getting written to .tour file
+
+## [0.3.2]
+
+- Fix bug with linking tour stops introduced in 0.3.1
