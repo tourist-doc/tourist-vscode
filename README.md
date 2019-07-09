@@ -2,37 +2,59 @@
 
 ## What's all this about?
 
-Tourist is a tool for documenting your code through "tours", similarly to how
-an experienced developer may introduce a newer dev to a codebase.
+Tourist is a new approach to documentation that allows programmers to explain
+low-level technical details of a system while simultaneously providing the
+context of how those details fit into the broader architecture. It lets
+programmers document code in the same way that they would explain it in
+person: by walking the consumer step-by-step through the important parts of a
+codebase.
 
-## Running the code
+A **tour** is a series of locations throughout a codebase, along with
+accompanying prose that explains the importance each location in turn.
 
-Before you can build this project, you need to build `tourist` from
-[hgoldstein95/tourist](https://github.com/hgoldstein95/tourist). By default,
-the `package.json` requires that the two repositories be siblings. This will
-change when `tourist` is hosted on npm. After that, remember to run
-```bash
-npm install
-```
-in the `tourist-vscode` directory.
+A maintainer of a project can more effectively introduce newcomers to the
+project by setting up one or more tours for the codebase that highlight the
+relevant functional components. A person implementing a complex feature or
+workflow can use a tour to solicit feedback from other people who are
+familiar to the codebase, but not that particular logical flow.
+
+## Getting Started
+
+To create a new tour, start off by creating a separate directory (versioned
+with git if desired) that will hold your tours. You can use this to keep
+track of lots of tours of lots of codebases at once.
+
+From the command palette (`CTRL-SHIFT-P` by default), run **Tourist: Create a
+new tour**. Give the tour a name, and save the file in your tour directory.
+
+Now, you can go from file to file, adding tour stops by right clicking on
+lines in code and selecting "Add a tour stop" from the context menu. Once you
+create a stop, you can add a markdown body.
+
+### Opening a Tour from Someone Else
+
+If someone else provides you with a tour, there are a couple of steps that
+you need to take before you'll be able to actually view the tour.
+
+First, make sure you have any repositories that the tour visits checked out
+on your machine via git. For example, if the tour touches
+`hgoldstein95/tourist-core` and `hgoldstein95/tourist-vscode`, make sure you
+have both checked out locally.
+
+Then, run **Tourist: Map a name to a repository** from the command palette and
+show tourist where you put each repository on your system. By convention, the
+tour file will use the plain repository name (e.g. `tourist-core` for
+`hgoldstein95/tourist-core`) but you may want to check the `repositories`
+section of the `.tour` file just to be sure.
+
+Now you can run **Tourist: Start a tour** to view the tour!
+
+Optionally, you can also turn on "Read-only Mode" by unchecking "Show Edit
+Controls" in the tourist user settings.
+
+## Development
 
 This project is a Visual Studio Code plugin. In order to run the plugin, open
 the top-level directory in VSCode and simply run the debugger.
 
 A new editor window should open with the Tourist extension running!
-
-## Simple Workflow
-
-Start off by creating a separate directory (versioned with git if desired)
-that will hold your tours. You can use this to keep track of lots of tours of
-lots of codebases at once.
-
-Create a workspace with your new tour directory, as well as any repositories
-that you might want to put tour stops in.
-
-Select your tour directory in the file explorer, and then run the "Create a
-new tour" command to make a new tour file.
-
-Now, you can go from file to file, adding tour stops by right clicking on
-lines in code and selecting "Add a tour stop" from the context menu. Once you
-create a stop, you can add a markdown body.
