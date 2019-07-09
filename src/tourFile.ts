@@ -84,9 +84,10 @@ export async function findWithUri(uri: Uri): Promise<TourFile | undefined> {
 }
 
 export function getStopIndex(stop: AbsoluteTourStop | BrokenTourStop) {
-  return globals.tourState!.tour.stops.findIndex((s) => {
+  const idx = globals.tourState!.tour.stops.findIndex((s) => {
     return s.id === stop!.id;
   });
+  return idx === -1 ? undefined : idx;
 }
 
 /**

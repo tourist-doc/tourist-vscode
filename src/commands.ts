@@ -252,7 +252,7 @@ export async function deleteTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
     }
 
     const idx = getStopIndex(stop);
-    if (idx !== -1) {
+    if (idx) {
       let tf: TourFile;
       try {
         await globals.tourist.remove(globals.tourState.tourFile, idx);
@@ -309,7 +309,7 @@ export async function editTitle(
     });
     if (title !== undefined) {
       const idx = getStopIndex(stop);
-      if (idx !== -1) {
+      if (idx) {
         try {
           await globals.tourist.edit(globals.tourState.tourFile, idx, {
             title,
@@ -355,7 +355,7 @@ export async function editBody(
 
     if (body !== undefined) {
       const idx = getStopIndex(stop);
-      if (idx !== -1) {
+      if (idx) {
         try {
           await globals.tourist.edit(globals.tourState.tourFile, idx, {
             body,
@@ -390,7 +390,7 @@ export async function moveTourstopUp(stop?: AbsoluteTourStop | BrokenTourStop) {
 
   if (stop) {
     const idx = getStopIndex(stop);
-    if (idx > 0) {
+    if (idx && idx > 0) {
       const otherIdx = idx - 1;
       const newIndices = Array.from(
         Array(globals.tourState.tour.stops.length).keys(),
@@ -434,7 +434,7 @@ export async function moveTourstopDown(
 
   if (stop) {
     const idx = getStopIndex(stop);
-    if (idx < globals.tourState.tour.stops.length - 1 && idx !== -1) {
+    if (idx && idx < globals.tourState.tour.stops.length - 1) {
       const otherIdx = idx + 1;
       const newIndices = Array.from(
         Array(globals.tourState.tour.stops.length).keys(),
@@ -482,9 +482,9 @@ export async function moveTourstop(
     if (editor) {
       await editor.document.save();
       const newLocation = editor.selection.active;
+      const stopIdx = getStopIndex(stop);
       try {
-        const stopIdx = getStopIndex(stop);
-        await globals.tourist.move(globals.tourState.tourFile, stopIdx, {
+        await globals.tourist.move(globals.tourState.tourFile, stopIdx!, {
           absPath: editor.document.fileName,
           line: newLocation.line + 1,
         });
@@ -758,7 +758,7 @@ export async function linkTour(tf?: TourFile) {
 
   const idx = getStopIndex(globals.tourState!.currentStop!);
 
-  globals.tourist.link(globals.tourState!.tourFile, idx, {
+  globals.tourist.link(globals.tourState!.tourFile, idx!, {
     tourId: tf.id,
     stopNum: 0,
   });

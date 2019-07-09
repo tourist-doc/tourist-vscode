@@ -8,7 +8,7 @@ import * as config from "./config";
 import * as globals from "./globals";
 import * as resources from "./resources";
 import * as statusBar from "./statusBar";
-import { findWithUri, resolve, TourFile } from "./tourFile";
+import { findWithUri, resolve, TourFile, getStopIndex } from "./tourFile";
 import * as treeView from "./treeView";
 import * as util from "./util";
 import { TouristWebview } from "./webview";
@@ -181,6 +181,12 @@ export async function processTourFile(tf: TourFile, save = true) {
     await globals.setTour(tf, tour);
     if (save) {
       saveTour(tf);
+    }
+
+    if (globals.tourState && globals.tourState.currentStop) {
+      globals.tourState.currentStop = globals.tourState.tour.stops.find((s) => {
+        return s.id === globals.tourState!.currentStop!.id;
+      });
     }
     updateGUI();
   }
