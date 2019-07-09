@@ -230,6 +230,10 @@ export async function deleteTour(tf?: TourFile) {
     return;
   }
 
+  if (globals.tourState && globals.tourState.tourFile === tf) {
+    globals.clearTourState();
+  }
+
   unlink(tf.path.fsPath);
   globals.forgetTour(tf);
   updateGUI();
