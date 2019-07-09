@@ -9,6 +9,7 @@ import {
 } from "vscode";
 import * as codeLenses from "./codeLenses";
 import { TouristWebview } from "./webview";
+import * as vscode from "vscode";
 
 let activeTourstopDecorationTypeCached: TextEditorDecorationType | undefined;
 let inactiveTourstopDecorationTypeCached: TextEditorDecorationType | undefined;
@@ -212,4 +213,16 @@ export function newTourstopDecorationType(): TextEditorDecorationType {
   }
 
   return newTourstopDecorationTypeCached!;
+}
+
+/** The path at which .tour files will be saved by default */
+export function defaultTourSaveLocation() {
+  const cfgVal = workspace
+    .getConfiguration()
+    .get<string>("tourist.defaultTourSaveLocation", "");
+  return cfgVal
+    ? cfgVal
+    : vscode.workspace.workspaceFolders
+    ? vscode.workspace.workspaceFolders[0].uri.fsPath
+    : "";
 }

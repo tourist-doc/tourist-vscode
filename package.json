@@ -321,6 +321,11 @@
           "type": "string",
           "description": "The color that a new tourstop is highlighted",
           "default": "merge.currentHeaderBackground"
+        },
+        "tourist.defaultTourSaveLocation": {
+          "type": "string",
+          "description": "The path at which .tour files will be saved by default",
+          "default": ""
         }
       }
     }

@@ -1,5 +1,5 @@
 import { unlink } from "fs-extra";
-import { dirname } from "path";
+import { dirname, join } from "path";
 import {
   AbsoluteTourStop,
   BrokenTourStop,
@@ -720,12 +720,7 @@ export async function newTour(path?: vscode.Uri): Promise<void> {
 
   if (!path) {
     const defaultUri = vscode.Uri.file(
-      (vscode.workspace.workspaceFolders
-        ? vscode.workspace.workspaceFolders[0].uri.fsPath
-        : "") +
-        "/" +
-        title +
-        ".tour",
+      join(config.defaultTourSaveLocation(), title + ".tour"),
     );
     path = await vscode.window.showSaveDialog({ defaultUri });
   }
