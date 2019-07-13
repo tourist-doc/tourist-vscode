@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 
 import * as globals from "./globals";
 import { findWithUri, TourFile } from "./tourFile";
+import { newTour } from "./commands";
 
 /**
  * Controls how tourstops are displayed in QuickPicks
@@ -101,13 +102,18 @@ async function getTourFileURI(): Promise<vscode.Uri | undefined> {
  * Presents a QuickPick of tourstops to the user, returning the one she picked, or `undefined`.
  * @param tour The tour from which to pick a stop
  */
-export async function quickPickTourFile(): Promise<TourFile | undefined> {
+export async function quickPickTourFile(
+  allowNew = true,
+): Promise<TourFile | undefined> {
   const tourFiles = await globals.knownTours();
   const fromFile: vscode.QuickPickItem = { label: "Open .tour file" };
+  const newTourFile: vscode.QuickPickItem = { label: "Create new .tour file" };
   const quickPickItems = tourFiles
     .map((tf) => new TourFileQuickPickItem(tf) as vscode.QuickPickItem)
     .concat([fromFile]);
-
+  if (allowNew) {
+    quickPickItems.push(newTourFile);
+  }
   const item = await vscode.window.showQuickPick<vscode.QuickPickItem>(
     quickPickItems,
     { canPickMany: false, placeHolder: "Tour file" },
@@ -116,9 +122,13 @@ export async function quickPickTourFile(): Promise<TourFile | undefined> {
   if (item instanceof TourFileQuickPickItem) {
     return item.tf;
   } else if (item) {
-    const uri = await getTourFileURI();
-    if (uri) {
-      return findWithUri(uri);
+    if (item.label === "Open .tour file") {
+      const uri = await getTourFileURI();
+      if (uri) {
+        return findWithUri(uri);
+      }
+    } else if (item.label === "Create new .tour file") {
+      return newTour();
     }
   }
 

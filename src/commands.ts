@@ -224,7 +224,7 @@ export async function gotoTourStop(
  */
 export async function deleteTour(tf?: TourFile) {
   if (!tf) {
-    tf = await quickPickTourFile();
+    tf = await quickPickTourFile(false);
   }
   if (!tf) {
     return;
@@ -710,7 +710,9 @@ export async function unmapRepo(repoName?: string): Promise<void> {
 /**
  * Creates a new Tour, saving the .tour file to disk
  */
-export async function newTour(path?: vscode.Uri): Promise<void> {
+export async function newTour(
+  path?: vscode.Uri,
+): Promise<TourFile | undefined> {
   const folderName = vscode.workspace.rootPath
     ? vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
     : "My Tour";
@@ -737,6 +739,7 @@ export async function newTour(path?: vscode.Uri): Promise<void> {
     };
     globals.newTourFile(tfWithPath);
     await processTourFile(tfWithPath, true);
+    return tfWithPath;
   }
 }
 
