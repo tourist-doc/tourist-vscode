@@ -4,8 +4,8 @@
   "description": "A tool for making and viewing guided tours of code bases.",
   "version": "0.3.2",
   "publisher": "tourist",
-  "repository": "github:hgoldstein95/tourist-vscode",
-  "bugs": "https://github.com/hgoldstein95/tourist-vscode/issues/new",
+  "repository": "github:tourist-doc/tourist-vscode",
+  "bugs": "https://github.com/tourist-doc/tourist-vscode/issues/new",
   "extensionKind": "ui",
   "preview": true,
   "license": "MIT",
@@ -343,7 +343,7 @@
     "@types/dot": "^1.1.3",
     "@types/fs-extra": "^8.0.0",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.0.10",
+    "@types/node": "^12.6.2",
     "@types/showdown": "^1.9.3",
     "@types/sinon": "^7.0.13",
     "chai": "^4.2.0",
@@ -353,10 +353,10 @@
     "sinon": "^7.3.2",
     "ts-loader": "^6.0.4",
     "tslint": "^5.18.0",
-    "typescript": "^3.5.2",
+    "typescript": "^3.5.3",
     "vscode": "^1.1.35",
-    "webpack": "^4.35.2",
-    "webpack-cli": "^3.3.5"
+    "webpack": "^4.35.3",
+    "webpack-cli": "^3.3.6"
   },
   "dependencies": {
     "dot": "^1.1.2",

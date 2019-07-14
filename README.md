@@ -38,13 +38,13 @@ you need to take before you'll be able to actually view the tour.
 
 First, make sure you have any repositories that the tour visits checked out
 on your machine via git. For example, if the tour touches
-`hgoldstein95/tourist-core` and `hgoldstein95/tourist-vscode`, make sure you
+`tourist-doc/tourist-core` and `tourist-doc/tourist-vscode`, make sure you
 have both checked out locally.
 
 Then, run **Tourist: Map a name to a repository** from the command palette and
 show tourist where you put each repository on your system. By convention, the
 tour file will use the plain repository name (e.g. `tourist-core` for
-`hgoldstein95/tourist-core`) but you may want to check the `repositories`
+`tourist-doc/tourist-core`) but you may want to check the `repositories`
 section of the `.tour` file just to be sure.
 
 Now you can run **Tourist: Start a tour** to view the tour!
