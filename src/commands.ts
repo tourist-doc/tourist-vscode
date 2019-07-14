@@ -764,12 +764,19 @@ export async function linkTour(tf?: TourFile) {
   }
 
   const idx = getStopIndex(globals.tourState!.currentStop!);
+  const stopNum = 0;
 
-  globals.tourist.link(globals.tourState!.tourFile, idx!, {
-    tourId: tf.id,
-    stopNum: 0,
-  });
-  await processTourFile(globals.tourState!.tourFile);
+  if (
+    !globals.tourState!.tourFile.stops[idx!].childStops.some((child) => {
+      return child.tourId === tf!.id && stopNum === child.stopNum;
+    })
+  ) {
+    globals.tourist.link(globals.tourState!.tourFile, idx!, {
+      tourId: tf.id,
+      stopNum: 0,
+    });
+    await processTourFile(globals.tourState!.tourFile);
+  }
 }
 
 /**
