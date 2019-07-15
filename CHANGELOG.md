@@ -35,3 +35,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.3.2]
 
 - Fix bug with linking tour stops introduced in 0.3.1
+
+## [0.4.0]
+
+- New tourist.defaultTourSaveLocation config option
+- "Create tour" option in TourFile quickpick
+- Close tour if it's active when it's deleted
+- Prevent a tour from being linked on the same stop more than once
+- Small fixes
