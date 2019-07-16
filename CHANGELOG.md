@@ -43,3 +43,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Close tour if it's active when it's deleted
 - Prevent a tour from being linked on the same stop more than once
 - Small fixes
+
+## [0.5.0]
+
+- Use linux style path separators in .tour files
