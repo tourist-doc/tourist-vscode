@@ -7,6 +7,10 @@
       a {
         cursor: pointer;
       }
+      #header {
+        font-size: webviewFontSizepx;
+        user-select: none;
+      }
       #no-stops {
         font-size: webviewFontSizepx;
         font-style: italic;
@@ -63,6 +67,12 @@
       .warning-symbol.hidden {
         opacity: 0;
       }
+      .center-icon {
+        font-size: calc(webviewFontSizepx - 0px) !important;
+        display: inline-flex;
+        vertical-align: middle !important;
+        padding-bottom: 3px;
+      }
     </style>
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
@@ -89,6 +99,14 @@
           });
       };
     </script>
+
+    <div id="header">
+      <a
+        title="Start tour"
+        onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '0'});"
+        ><i class="material-icons center-icon">play_arrow</i>Start tour</a
+      >
+    </div>
 
     <h1>
       {{=it.tf.title}}
