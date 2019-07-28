@@ -256,10 +256,10 @@ export async function deleteTourStop(stop?: AbsoluteTourStop | BrokenTourStop) {
     }
 
     const idx = getStopIndex(stop);
-    if (idx) {
+    if (stop.id) {
       let tf: TourFile;
       try {
-        await globals.tourist.remove(globals.tourState.tourFile, idx);
+        await globals.tourist.remove(globals.tourState.tourFile, stop.id);
         tf = globals.tourState.tourFile;
       } catch (error) {
         switch (error.code) {
@@ -313,9 +313,9 @@ export async function editTitle(
     });
     if (title !== undefined) {
       const idx = getStopIndex(stop);
-      if (idx) {
+      if (stop.id) {
         try {
-          await globals.tourist.edit(globals.tourState.tourFile, idx, {
+          await globals.tourist.edit(globals.tourState.tourFile, stop.id, {
             title,
           });
         } catch (error) {
@@ -328,7 +328,7 @@ export async function editTitle(
         }
         await processTourFile(globals.tourState.tourFile);
         if (stop === globals.tourState.currentStop) {
-          globals.tourState.currentStop = globals.tourState.tour.stops[idx];
+          globals.tourState.currentStop = globals.tourState.tour.stops[idx!];
         }
       }
     }
@@ -359,9 +359,9 @@ export async function editBody(
 
     if (body !== undefined) {
       const idx = getStopIndex(stop);
-      if (idx) {
+      if (stop.id) {
         try {
-          await globals.tourist.edit(globals.tourState.tourFile, idx, {
+          await globals.tourist.edit(globals.tourState.tourFile, stop.id, {
             body,
           });
         } catch (error) {
@@ -374,7 +374,7 @@ export async function editBody(
         }
         await processTourFile(globals.tourState.tourFile);
         if (stop === globals.tourState.currentStop) {
-          globals.tourState.currentStop = globals.tourState.tour.stops[idx];
+          globals.tourState.currentStop = globals.tourState.tour.stops[idx!];
         }
       }
     }
@@ -394,21 +394,14 @@ export async function moveTourstopUp(stop?: AbsoluteTourStop | BrokenTourStop) {
 
   if (stop) {
     const idx = getStopIndex(stop);
-    if (idx && idx > 0) {
-      const otherIdx = idx - 1;
-      const newIndices = Array.from(
-        Array(globals.tourState.tour.stops.length).keys(),
-      ).map((i) => {
-        if (i === idx) {
-          return otherIdx;
-        } else if (i === otherIdx) {
-          return idx;
-        } else {
-          return i;
-        }
-      });
+    if (stop.id && idx && idx > 0) {
+      const newIdx = idx - 1;
       try {
-        await globals.tourist.scramble(globals.tourState.tourFile, newIndices);
+        await globals.tourist.reorder(
+          globals.tourState.tourFile,
+          stop.id,
+          newIdx,
+        );
       } catch (error) {
         switch (error.code) {
           case 1:
@@ -438,21 +431,18 @@ export async function moveTourstopDown(
 
   if (stop) {
     const idx = getStopIndex(stop);
-    if (idx && idx < globals.tourState.tour.stops.length - 1) {
-      const otherIdx = idx + 1;
-      const newIndices = Array.from(
-        Array(globals.tourState.tour.stops.length).keys(),
-      ).map((i) => {
-        if (i === idx) {
-          return otherIdx;
-        } else if (i === otherIdx) {
-          return idx;
-        } else {
-          return i;
-        }
-      });
+    if (
+      stop.id &&
+      idx !== undefined &&
+      idx < globals.tourState.tour.stops.length - 1
+    ) {
+      const newIdx = idx + 1;
       try {
-        await globals.tourist.scramble(globals.tourState.tourFile, newIndices);
+        await globals.tourist.reorder(
+          globals.tourState.tourFile,
+          stop.id,
+          newIdx,
+        );
       } catch (error) {
         switch (error.code) {
           case 1:
@@ -481,14 +471,13 @@ export async function moveTourstop(
     stop = await quickPickTourstop();
   }
 
-  if (stop) {
+  if (stop && stop.id) {
     const editor = vscode.window.activeTextEditor;
     if (editor) {
       await editor.document.save();
       const newLocation = editor.selection.active;
-      const stopIdx = getStopIndex(stop);
       try {
-        await globals.tourist.move(globals.tourState.tourFile, stopIdx!, {
+        await globals.tourist.move(globals.tourState.tourFile, stop.id, {
           absPath: editor.document.fileName,
           line: newLocation.line + 1,
         });
@@ -771,10 +760,14 @@ export async function linkTour(tf?: TourFile) {
       return child.tourId === tf!.id && stopNum === child.stopNum;
     })
   ) {
-    globals.tourist.link(globals.tourState!.tourFile, idx!, {
-      tourId: tf.id,
-      stopNum: 0,
-    });
+    globals.tourist.link(
+      globals.tourState!.tourFile,
+      globals.tourState!.currentStop!.id!,
+      {
+        tourId: tf.id,
+        stopNum: 0,
+      },
+    );
     await processTourFile(globals.tourState!.tourFile);
   }
 }
