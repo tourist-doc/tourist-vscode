@@ -47,3 +47,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.5.0]
 
 - Use linux style path separators in .tour files
+
+## [0.6.0]
+
+- Add "start tour" button to tour webview
+- Change internal API which increases stability
