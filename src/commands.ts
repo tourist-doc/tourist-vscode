@@ -310,6 +310,7 @@ export async function editTitle(
     const title = await vscode.window.showInputBox({
       prompt: "What's the new title?",
       value: stop.title,
+      ignoreFocusOut: true,
     });
     if (title !== undefined) {
       const idx = getStopIndex(stop);
@@ -354,6 +355,7 @@ export async function editBody(
       body = await vscode.window.showInputBox({
         prompt: "What's the new body?",
         value: stop.body,
+        ignoreFocusOut: true,
       });
     }
 
@@ -584,6 +586,7 @@ export async function renameTour(tf?: TourFile, name?: string): Promise<void> {
     name = await vscode.window.showInputBox({
       prompt: "What's the new title?",
       value: tf.title,
+      ignoreFocusOut: true,
     });
   }
   if (name === undefined) {
@@ -621,6 +624,7 @@ export async function editDescription(tf?: TourFile, description?: string) {
     description = await vscode.window.showInputBox({
       prompt: "What's the new description?",
       value: tf.description,
+      ignoreFocusOut: true,
     });
   }
   if (description === undefined) {
@@ -644,6 +648,7 @@ export async function mapRepo(
     repoName = await vscode.window.showInputBox({
       prompt: "What's the name of the repository?",
       value: repoName,
+      ignoreFocusOut: true,
     });
   }
 
@@ -708,6 +713,7 @@ export async function newTour(
   const title = await vscode.window.showInputBox({
     prompt: "What's the name of the new tour?",
     value: folderName,
+    ignoreFocusOut: true,
   });
   if (!title) {
     return;
