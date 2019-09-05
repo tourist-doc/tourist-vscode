@@ -5,6 +5,7 @@ import * as config from "./config";
 import { tourState } from "./globals";
 import { TourFile } from "./tourFile";
 import { TouristWebview } from "./webview";
+import * as vscode from "vscode";
 
 interface TourTemplateArgs {
   tf: TourFile;
@@ -31,9 +32,11 @@ export class TourWebview {
   public async update() {
     const panel = TouristWebview.getPanel();
     panel.title = tourState!.tourFile.title;
-    const description = TouristWebview.mdConverter.makeHtml(
-      tourState!.tourFile.description,
-    );
+    const description: string =
+      (await vscode.commands.executeCommand(
+        "markdown.api.render",
+        tourState!.tourFile.description,
+      )) || "";
     panel.webview.html = this.template!({
       tf: tourState!.tourFile,
       tour: tourState!.tour,

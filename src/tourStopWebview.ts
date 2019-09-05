@@ -1,5 +1,6 @@
 import { template } from "dot";
 import { AbsoluteTourStop, BrokenTourStop } from "tourist-core";
+import * as vscode from "vscode";
 import * as commands from "./commands";
 import * as config from "./config";
 import { tourState } from "./globals";
@@ -29,15 +30,20 @@ export class TourStopWebview {
   public async update() {
     const panel = TouristWebview.getPanel();
     panel.title = tourState!.currentStop!.title;
-    const body = TouristWebview.mdConverter.makeHtml(
-      tourState!.currentStop!.body || "",
-    );
-    panel.webview.html = this.template!({
-      stop: tourState!.currentStop!,
-      bodyHTML: body,
-      editingBody: this.editingBody,
-      showEditControls: config.showEditControls(),
-    });
+
+    if (tourState!.currentStop!.body) {
+      const body: string =
+        (await vscode.commands.executeCommand(
+          "markdown.api.render",
+          tourState!.currentStop!.body,
+        )) || "";
+      panel.webview.html = this.template!({
+        stop: tourState!.currentStop!,
+        bodyHTML: body,
+        editingBody: this.editingBody,
+        showEditControls: config.showEditControls(),
+      });
+    }
   }
 
   public setEditing(editing: boolean) {

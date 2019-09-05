@@ -1,4 +1,3 @@
-import * as showdown from "showdown";
 import * as vscode from "vscode";
 
 import * as commands from "./commands";
@@ -13,9 +12,6 @@ import { TourWebview } from "./tourWebview";
  * the assumption that for now, only one extension-wide webview will exist.
  */
 export class TouristWebview {
-  /** An object that converts markdown into HTML */
-  public static mdConverter: showdown.Converter;
-
   public static async init() {
     this.tourWebview = new TourWebview(
       (await vscode.workspace.openTextDocument(
@@ -28,11 +24,6 @@ export class TouristWebview {
         context!.asAbsolutePath("dist/tourstop.html"),
       )).getText(),
     );
-
-    this.mdConverter = new showdown.Converter({
-      simplifiedAutoLink: true,
-    });
-    this.mdConverter.setFlavor("github");
   }
 
   /**
