@@ -3,12 +3,20 @@
   "displayName": "Tourist",
   "description": "A tool for making and viewing guided tours of code bases.",
   "version": "0.6.0",
-  "publisher": "tourist",
+  "license": "MIT",
   "repository": "github:tourist-doc/tourist-vscode",
   "bugs": "https://github.com/tourist-doc/tourist-vscode/issues/new",
+  "author": {
+    "name": "Jason Fields",
+    "email": "jasonfields4@gmail.com",
+    "url": "https://github.com/J-Fields"
+  },
+  "publisher": "tourist",
   "extensionKind": "ui",
   "preview": true,
-  "license": "MIT",
+  "keywords": [
+    "documentation"
+  ],
   "engines": {
     "vscode": "^1.35.1"
   },
@@ -294,38 +302,39 @@
         },
         "tourist.tourDirectories": {
           "type": "array",
-          "description": "The directories where you store your .tour files.",
+          "markdownDescription": "The directories where you store your `.tour` files.",
           "default": []
         },
         "tourist.showWebview": {
           "type": "boolean",
-          "description": "Whether to show the webview",
+          "description": "Whether to show the webview.",
           "default": true
         },
         "tourist.showEditControls": {
           "type": "boolean",
-          "description": "Whether to show edit controls",
+          "description": "Whether to show edit controls.",
           "default": true
         },
         "tourist.activeTourstopColor": {
           "type": "string",
-          "description": "The color that the active tourstop is highlighted",
+          "description": "The color that the active tourstop is highlighted.",
           "default": "merge.incomingHeaderBackground"
         },
         "tourist.inactiveTourstopColor": {
           "type": "string",
-          "description": "The color that inactive tourstops are highlighted",
+          "description": "The color that inactive tourstops are highlighted.",
           "default": "merge.incomingContentBackground"
         },
         "tourist.newTourstopColor": {
           "type": "string",
-          "description": "The color that a new tourstop is highlighted",
+          "description": "The color that a new tourstop is highlighted.",
           "default": "merge.currentHeaderBackground"
         },
         "tourist.defaultTourSaveLocation": {
           "type": "string",
-          "description": "The path at which .tour files will be saved by default",
-          "default": ""
+          "markdownDescription": "The path at which `.tour` files will be saved by default.",
+          "default": "",
+          "scope": "machine"
         }
       }
     }
