@@ -4,3 +4,4 @@ dist/
 *.vsix
 
 \.vscode/
+\.vscode-test/

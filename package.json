@@ -348,22 +348,21 @@
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.0",
+    "@types/chai": "^4.2.1",
     "@types/dot": "^1.1.3",
     "@types/fs-extra": "^8.0.0",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.7.2",
+    "@types/node": "^12.7.4",
     "@types/sinon": "^7.0.13",
     "chai": "^4.2.0",
     "copy-webpack-plugin": "^5.0.4",
-    "husky": "^3.0.4",
-    "lint-staged": "^9.2.3",
-    "sinon": "^7.4.1",
+    "husky": "^3.0.5",
+    "lint-staged": "^9.2.5",
     "ts-loader": "^6.0.4",
     "tslint": "^5.19.0",
-    "typescript": "^3.5.3",
+    "typescript": "^3.6.2",
     "vscode": "^1.1.36",
-    "webpack": "^4.39.2",
+    "webpack": "^4.39.3",
     "webpack-cli": "^3.3.7"
   },
   "dependencies": {
