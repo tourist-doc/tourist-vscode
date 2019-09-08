@@ -36,6 +36,12 @@
         ]
       }
     ],
+    "jsonValidation": [
+      {
+        "fileMatch": "*.tour",
+        "url": "./resources/tour.schema.json"
+      }
+    ],
     "commands": [
       {
         "command": "tourist.gotoTourstop",

@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Tour",
+  "description": "A Tourist Tour",
+  "type": "object",
+  "properties": {
+    "protocolVersion": {
+      "type": "string",
+      "description": "The tourist protocol version this file uses.",
+      "readOnly": true
+    },
+    "id": {
+      "type": "string",
+      "description": "A globally-unique identifier for this tour.",
+      "readOnly": true
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of this tour."
+    },
+    "stops": {
+      "type": "array",
+      "description": "A list of stops in this tour.",
+      "items": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A globally-unique identifier for this tour stop."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of this tour stop."
+          },
+          "body": {
+            "type": "string",
+            "description": "The body of this tour stop."
+          },
+          "repository": {
+            "type": "string",
+            "description": "The ID of the repository which contains this tour stop."
+          },
+          "relPath": {
+            "type": "string",
+            "description": "A path from the repository root to the file containing this tour stop."
+          },
+          "line": {
+            "type": "number",
+            "description": "The line number this tour stop is on.",
+            "minimum": 1
+          },
+          "childStops": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "tourId": {
+                  "type": "string",
+                  "description": "The ID of the tour this link refers to."
+                },
+                "stopNum": {
+                  "type": "number",
+                  "description": "Index of the stop in its tour."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "repositories": {
+      "type": "array",
+      "description": "A list of repository pins this tour refers to.",
+      "items": {
+        "properties": {
+          "commit": {
+            "type": "string",
+            "description": "The hash of the commit."
+          },
+          "repository": {
+            "type": "string",
+            "description": "The repository ID."
+          }
+        }
+      }
+    },
+    "generator": {
+      "type": "integer",
+      "description": "Internal state used to generate new tourstop IDs."
+    }
+  },
+  "required": [
+    "protocolVersion",
+    "id",
+    "description",
+    "stops",
+    "repositories",
+    "generator"
+  ],
+  "readOnly": true
+}
