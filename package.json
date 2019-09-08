@@ -104,6 +104,11 @@
         "category": "Tourist"
       },
       {
+        "command": "tourist.editTour",
+        "title": "Edit a tour",
+        "category": "Tourist"
+      },
+      {
         "command": "tourist.stopTour",
         "title": "Stop a tour",
         "category": "Tourist"
@@ -185,6 +190,11 @@
           "command": "tourist.startTour",
           "group": "Tourist",
           "when": "resourceFilename =~ /.+\\.tour/"
+        },
+        {
+          "command": "tourist.editTour",
+          "group": "Tourist",
+          "when": "resourceFilename =~ /.+\\.tour/"
         }
       ],
       "editor/context": [
@@ -228,6 +238,14 @@
           "command": "tourist.moveTourstopDown",
           "when": "viewItem == stop",
           "group": "move@2"
+        },
+        {
+          "command": "tourist.startTour",
+          "when": "viewItem == tour"
+        },
+        {
+          "command": "tourist.editTour",
+          "when": "viewItem == tour"
         },
         {
           "command": "tourist.deleteTour",
@@ -316,9 +334,9 @@
           "description": "Whether to show the webview.",
           "default": true
         },
-        "tourist.showEditControls": {
+        "tourist.readOnlyByDefault": {
           "type": "boolean",
-          "description": "Whether to show edit controls.",
+          "description": "Whether to open tours read-only by default.",
           "default": true
         },
         "tourist.activeTourstopColor": {

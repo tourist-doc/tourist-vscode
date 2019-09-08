@@ -11,7 +11,7 @@ interface TourStopTemplateArgs {
   stop: AbsoluteTourStop | BrokenTourStop;
   bodyHTML: string;
   editingBody?: string;
-  showEditControls: boolean;
+  readOnly: boolean;
 }
 export class TourStopWebview {
   protected template: (args: TourStopTemplateArgs) => string;
@@ -41,7 +41,7 @@ export class TourStopWebview {
         stop: tourState!.currentStop!,
         bodyHTML: body,
         editingBody: this.editingBody,
-        showEditControls: config.showEditControls(),
+        readOnly: tourState!.readOnly,
       });
     }
   }

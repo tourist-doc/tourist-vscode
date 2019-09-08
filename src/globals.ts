@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 
 import { readdir } from "fs-extra";
 import { join } from "path";
-import { tourDirectories } from "./config";
+import { tourDirectories, readOnlyByDefault } from "./config";
 import { context } from "./extension";
 import { findWithUri, getStopIndex, TourFile } from "./tourFile";
 import { pathsEqual } from "./util";
@@ -40,15 +40,18 @@ export class TourState {
   public tour: Tour;
   public tourFile: TourFile;
   public currentStop: AbsoluteTourStop | BrokenTourStop | undefined;
+  public readOnly: boolean;
 
   constructor(
     tf: TourFile,
     tour: Tour,
     currentStop?: AbsoluteTourStop | BrokenTourStop,
+    readOnly?: boolean,
   ) {
     this.tour = tour;
     this.tourFile = tf;
     this.currentStop = currentStop;
+    this.readOnly = readOnly !== undefined ? readOnly : readOnlyByDefault();
   }
 
   /**

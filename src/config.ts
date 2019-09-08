@@ -32,8 +32,6 @@ export async function configChanged(evt: ConfigurationChangeEvent) {
     await TouristWebview.refresh();
   } else if (evt.affectsConfiguration("tourist.showWebview")) {
     await TouristWebview.refresh();
-  } else if (evt.affectsConfiguration("tourist.showEditControls")) {
-    await TouristWebview.refresh();
   } else if (evt.affectsConfiguration("tourist.activeTourstopColor")) {
     activeTourstopDecorationTypeCached = undefined;
   } else if (evt.affectsConfiguration("tourist.inactiveTourstopColor")) {
@@ -143,11 +141,10 @@ export function showWebview(): boolean {
   return workspace.getConfiguration().get<boolean>("tourist.showWebview", true);
 }
 
-// TODO: Consider making this a part of TourState, with "open for writing" and "open for reading" different commands
-export function showEditControls(): boolean {
+export function readOnlyByDefault(): boolean {
   return workspace
     .getConfiguration()
-    .get<boolean>("tourist.showEditControls", true);
+    .get<boolean>("tourist.readOnlyByDefault", true);
 }
 
 /** The text decoration shown on the active tourstop */

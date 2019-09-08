@@ -115,7 +115,7 @@
         title="Edit"
         onclick='vscode.postMessage({command: "editTitle"});'
         {{?
-        !it.showEditControls}}hidden{{?}}
+        it.readOnly}}hidden{{?}}
         ><i class="material-icons">edit</i>
       </a>
     </h1>
@@ -126,7 +126,7 @@
         title="Edit"
         onclick='vscode.postMessage({command: "editDescription"});'
         {{?
-        !it.showEditControls}}hidden{{?}}
+        it.readOnly}}hidden{{?}}
         ><i class="material-icons">edit</i></a
       >
     </h2>
@@ -197,7 +197,7 @@
         title="Delete stop"
         onclick="vscode.postMessage({command: 'deleteStop', stopIndex: '{{=idx}}'})"
         {{?
-        !it.showEditControls}}hidden{{?}}
+        it.readOnly}}hidden{{?}}
       >
         <i class="material-icons">
           delete

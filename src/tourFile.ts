@@ -26,6 +26,11 @@ export interface TourFile {
   path: Uri;
 }
 
+export function isTourFile(thing: any): thing is TourFile {
+  // TODO: more robust check - probably fine for now
+  return thing.protocolVersion && thing.generator && thing.id;
+}
+
 // TODO: consider moving caching into tourist-core
 const tourCache: Map<TourFile, Tour> = new Map();
 

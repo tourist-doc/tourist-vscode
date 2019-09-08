@@ -13,7 +13,7 @@ const sanitize = require("sanitize-filename");
 import * as config from "./config";
 import { context, processTourFile, saveTour, updateGUI } from "./extension";
 import * as globals from "./globals";
-import { findWithUri, getStopIndex, TourFile } from "./tourFile";
+import { findWithUri, getStopIndex, TourFile, isTourFile } from "./tourFile";
 import {
   quickPickRepoName,
   quickPickTourFile,
@@ -32,6 +32,7 @@ const commands = {
   "tourist.deleteTourstop": deleteTourStop,
   "tourist.editBody": editBody,
   "tourist.editTitle": editTitle,
+  "tourist.editTour": editTour,
   "tourist.gotoTourstop": gotoTourStop,
   "tourist.linkTour": linkTour,
   "tourist.mapRepo": mapRepo,
@@ -525,14 +526,30 @@ export async function moveTourstop(
 /**
  * Starts a Tour from a .tour file
  */
-export async function startTour(uri?: vscode.Uri): Promise<void> {
-  const tf = await (uri ? findWithUri(uri) : quickPickTourFile());
+export async function startTour(tf?: vscode.Uri | TourFile): Promise<void> {
+  if (!isTourFile(tf)) {
+    tf = await (tf ? findWithUri(tf) : quickPickTourFile());
+  }
 
   if (tf) {
     // Clear currentStop
     globals.clearTourState();
 
     await processTourFile(tf, false);
+  }
+}
+
+export async function editTour(tf?: vscode.Uri | TourFile): Promise<void> {
+  if (!isTourFile(tf)) {
+    tf = await (tf ? findWithUri(tf) : quickPickTourFile());
+  }
+
+  if (tf) {
+    // Clear currentStop
+    globals.clearTourState();
+
+    await processTourFile(tf, false);
+    globals.tourState!.readOnly = false;
   }
 }
 

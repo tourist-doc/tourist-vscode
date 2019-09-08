@@ -126,7 +126,7 @@
         title="Edit title"
         onclick='vscode.postMessage({command: "editTitle"});'
         {{?
-        !it.showEditControls}}hidden{{?}}
+        it.readOnly}}hidden{{?}}
         ><i class="material-icons">edit</i></a
       >
     </h1>
@@ -168,7 +168,7 @@
           title="Edit body"
           onclick='vscode.postMessage({command: "editBody"});'
           {{?
-          !it.showEditControls}}style="display: none;"
+          it.readOnly}}style="display: none;"
           {{?}}
           >Edit</a
         >
@@ -178,13 +178,13 @@
     </div>
 
     <div id="child-stops">
-      {{? it.showEditControls || it.stop.childStops.length > 0 }}
+      {{? !it.readOnly || it.stop.childStops.length > 0 }}
       <hr size="1" />
 
       <h2>Linked Stops</h2>
       {{?}}
 
-      {{? it.showEditControls && it.stop.childStops.length === 0 }}
+      {{? !it.readOnly && it.stop.childStops.length === 0 }}
       <div id="no-linked">
         You can link to stops on other tours here!
       </div>
@@ -204,7 +204,7 @@
         title="Link a Stop"
         onclick="vscode.postMessage({command: 'linkStop'});"
         {{?
-        !it.showEditControls}}hidden{{?}}
+        it.readOnly}}hidden{{?}}
         >Link a Stop</a
       >
     </div>

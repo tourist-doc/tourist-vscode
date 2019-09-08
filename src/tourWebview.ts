@@ -12,7 +12,7 @@ interface TourTemplateArgs {
   tour: Tour;
   descriptionHTML: string;
   editingDescription?: string;
-  showEditControls: boolean;
+  readOnly: boolean;
 }
 
 export class TourWebview {
@@ -42,7 +42,7 @@ export class TourWebview {
       tour: tourState!.tour,
       descriptionHTML: description,
       editingDescription: this.editingDescription,
-      showEditControls: config.showEditControls(),
+      readOnly: tourState!.readOnly,
     });
   }
 
