@@ -8,6 +8,8 @@ import {
 } from "tourist-core";
 import * as vscode from "vscode";
 
+// tslint:disable-next-line: no-var-requires
+const sanitize = require("sanitize-filename");
 import * as config from "./config";
 import { context, processTourFile, saveTour, updateGUI } from "./extension";
 import * as globals from "./globals";
@@ -721,7 +723,7 @@ export async function newTour(
 
   if (!path) {
     const defaultUri = vscode.Uri.file(
-      join(config.defaultTourSaveLocation(), title + ".tour"),
+      join(config.defaultTourSaveLocation(), sanitize(title) + ".tour"),
     );
     path = await vscode.window.showSaveDialog({ defaultUri });
   }
