@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { statusBarItemColor } from "./config";
 import { tourState } from "./globals";
 
 const statusBarItem = vscode.window.createStatusBarItem(
@@ -6,8 +7,8 @@ const statusBarItem = vscode.window.createStatusBarItem(
   10000,
 );
 
-export function init() {
-  statusBarItem.color = new vscode.ThemeColor("terminal.ansiRed");
+export function updateColor() {
+  statusBarItem.color = statusBarItemColor();
 }
 
 export function refresh() {

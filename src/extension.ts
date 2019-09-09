@@ -27,10 +27,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   await globals.init();
   resources.init(context);
-  statusBar.init();
   treeView.init();
   TouristWebview.init();
   commands.registerAll();
+  statusBar.updateColor();
 
   ctx.subscriptions.push(
     vscode.languages.registerCodeLensProvider(

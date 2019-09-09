@@ -354,6 +354,11 @@
           "description": "The color that a new tourstop is highlighted.",
           "default": "merge.currentHeaderBackground"
         },
+        "tourist.statusBarItemColor": {
+          "type": "string",
+          "description": "The color of the tourist status bar item.",
+          "default": "#ffffff"
+        },
         "tourist.defaultTourSaveLocation": {
           "type": "string",
           "markdownDescription": "The path at which `.tour` files will be saved by default.",

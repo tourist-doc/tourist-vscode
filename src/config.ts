@@ -10,6 +10,7 @@ import {
 import * as codeLenses from "./codeLenses";
 import { TouristWebview } from "./webview";
 import * as vscode from "vscode";
+import { updateColor } from "./statusBar";
 
 let activeTourstopDecorationTypeCached: TextEditorDecorationType | undefined;
 let inactiveTourstopDecorationTypeCached: TextEditorDecorationType | undefined;
@@ -38,6 +39,8 @@ export async function configChanged(evt: ConfigurationChangeEvent) {
     inactiveTourstopDecorationTypeCached = undefined;
   } else if (evt.affectsConfiguration("tourist.newTourstopColor")) {
     newTourstopDecorationTypeCached = undefined;
+  } else if (evt.affectsConfiguration("tourist.statusBarItemColor")) {
+    updateColor();
   }
 }
 
@@ -222,4 +225,11 @@ export function defaultTourSaveLocation() {
     : vscode.workspace.workspaceFolders
     ? vscode.workspace.workspaceFolders[0].uri.fsPath
     : "";
+}
+
+/** The color of the tourist status bar item */
+export function statusBarItemColor() {
+  return workspace
+    .getConfiguration()
+    .get<string>("tourist.statusBarItemColor", "#ffffff");
 }
