@@ -4,9 +4,17 @@
 //
 
 import * as assert from "assert";
-import { expect } from "chai";
+import { TouristClient } from "../touristClient";
 
-suite("To do", () => {
-  expect(5).to.be.lessThan(6);
-  assert.equal(2 + 2, 4);
+suite("TouristClient", () => {
+  test("can list tours", async () => {
+    const client = new TouristClient();
+    await client.connect();
+
+    const response = await client.listTours();
+
+    assert.equal(4 + 4, 8);
+
+    console.log("reponse=", response);
+  });
 });

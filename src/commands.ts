@@ -13,7 +13,7 @@ const sanitize = require("sanitize-filename");
 import * as config from "./config";
 import { context, processTourFile, saveTour, updateGUI } from "./extension";
 import * as globals from "./globals";
-import { findWithUri, getStopIndex, TourFile, isTourFile } from "./tourFile";
+import { findWithUri, getStopIndex, isTourFile, TourFile } from "./tourFile";
 import {
   quickPickRepoName,
   quickPickTourFile,
@@ -801,6 +801,14 @@ export async function linkTour(tf?: TourFile) {
  * Places a breakpoint at each tourstop location in the active tour
  */
 export async function addBreakpoints(): Promise<void> {
+  await globals.touristClient.listTours();
+  const tourId = await globals.touristClient.createTour("rpc tour yay");
+  await globals.touristClient.saveTour(
+    tourId,
+    "C:\\Users\\jfields\\Desktop\\tours\\my_rpc_tour.tour",
+  );
+  await globals.touristClient.listTours();
+  /*
   if (!globals.tourState) {
     return;
   }
@@ -820,6 +828,7 @@ export async function addBreakpoints(): Promise<void> {
   }
 
   vscode.debug.addBreakpoints(breakpoints);
+  */
 }
 
 /**

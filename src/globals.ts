@@ -3,9 +3,10 @@ import * as vscode from "vscode";
 
 import { readdir } from "fs-extra";
 import { join } from "path";
-import { tourDirectories, readOnlyByDefault } from "./config";
+import { readOnlyByDefault, tourDirectories } from "./config";
 import { context } from "./extension";
 import { findWithUri, getStopIndex, TourFile } from "./tourFile";
+import { TouristClient } from "./touristClient";
 import { pathsEqual } from "./util";
 
 /**
@@ -17,6 +18,8 @@ export let tourist = new Tourist();
 
 /** The state of the active tour */
 export let tourState: TourState | undefined;
+
+export let touristClient = new TouristClient();
 
 const knownTourFiles = [] as TourFile[];
 
@@ -95,6 +98,8 @@ export class TourState {
  * Called on extension startup
  */
 export async function init() {
+  await touristClient.connect();
+
   const touristJSON = context!.globalState.get<string>("touristInstance");
   if (touristJSON) {
     tourist = Tourist.deserialize(touristJSON);
