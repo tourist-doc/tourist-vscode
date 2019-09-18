@@ -4,11 +4,11 @@
 //
 
 import * as assert from "assert";
-import { TouristClient } from "../touristClient";
+import { TouristRpcClient } from "../touristClient";
 
 suite("TouristClient", () => {
   test("can list tours", async () => {
-    const client = new TouristClient();
+    const client = new TouristRpcClient();
     await client.connect();
 
     const response = await client.listTours();

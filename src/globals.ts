@@ -6,7 +6,7 @@ import { join } from "path";
 import { readOnlyByDefault, tourDirectories } from "./config";
 import { context } from "./extension";
 import { findWithUri, getStopIndex, TourFile } from "./tourFile";
-import { TouristClient } from "./touristClient";
+import { TouristRpcClient } from "./touristClient";
 import { pathsEqual } from "./util";
 
 /**
@@ -19,7 +19,7 @@ export let tourist = new Tourist();
 /** The state of the active tour */
 export let tourState: TourState | undefined;
 
-export let touristClient = new TouristClient();
+export let touristClient = new TouristRpcClient();
 
 const knownTourFiles = [] as TourFile[];
 
