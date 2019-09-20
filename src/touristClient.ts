@@ -10,6 +10,8 @@ type Method =
   | "forget_tour"
   | "create_stop"
   | "view_stop"
+  | "move_stop"
+  | "reorder_stop"
   | "edit_stop_metadata"
   | "link_stop"
   | "unlink_stop"
@@ -131,6 +133,26 @@ export class TouristRpcClient {
   // View all of the top-level data for a stop.
   public async viewStop(tourId: TourId, stopId: StopId): Promise<StopView> {
     return this.makeRequest("view_stop", [tourId, stopId]);
+  }
+
+  // Move a stop to a different place in the codebase.
+  public async moveStop(
+    tourId: TourId,
+    stopId: StopId,
+    path: Path,
+    line: number,
+  ) {
+    return this.makeRequest("move_stop", [tourId, stopId, path, line]);
+  }
+
+  // Change the order of a tour's stops. Position delta is applied to the position of the stop in
+  // the list, bounded by the length of the list.
+  public async reorderStop(
+    tourId: TourId,
+    stopId: StopId,
+    positionDelta: number,
+  ) {
+    return this.makeRequest("reorder_stop", [tourId, stopId, positionDelta]);
   }
 
   // Edit stop metadata, e.g. title and description. The delta object has a number of optional
