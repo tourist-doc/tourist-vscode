@@ -52,3 +52,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Add "start tour" button to tour webview
 - Change internal API which increases stability
+
+## [0.7.0]
+
+- Validation & intellisense for .tour files
+- Sanitize tour name before using it as suggested file name
+- Make startTour read-only, and add editTour, instead of showEditControls
+- Add statusBarItemColor setting

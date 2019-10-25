@@ -2,7 +2,7 @@
   "name": "tourist-vscode",
   "displayName": "Tourist",
   "description": "A tool for making and viewing guided tours of code bases.",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "license": "MIT",
   "repository": "github:tourist-doc/tourist-vscode",
   "bugs": "https://github.com/tourist-doc/tourist-vscode/issues/new",
