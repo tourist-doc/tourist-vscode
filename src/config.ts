@@ -81,10 +81,11 @@ export function tourstopRevealLocation(): TextEditorRevealType {
       .getConfiguration()
       .get<"Center" | "Top">("tourist.tourstopRevealLocation", "Center")
   ) {
-    case "Center":
-      return TextEditorRevealType.InCenter;
     case "Top":
       return TextEditorRevealType.AtTop;
+    case "Center":
+    default:
+      return TextEditorRevealType.InCenter;
   }
 }
 

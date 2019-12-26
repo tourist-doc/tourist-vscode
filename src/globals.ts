@@ -1,9 +1,9 @@
 import { AbsoluteTourStop, BrokenTourStop, Tour, Tourist } from "tourist-core";
 import * as vscode from "vscode";
 
-import { readdir } from "fs-extra";
+import { readdir, pathExists } from "fs-extra";
 import { join } from "path";
-import { tourDirectories, readOnlyByDefault } from "./config";
+import { readOnlyByDefault, tourDirectories } from "./config";
 import { context } from "./extension";
 import { findWithUri, getStopIndex, TourFile } from "./tourFile";
 import { pathsEqual } from "./util";
@@ -123,12 +123,18 @@ async function findKnownTours() {
   }
 
   // Find .tour files in each of the tour directories specified in config
-  for (const dirPath of await tourDirectories()) {
-    for (const tourPath of await readdir(dirPath)) {
-      const uri = vscode.Uri.file(join(dirPath, tourPath));
-      if (tourPath.endsWith(".tour")) {
-        known.add(uri);
+  for (const dirPath of tourDirectories()) {
+    if (await pathExists(dirPath)) {
+      for (const tourPath of await readdir(dirPath)) {
+        const uri = vscode.Uri.file(join(dirPath, tourPath));
+        if (tourPath.endsWith(".tour")) {
+          known.add(uri);
+        }
       }
+    } else {
+      vscode.window.showWarningMessage(
+        `Could not find tour directory ${dirPath}.`,
+      );
     }
   }
 
