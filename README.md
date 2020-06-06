@@ -54,7 +54,12 @@ Controls" in the tourist user settings.
 
 ## Development
 
-This project is a Visual Studio Code plugin. In order to run the plugin, open
-the top-level directory in VSCode and simply run the debugger.
+This project is a Visual Studio Code plugin. Make sure you have `npm` on your
+system, then run
+```
+npm install
+```
+After that, simply open the top-level directory in VSCode and run the
+debugger.
 
 A new editor window should open with the Tourist extension running!
