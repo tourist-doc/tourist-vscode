@@ -1,11 +1,11 @@
 import { template } from "dot";
 import { Tour } from "tourist-core";
+import * as vscode from "vscode";
 import * as commands from "./commands";
 import * as config from "./config";
 import { tourState } from "./globals";
 import { TourFile } from "./tourFile";
 import { TouristWebview } from "./webview";
-import * as vscode from "vscode";
 
 interface TourTemplateArgs {
   tf: TourFile;

@@ -13,7 +13,7 @@ const sanitize = require("sanitize-filename");
 import * as config from "./config";
 import { context, processTourFile, saveTour, updateGUI } from "./extension";
 import * as globals from "./globals";
-import { findWithUri, getStopIndex, TourFile, isTourFile } from "./tourFile";
+import { findWithUri, getStopIndex, isTourFile, TourFile } from "./tourFile";
 import {
   quickPickRepoName,
   quickPickTourFile,

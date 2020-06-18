@@ -8,9 +8,8 @@ import {
   workspace,
 } from "vscode";
 import * as codeLenses from "./codeLenses";
-import { TouristWebview } from "./webview";
-import * as vscode from "vscode";
 import { updateColor } from "./statusBar";
+import { TouristWebview } from "./webview";
 
 let activeTourstopDecorationTypeCached: TextEditorDecorationType | undefined;
 let inactiveTourstopDecorationTypeCached: TextEditorDecorationType | undefined;
@@ -223,8 +222,8 @@ export function defaultTourSaveLocation() {
     .get<string>("tourist.defaultTourSaveLocation", "");
   return cfgVal
     ? cfgVal
-    : vscode.workspace.workspaceFolders
-    ? vscode.workspace.workspaceFolders[0].uri.fsPath
+    : workspace.workspaceFolders
+    ? workspace.workspaceFolders[0].uri.fsPath
     : "";
 }
 

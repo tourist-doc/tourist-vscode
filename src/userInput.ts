@@ -6,9 +6,9 @@ import {
 } from "tourist-core";
 import * as vscode from "vscode";
 
+import { newTour } from "./commands";
 import * as globals from "./globals";
 import { findWithUri, TourFile } from "./tourFile";
-import { newTour } from "./commands";
 
 /**
  * Controls how tourstops are displayed in QuickPicks

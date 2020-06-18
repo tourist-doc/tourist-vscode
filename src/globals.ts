@@ -1,7 +1,7 @@
 import { AbsoluteTourStop, BrokenTourStop, Tour, Tourist } from "tourist-core";
 import * as vscode from "vscode";
 
-import { readdir, pathExists } from "fs-extra";
+import { pathExists, readdir } from "fs-extra";
 import { join } from "path";
 import { readOnlyByDefault, tourDirectories } from "./config";
 import { context } from "./extension";
