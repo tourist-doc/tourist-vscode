@@ -136,7 +136,8 @@
     <textarea
       id="description-textarea"
       placeholder="Type some information about this tour - you can use markdown too!"
-      >{{=it.editingDescription}}</textarea
+    >
+{{=it.editingDescription}}</textarea
     >
     <br />
     <span id="description-controls">
@@ -159,8 +160,7 @@
       id="description"
       oncontextmenu="vscode.postMessage({command: 'gotoTourstop', stopIndex: '0'});"
     >
-      {{=it.descriptionHTML}}
-      {{? !it.descriptionHTML }}
+      {{=it.descriptionHTML}} {{? !it.descriptionHTML }}
       <div id="no-description">
         You can add a short description to your tour here!
       </div>
@@ -174,9 +174,7 @@
     <div id="no-stops">
       No stops yet! You can add one with tourist.addTourstop
     </div>
-    {{?}}
-
-    {{~it.tour.stops :stop:idx}}
+    {{?}} {{~it.tour.stops :stop:idx}}
     <span class="tourstop">
       {{? stop.absPath === undefined }}
       <a
@@ -205,9 +203,7 @@
       </a>
     </span>
     <br />
-    {{~}}
-
-    {{? it.tf.repositories.length > 0 }}
+    {{~}} {{? it.tf.repositories.length > 0 }}
     <h2>Repositories</h2>
     {{~it.tf.repositories :repo:idx}}
     <span class="repo">
@@ -220,7 +216,6 @@
       >)
     </span>
     <br />
-    {{~}}
-    {{?}}
+    {{~}} {{?}}
   </body>
 </html>

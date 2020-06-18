@@ -14,15 +14,19 @@ import { TourWebview } from "./tourWebview";
 export class TouristWebview {
   public static async init() {
     this.tourWebview = new TourWebview(
-      (await vscode.workspace.openTextDocument(
-        context!.asAbsolutePath("dist/tour.html"),
-      )).getText(),
+      (
+        await vscode.workspace.openTextDocument(
+          context!.asAbsolutePath("dist/tour.html"),
+        )
+      ).getText(),
     );
 
     this.tourStopWebview = new TourStopWebview(
-      (await vscode.workspace.openTextDocument(
-        context!.asAbsolutePath("dist/tourstop.html"),
-      )).getText(),
+      (
+        await vscode.workspace.openTextDocument(
+          context!.asAbsolutePath("dist/tourstop.html"),
+        )
+      ).getText(),
     );
   }
 
