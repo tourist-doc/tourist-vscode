@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import * as commands from "./commands";
 import * as config from "./config";
 import { context } from "./extension";
-import { tourState } from "./globals";
+import { tourState, touristClient } from "./globals";
 import { TourStopWebview } from "./tourStopWebview";
 import { TourWebview } from "./tourWebview";
 
@@ -14,15 +14,19 @@ import { TourWebview } from "./tourWebview";
 export class TouristWebview {
   public static async init() {
     this.tourWebview = new TourWebview(
-      (await vscode.workspace.openTextDocument(
-        context!.asAbsolutePath("dist/tour.html"),
-      )).getText(),
+      (
+        await vscode.workspace.openTextDocument(
+          context!.asAbsolutePath("dist/tour.html"),
+        )
+      ).getText(),
     );
 
     this.tourStopWebview = new TourStopWebview(
-      (await vscode.workspace.openTextDocument(
-        context!.asAbsolutePath("dist/tourstop.html"),
-      )).getText(),
+      (
+        await vscode.workspace.openTextDocument(
+          context!.asAbsolutePath("dist/tourstop.html"),
+        )
+      ).getText(),
     );
   }
 
@@ -36,7 +40,7 @@ export class TouristWebview {
     }
 
     if (tourState) {
-      if (tourState.currentStop) {
+      if (tourState.stopId) {
         await this.tourStopWebview.update();
       } else {
         await this.tourWebview.update();
@@ -73,7 +77,7 @@ export class TouristWebview {
       });
       this.panel.webview.onDidReceiveMessage(async (msg) => {
         if (tourState) {
-          if (tourState.currentStop) {
+          if (tourState.stopId) {
             await this.tourStopWebview.handleMessage(msg);
           } else {
             await this.tourWebview.handleMessage(msg);

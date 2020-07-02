@@ -44,6 +44,11 @@
     ],
     "commands": [
       {
+        "command": "tourist.testCommand",
+        "title": "Is Dumb",
+        "category": "Tourist"
+      },
+      {
         "command": "tourist.gotoTourstop",
         "title": "Go to tour stop",
         "category": "Tourist"
@@ -323,6 +328,12 @@
           "type": "number",
           "description": "The font size, in pixel, used in the webview.",
           "default": 15
+        },
+        "tourist.binaryPath": {
+          "type": "string",
+          "markdownDescription": "The path to the tourist binary",
+          "default": "tourist",
+          "scope": "machine"
         },
         "tourist.tourDirectories": {
           "type": "array",

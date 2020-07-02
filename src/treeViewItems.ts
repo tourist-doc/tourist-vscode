@@ -17,12 +17,9 @@ export class TourFileTreeItem extends vscode.TreeItem {
     this.command = {
       title: "startTour",
       command: "tourist.startTour",
-      arguments: [tourFile.path],
     };
     this.contextValue = "tour";
-    this.tooltip = `${tourFile.stops.length} stops`;
-    this.tourFile = tourFile;
-    this.uri = tourFile.path;
+    this.tooltip = `${tv.stops.length} stops`;
   }
 }
 

@@ -3,15 +3,16 @@ import { AbsoluteTourStop, BrokenTourStop } from "tourist-core";
 import * as vscode from "vscode";
 import * as commands from "./commands";
 import * as config from "./config";
-import { tourState } from "./globals";
+import { tourState, touristClient } from "./globals";
 import { findWithID } from "./tourFile";
 import { TouristWebview } from "./webview";
+import { StopView } from "./touristClient";
 
 interface TourStopTemplateArgs {
-  stop: AbsoluteTourStop | BrokenTourStop;
+  stop: StopView;
+  isBroken: boolean;
   bodyHTML: string;
   editingBody?: string;
-  readOnly: boolean;
 }
 export class TourStopWebview {
   protected template: (args: TourStopTemplateArgs) => string;
@@ -28,29 +29,40 @@ export class TourStopWebview {
   }
 
   public async update() {
-    const panel = TouristWebview.getPanel();
-    panel.title = tourState!.currentStop!.title;
+    if (tourState && tourState.stopId) {
+      const sv = await touristClient.viewStop(
+        tourState.tourId,
+        tourState.stopId,
+      );
+      const stopStatus = await touristClient.locateStop(
+        tourState.tourId,
+        tourState.stopId,
+        true,
+      );
 
-    if (tourState!.currentStop!.body) {
-      const body: string =
-        (await vscode.commands.executeCommand(
-          "markdown.api.render",
-          tourState!.currentStop!.body,
-        )) || "";
-      panel.webview.html = this.template!({
-        stop: tourState!.currentStop!,
-        bodyHTML: body,
-        editingBody: this.editingBody,
-        readOnly: tourState!.readOnly,
-      });
+      const panel = TouristWebview.getPanel();
+      panel.title = sv.title;
+
+      if (sv.description) {
+        const body: string =
+          (await vscode.commands.executeCommand(
+            "markdown.api.render",
+            sv.description,
+          )) || "";
+        panel.webview.html = this.template!({
+          stop: sv,
+          isBroken: !stopStatus,
+          bodyHTML: sv.description,
+          editingBody: this.editingBody,
+        });
+      }
     }
   }
 
-  public setEditing(editing: boolean) {
-    this.editingBody = editing ? tourState!.currentStop!.body || "" : undefined;
-  }
-
   public async handleMessage(message: any) {
+    if (!tourState || !tourState.stopId) {
+      return;
+    }
     switch (message.command) {
       case "nextTourstop":
         await commands.nextTourStop();
@@ -59,25 +71,30 @@ export class TourStopWebview {
         await commands.prevTourStop();
         break;
       case "editTitle":
-        await commands.editTitle(tourState!.currentStop);
+        await commands.editTitle();
         break;
       case "editBody":
-        this.setEditing(true);
+        const sv = await touristClient.viewStop(
+          tourState.tourId,
+          tourState.stopId,
+        );
+        this.editingBody = sv.description || "";
         break;
       case "editBodyCancel":
-        this.setEditing(false);
+        this.editingBody = undefined;
         break;
       case "editBodySave":
-        this.setEditing(false);
-        if (
-          tourState!.currentStop !== undefined &&
-          message.newBody !== undefined
-        ) {
-          await commands.editBody(tourState!.currentStop, message.newBody);
+        this.editingBody = undefined;
+        if (tourState?.stopId) {
+          await touristClient.editStopMetadata(
+            tourState.tourId,
+            tourState.stopId,
+            { description: message.newBody },
+          );
         }
         break;
       case "backToTour":
-        tourState!.currentStop = undefined;
+        tourState.stopId = undefined;
         break;
       case "gotoChildStop":
         const tf = findWithID(message.tourId);

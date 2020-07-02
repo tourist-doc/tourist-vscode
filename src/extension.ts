@@ -12,6 +12,7 @@ import { findWithUri, resolve, TourFile } from "./tourFile";
 import * as treeView from "./treeView";
 import * as util from "./util";
 import { TouristWebview } from "./webview";
+import { TourId, StopId } from "./touristClient";
 
 export let context: vscode.ExtensionContext | undefined;
 
@@ -123,7 +124,7 @@ export function showDecorations() {
     return;
   }
 
-  const current = globals.tourState.currentStop;
+  const current = globals.tourState.stopId;
   for (const editor of vscode.window.visibleTextEditors) {
     let activeTourStops = [] as vscode.Range[];
     if (
@@ -174,20 +175,16 @@ export async function saveTour(tf: TourFile) {
  * Updates global state and the GUI to reflect a given tour file
  * @param tf The TourFile
  */
-export async function processTourFile(tf: TourFile, save = true) {
-  console.debug(`Processing TourFile ${tf.id}, save=${save}`);
-  const tour = await resolve(tf, save);
-  if (tour) {
-    await globals.setTour(tf, tour);
-    if (save) {
-      saveTour(tf);
-    }
+export async function processTourFile(
+  tourId: TourId,
+  path: vscode.Uri,
+  save: boolean = true,
+) {
+  console.debug(`Processing TourFile ${tourId}`);
 
-    if (globals.tourState && globals.tourState.currentStop) {
-      globals.tourState.currentStop = globals.tourState.tour.stops.find((s) => {
-        return s.id === globals.tourState!.currentStop!.id;
-      });
-    }
-    updateGUI();
+  if (save) {
+    globals.touristClient.saveTour(tourId, path.toString());
   }
+
+  updateGUI();
 }

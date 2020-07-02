@@ -137,7 +137,8 @@
       <textarea
         id="body-textarea"
         placeholder="Type some information about this stop - you can use markdown too!"
-        >{{=it.editingBody}}</textarea
+      >
+{{=it.editingBody}}</textarea
       >
       <br />
       <span id="body-controls">
@@ -157,8 +158,7 @@
       {{??}}
 
       <div id="body">
-        {{=it.bodyHTML}}
-        {{? !it.bodyHTML }}
+        {{=it.bodyHTML}} {{? !it.bodyHTML }}
         <div id="no-body">
           Put some information about this stop here - you can use markdown too!
         </div>
@@ -178,19 +178,15 @@
     </div>
 
     <div id="child-stops">
-      {{? !it.readOnly || it.stop.childStops.length > 0 }}
+      {{? !it.readOnly || it.stop.children.length > 0 }}
       <hr size="1" />
 
       <h2>Linked Stops</h2>
-      {{?}}
-
-      {{? !it.readOnly && it.stop.childStops.length === 0 }}
+      {{?}} {{? !it.readOnly && it.stop.children.length === 0 }}
       <div id="no-linked">
         You can link to stops on other tours here!
       </div>
-      {{?}}
-
-      {{~it.stop.childStops :stop:idx}}
+      {{?}} {{~it.stop.children :stop}}
       <a
         class="child-stop"
         title="{{=stop.tourId}}"
@@ -209,15 +205,9 @@
       >
     </div>
 
-    {{? it.stop.errors }}
+    {{? it.isBroken }}
     <div class="errors">
-      <h2>Errors</h2>
-      {{~it.stop.errors :error:idx}}
-      <span class="error">
-        {{=error}}
-      </span>
-      <br />
-      {{~}}
+      STOP IS BROKEN
     </div>
     {{?}}
   </body>

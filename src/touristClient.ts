@@ -25,12 +25,13 @@ type Method =
 
 type Path = string;
 
-type TourId = string;
-interface TourMetadata {
+export type TourId = string;
+
+export interface TourMetadata {
   title?: string;
   description?: string;
 }
-interface TourView {
+export interface TourView {
   title: string;
   description: string;
   // A list of pairs containing `(stop_id, stop_title)`.
@@ -41,13 +42,14 @@ interface TourView {
   edit: boolean;
 }
 
-type StopId = number;
-interface StopMetadata {
+export type StopId = string;
+
+export interface StopMetadata {
   title?: string;
   description?: string;
 }
 
-interface StopReferenceView {
+export interface StopReferenceView {
   tourId: TourId;
   tourTitle?: string;
   // `undefined` if the reference links to the root of the tour.
@@ -56,7 +58,7 @@ interface StopReferenceView {
   stopTitle?: string;
 }
 
-interface StopView {
+export interface StopView {
   title: string;
   description: string;
   repository: string;
@@ -74,9 +76,9 @@ export class TouristRpcClient {
    *
    * @throws If unable to connect
    */
-  public async connect() {
+  public async connect(pathToBinary: string) {
     try {
-      this.touristProcess = child_process.spawn("tourist", ["serve"]);
+      this.touristProcess = child_process.spawn(pathToBinary, ["serve"]);
     } catch (e) {
       console.error(`Caught err: ${e}`);
       throw e;
@@ -257,7 +259,13 @@ export class TouristRpcClient {
     });
 
     console.log(`RPC request: ${request}`);
-    this.touristProcess!.stdin.write(request + "\n");
+    try{ 
+      this.touristProcess!.stdin.write(request + "\n");
+    }
+    catch(err) {
+      console.log(err);
+      throw err;
+    }
 
     // TODO: Handle concurrent requests
     return new Promise((resolve) => {

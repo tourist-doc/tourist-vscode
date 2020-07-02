@@ -101,11 +101,13 @@
     </script>
 
     <div id="header">
+      {{? it.tourView.stops.length > 0 }}
       <a
         title="Start tour"
-        onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '0'});"
+        onclick="vscode.postMessage({command: 'gotoTourstop', stopId: 'it.tourView.stops[0][0]'});"
         ><i class="material-icons center-icon">play_arrow</i>Start tour</a
       >
+      {{?}}
     </div>
 
     <h1>
@@ -136,7 +138,8 @@
     <textarea
       id="description-textarea"
       placeholder="Type some information about this tour - you can use markdown too!"
-      >{{=it.editingDescription}}</textarea
+    >
+{{=it.editingDescription}}</textarea
     >
     <br />
     <span id="description-controls">
@@ -154,13 +157,11 @@
     </span>
 
     {{??}}
-
     <div
       id="description"
-      oncontextmenu="vscode.postMessage({command: 'gotoTourstop', stopIndex: '0'});"
+      oncontextmenu="vscode.postMessage({command: 'gotoTourstop', stopIndex: 'it.tour.stops[0][0]'});"
     >
-      {{=it.descriptionHTML}}
-      {{? !it.descriptionHTML }}
+      {{=it.descriptionHTML}} {{? !it.descriptionHTML }}
       <div id="no-description">
         You can add a short description to your tour here!
       </div>
@@ -170,24 +171,22 @@
     {{?}}
 
     <h2>Stops</h2>
-    {{? it.tour.stops.length === 0 }}
+    {{? it.tourView.stops.length === 0 }}
     <div id="no-stops">
       No stops yet! You can add one with tourist.addTourstop
     </div>
-    {{?}}
-
-    {{~it.tour.stops :stop:idx}}
+    {{?}} {{~it.tourView.stops : stop}}
     <span class="tourstop">
       {{? stop.absPath === undefined }}
       <a
         title="This stop is broken. Move it to the correct location or delete it."
-        onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
+        onclick="vscode.postMessage({command: 'gotoTourstop', stopId: '{{=stop[0]}}'});"
         ><i class="material-icons warning-symbol">warning</i> {{=stop.title}}
       </a>
       {{??}}
       <a
-        title="{{=stop.title}}"
-        onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=idx}}'});"
+        title="{{=stop[1]}}"
+        onclick="vscode.postMessage({command: 'gotoTourstop', stopIndex: '{{=stop[0]}}'});"
         ><i class="material-icons warning-symbol hidden">warning</i>
         {{=stop.title}}</a
       >
@@ -195,7 +194,7 @@
       <a
         class="delete-stop"
         title="Delete stop"
-        onclick="vscode.postMessage({command: 'deleteStop', stopIndex: '{{=idx}}'})"
+        onclick="vscode.postMessage({command: 'deleteStop', stopId: '{{=stop[0]}}'})"
         {{?
         it.readOnly}}hidden{{?}}
       >
@@ -205,9 +204,7 @@
       </a>
     </span>
     <br />
-    {{~}}
-
-    {{? it.tf.repositories.length > 0 }}
+    {{~}} {{? it.tf.repositories.length > 0 }}
     <h2>Repositories</h2>
     {{~it.tf.repositories :repo:idx}}
     <span class="repo">
@@ -220,7 +217,6 @@
       >)
     </span>
     <br />
-    {{~}}
-    {{?}}
+    {{~}} {{?}}
   </body>
 </html>

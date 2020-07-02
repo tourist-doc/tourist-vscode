@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { statusBarItemColor } from "./config";
-import { tourState } from "./globals";
+import { tourState, touristClient } from "./globals";
 
 const statusBarItem = vscode.window.createStatusBarItem(
   vscode.StatusBarAlignment.Right,
@@ -11,12 +11,16 @@ export function updateColor() {
   statusBarItem.color = statusBarItemColor();
 }
 
-export function refresh() {
-  if (tourState && tourState.currentStop) {
-    statusBarItem.text = `$(milestone) ${tourState.currentStop.title}`;
+export async function refresh() {
+  if (tourState && tourState.stopId) {
+    statusBarItem.text = `$(milestone) ${
+      (await touristClient.viewStop(tourState.tourId, tourState.stopId)).title
+    }`;
     statusBarItem.command = "tourist.gotoTourstop";
   } else if (tourState) {
-    statusBarItem.text = `$(milestone) ${tourState.tourFile.title}`;
+    statusBarItem.text = `$(milestone) ${
+      (await touristClient.viewTour(tourState.tourId)).title
+    }`;
     statusBarItem.command = "tourist.startTour";
   } else {
     statusBarItem.text = `$(milestone) Start a tour`;

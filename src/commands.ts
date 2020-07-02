@@ -21,11 +21,13 @@ import {
 } from "./userInput";
 import { findRepoRoot } from "./util";
 import { TouristWebview } from "./webview";
+import { TourId } from "./touristClient";
 
 /**
  * Exports a function corresponding to every VSCode command we contribute.
  */
 const commands = {
+  "tourist.testCommand": testCommand,
   "tourist.addBreakpoints": addBreakpoints,
   "tourist.addTourstop": addTourStop,
   "tourist.deleteTour": deleteTour,
@@ -50,6 +52,11 @@ const commands = {
   "tourist.toggleWebview": toggleWebview,
   "tourist.unmapRepo": unmapRepo,
 };
+
+export async function testCommand() {
+  let ret = await globals.touristClient.createTour();
+  console.error(ret);
+}
 
 /**
  * Registers each command with the `vscode` API, called on activation.
@@ -723,9 +730,7 @@ export async function unmapRepo(repoName?: string): Promise<void> {
 /**
  * Creates a new Tour, saving the .tour file to disk
  */
-export async function newTour(
-  path?: vscode.Uri,
-): Promise<TourFile | undefined> {
+export async function newTour(path?: vscode.Uri): Promise<TourId | undefined> {
   const folderName = vscode.workspace.rootPath
     ? vscode.workspace.rootPath.split(new RegExp(/\\|\//)).pop()
     : "My Tour";
@@ -745,16 +750,14 @@ export async function newTour(
     path = await vscode.window.showSaveDialog({ defaultUri });
   }
 
-  if (path) {
-    const tf = await globals.tourist.init(title, "");
-    const tfWithPath = {
-      path,
-      ...tf,
-    };
-    globals.newTourFile(tfWithPath);
-    await processTourFile(tfWithPath, true);
-    return tfWithPath;
+  if (!path) {
+    return;
   }
+
+  const tourId = await globals.touristClient.createTour(title);
+  globals.setTour(tourId);
+  await processTourFile(tourId, path);
+  return tourId;
 }
 
 export async function openTourFile(tf?: TourFile) {

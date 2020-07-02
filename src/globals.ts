@@ -3,11 +3,12 @@ import * as vscode from "vscode";
 
 import { readdir } from "fs-extra";
 import { join } from "path";
-import { readOnlyByDefault, tourDirectories } from "./config";
+import { readOnlyByDefault, tourDirectories, binaryPath } from "./config";
 import { context } from "./extension";
 import { findWithUri, getStopIndex, TourFile } from "./tourFile";
-import { TouristRpcClient } from "./touristClient";
+import { TouristRpcClient, StopId } from "./touristClient";
 import { pathsEqual } from "./util";
+import { TourId } from "./touristClient";
 
 /**
  * Global state and resources
@@ -26,35 +27,20 @@ const knownTourFiles = [] as TourFile[];
 /**
  * Sets the active tour file to `tf`, its path to `path`, and updates related state
  */
-export async function setTour(tf: TourFile, tour: Tour) {
-  // TODO: if the tour changed, we should make sure tourState.currentStop = undefined
-  if (tourState) {
-    tourState.tourFile = tf;
-    tourState.tour = tour;
-  } else {
-    tourState = new TourState(tf, tour);
-  }
+export async function setTour(tourId: TourId) {
+  tourState = new TourState(tourId);
 }
 
 /**
  * Represents the state of the active Tour
  */
 export class TourState {
-  public tour: Tour;
-  public tourFile: TourFile;
-  public currentStop: AbsoluteTourStop | BrokenTourStop | undefined;
-  public readOnly: boolean;
+  public tourId: TourId;
+  public stopId?: StopId;
 
-  constructor(
-    tf: TourFile,
-    tour: Tour,
-    currentStop?: AbsoluteTourStop | BrokenTourStop,
-    readOnly?: boolean,
-  ) {
-    this.tour = tour;
-    this.tourFile = tf;
-    this.currentStop = currentStop;
-    this.readOnly = readOnly !== undefined ? readOnly : readOnlyByDefault();
+  constructor(tourId: TourId, stopId?: StopId) {
+    this.tourId = tourId;
+    this.stopId = stopId;
   }
 
   /**
@@ -83,8 +69,8 @@ export class TourState {
   private stopAtOffset(
     offset: number,
   ): AbsoluteTourStop | BrokenTourStop | undefined {
-    if (this.currentStop) {
-      const stopIdx = getStopIndex(this.currentStop)! + offset;
+    if (this.stopId) {
+      const stopIdx = getStopIndex(this.stopId)! + offset;
       if (stopIdx >= 0 && stopIdx < this.tour.stops.length) {
         return this.tour.stops[stopIdx];
       }
@@ -98,7 +84,7 @@ export class TourState {
  * Called on extension startup
  */
 export async function init() {
-  await touristClient.connect();
+  await touristClient.connect(binaryPath());
 
   const touristJSON = context!.globalState.get<string>("touristInstance");
   if (touristJSON) {

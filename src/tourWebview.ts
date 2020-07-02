@@ -2,14 +2,14 @@ import { template } from "dot";
 import { Tour } from "tourist-core";
 import * as commands from "./commands";
 import * as config from "./config";
-import { tourState } from "./globals";
+import { tourState, touristClient, tourist } from "./globals";
 import { TourFile } from "./tourFile";
+import { TourView } from "./touristClient";
 import { TouristWebview } from "./webview";
 import * as vscode from "vscode";
 
 interface TourTemplateArgs {
-  tf: TourFile;
-  tour: Tour;
+  tourView: TourView;
   descriptionHTML: string;
   editingDescription?: string;
   readOnly: boolean;
@@ -30,56 +30,58 @@ export class TourWebview {
   }
 
   public async update() {
-    const panel = TouristWebview.getPanel();
-    panel.title = tourState!.tourFile.title;
-    const description: string =
-      (await vscode.commands.executeCommand(
-        "markdown.api.render",
-        tourState!.tourFile.description,
-      )) || "";
-    panel.webview.html = this.template!({
-      tf: tourState!.tourFile,
-      tour: tourState!.tour,
-      descriptionHTML: description,
-      editingDescription: this.editingDescription,
-      readOnly: tourState!.readOnly,
-    });
-  }
+    if (tourState) {
+      const tv = await touristClient.viewTour(tourState.tourId);
 
-  public setEditing(editing: boolean) {
-    this.editingDescription = editing
-      ? tourState!.tourFile.description || ""
-      : undefined;
+      const panel = TouristWebview.getPanel();
+      panel.title = tv.title;
+      const description: string =
+        (await vscode.commands.executeCommand(
+          "markdown.api.render",
+          tv.description,
+        )) || "";
+      panel.webview.html = this.template!({
+        tourView: tv,
+        descriptionHTML: description,
+        editingDescription: this.editingDescription,
+        readOnly: !tv.edit,
+      });
+    }
   }
 
   public async handleMessage(message: any) {
+    if (!tourState) {
+      return;
+    }
     switch (message.command) {
       case "editTitle":
-        await commands.renameTour(tourState!.tourFile);
+        await touristClient.editTourMetadata(tourState.tourId, {
+          title: message.command,
+        });
         break;
       case "gotoTourstop":
-        await commands.gotoTourStop(tourState!.tour.stops[message.stopIndex]);
+        await commands.gotoTourStop(message.stopId);
         break;
       case "mapRepo":
         await commands.mapRepo(message.repo);
         break;
       case "editDescription":
-        this.setEditing(true);
+        const tv = await touristClient.viewTour(tourState!.tourId);
+        this.editingDescription = tv.description || "";
         break;
       case "editDescriptionCancel":
-        this.setEditing(false);
+        this.editingDescription = undefined;
         break;
       case "editDescriptionSave":
-        this.setEditing(false);
+        this.editingDescription = undefined;
         if (message.newDescription !== undefined) {
-          await commands.editDescription(
-            tourState!.tourFile,
-            message.newDescription,
-          );
+          await touristClient.editTourMetadata(tourState.tourId, {
+            description: message.newDescription,
+          });
         }
         break;
       case "deleteStop":
-        await commands.deleteTourStop(tourState!.tour.stops[message.stopIndex]);
+        await touristClient.removeStop(tourState.tourId, message.stopId);
         break;
     }
 

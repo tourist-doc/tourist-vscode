@@ -43,9 +43,6 @@ export async function resolve(
   tf: TourFile,
   force = false,
 ): Promise<Tour | undefined> {
-  if (!force && tourCache.has(tf)) {
-    return tourCache.get(tf);
-  }
   try {
     const tour = await window.withProgress<Tour>(
       {

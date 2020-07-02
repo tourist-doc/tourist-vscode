@@ -131,6 +131,12 @@ export function webviewFontSize(): number {
     .get<number>("tourist.webviewFontSize", 15);
 }
 
+export function binaryPath(): string {
+  return workspace
+    .getConfiguration()
+    .get<string>("tourist.binaryPath", "tourist");
+}
+
 /**
  * The directories in which we look for .tour files
  */
