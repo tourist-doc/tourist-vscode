@@ -1,38 +1,32 @@
-import {
-  AbsoluteTourStop,
-  BrokenTourStop,
-  isNotBroken,
-  Tour,
-} from "tourist-core";
 import * as vscode from "vscode";
 
 import * as globals from "./globals";
 import { findWithUri, TourFile } from "./tourFile";
 import { newTour } from "./commands";
+import { TourView, StopId, TourId } from "./touristClient";
 
 /**
  * Controls how tourstops are displayed in QuickPicks
  */
 class TourstopQuickPickItem implements vscode.QuickPickItem {
-  public tourstop: AbsoluteTourStop | BrokenTourStop;
+  public tourstop: StopId;
 
   public label: string;
   public detail: string;
-  public description: string;
 
-  constructor(tourstop: AbsoluteTourStop | BrokenTourStop) {
+  constructor(tourstop: StopId, title: string) {
     this.tourstop = tourstop;
-    this.label = tourstop.title;
-    this.detail = tourstop.body || "";
+    this.label = title;
+    this.detail = "";
 
-    if (isNotBroken(tourstop)) {
-      const filename = tourstop.absPath
-        ? tourstop.absPath.split(/[/\\]/).pop()
-        : "";
-      this.description = `${filename}, line ${tourstop.line}`;
-    } else {
-      this.description = "";
-    }
+    // if (isNotBroken(tourstop)) {
+    //   const filename = tourstop.absPath
+    //     ? tourstop.absPath.split(/[/\\]/).pop()
+    //     : "";
+    //   this.description = `${filename}, line ${tourstop.line}`;
+    // } else {
+    //   this.description = "";
+    // }
   }
 }
 
@@ -41,18 +35,18 @@ class TourstopQuickPickItem implements vscode.QuickPickItem {
  * @param tour The tour from which to pick a stop
  */
 export async function quickPickTourstop(
-  tour?: Tour,
-): Promise<AbsoluteTourStop | BrokenTourStop | undefined> {
+  tour?: TourId,
+): Promise<StopId | undefined> {
   if (!tour) {
     if (globals.tourState) {
-      tour = globals.tourState.tour;
+      tour = globals.tourState.tourId;
     } else {
       return undefined;
     }
   }
 
-  const quickPickItems = tour.stops.map(
-    (stop) => new TourstopQuickPickItem(stop),
+  const quickPickItems = (await globals.touristClient.viewTour(tour)).stops.map(
+    ([id, title]) => new TourstopQuickPickItem(id, title),
   );
   const item = await vscode.window.showQuickPick<TourstopQuickPickItem>(
     quickPickItems,
@@ -65,17 +59,15 @@ export async function quickPickTourstop(
  * Controls how TourFiles are displayed in QuickPicks
  */
 class TourFileQuickPickItem implements vscode.QuickPickItem {
-  public tf: TourFile;
+  public tf: TourId;
 
   public label: string;
   public detail: string;
-  public description: string;
 
-  constructor(tf: TourFile) {
+  constructor(tf: TourId) {
     this.tf = tf;
-    this.label = tf.title;
+    this.label = "";
     this.detail = "";
-    this.description = vscode.workspace.asRelativePath(tf.path);
   }
 }
 
@@ -104,7 +96,7 @@ async function getTourFileURI(): Promise<vscode.Uri | undefined> {
  */
 export async function quickPickTourFile(
   allowNew = true,
-): Promise<TourFile | undefined> {
+): Promise<TourId | undefined> {
   const tourFiles = await globals.knownTours();
   const fromFile: vscode.QuickPickItem = { label: "Open .tour file" };
   const newTourFile: vscode.QuickPickItem = { label: "Create new .tour file" };
@@ -128,7 +120,10 @@ export async function quickPickTourFile(
         return findWithUri(uri);
       }
     } else if (item.label === "Create new .tour file") {
-      return newTour();
+      const uri = await getTourFileURI();
+      if (uri) {
+        return newTour(uri);
+      }
     }
   }
 

@@ -1,5 +1,4 @@
 import { template } from "dot";
-import { AbsoluteTourStop, BrokenTourStop } from "tourist-core";
 import * as vscode from "vscode";
 import * as commands from "./commands";
 import * as config from "./config";

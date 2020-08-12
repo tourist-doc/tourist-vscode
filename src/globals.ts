@@ -1,13 +1,8 @@
-import { AbsoluteTourStop, BrokenTourStop, Tour, Tourist } from "tourist-core";
-import * as vscode from "vscode";
+import { Tourist } from "tourist-core";
 
-import { readdir } from "fs-extra";
-import { join } from "path";
-import { readOnlyByDefault, tourDirectories, binaryPath } from "./config";
+import { binaryPath } from "./config";
 import { context } from "./extension";
-import { findWithUri, getStopIndex, TourFile } from "./tourFile";
 import { TouristRpcClient, StopId } from "./touristClient";
-import { pathsEqual } from "./util";
 import { TourId } from "./touristClient";
 
 /**
@@ -21,8 +16,6 @@ export let tourist = new Tourist();
 export let tourState: TourState | undefined;
 
 export let touristClient = new TouristRpcClient();
-
-const knownTourFiles = [] as TourFile[];
 
 /**
  * Sets the active tour file to `tf`, its path to `path`, and updates related state
@@ -48,8 +41,18 @@ export class TourState {
    *
    * Returns undefined if there is no current stop or if the current stop is the first one
    */
-  public prevTourStop(): AbsoluteTourStop | BrokenTourStop | undefined {
-    return this.stopAtOffset(-1);
+  public async prevTourStop(): Promise<StopId | undefined> {
+    const tourView = await touristClient.viewTour(this.tourId);
+    let ind = 0;
+    while (ind < tourView.stops.length && tourView.stops[ind][0] != this.stopId) {
+      ind++;
+    }
+    if (ind == 0 || ind == tourView.stops.length) {
+      return undefined;
+    }
+    else {
+      return tourView.stops[ind - 1][0];
+    }
   }
 
   /**
@@ -57,8 +60,18 @@ export class TourState {
    *
    * @returns undefined if there is no current stop or if the current stop is the last one
    */
-  public nextTourStop(): AbsoluteTourStop | BrokenTourStop | undefined {
-    return this.stopAtOffset(1);
+  public async nextTourStop(): Promise<StopId | undefined> {
+    const tourView = await touristClient.viewTour(this.tourId);
+    let ind = 0;
+    while (ind < tourView.stops.length && tourView.stops[ind][0] != this.stopId) {
+      ind++;
+    }
+    if (ind == tourView.stops.length) {
+      return undefined;
+    }
+    else {
+      return tourView.stops[ind + 1][0];
+    }
   }
 
   /**
@@ -66,18 +79,19 @@ export class TourState {
    * @param offset The number of stops away. Positive=right, negative=left
    * @returns A tourstop or `undefined` if out of bounds
    */
-  private stopAtOffset(
-    offset: number,
-  ): AbsoluteTourStop | BrokenTourStop | undefined {
-    if (this.stopId) {
-      const stopIdx = getStopIndex(this.stopId)! + offset;
-      if (stopIdx >= 0 && stopIdx < this.tour.stops.length) {
-        return this.tour.stops[stopIdx];
-      }
-    }
+  // private async stopAtOffset(
+  //   offset: number,
+  // ): Promise<StopId | undefined> {
+  //   if (this.stopId) {
+  //     const stopIdx = getStopIndex(this.stopId)! + offset;
+  //     const tourView = await touristClient.viewTour(this.tourId)
+  //     if (stopIdx >= 0 && stopIdx < tourView.stops.length) {
+  //       return tourView.stops[stopIdx][0];
+  //     }
+  //   }
 
-    return undefined;
-  }
+  //   return undefined;
+  // }
 }
 
 /**
@@ -90,8 +104,6 @@ export async function init() {
   if (touristJSON) {
     tourist = Tourist.deserialize(touristJSON);
   }
-
-  await findKnownTours();
 }
 
 /**
@@ -105,67 +117,58 @@ export function clearTourState() {
  * Finds, parses, and returns all the TourFiles found in the current workspace
  * and in the directories listed in `tourDirectories`
  */
-async function findKnownTours() {
-  const known = new Set<vscode.Uri>();
+// async function findKnownTours() {
+//   const known = new Set<vscode.Uri>();
 
-  // Find .tour files in the current workspace
-  for (const uri of await vscode.workspace.findFiles("**/*.tour")) {
-    known.add(uri);
-  }
+//   // Find .tour files in the current workspace
+//   for (const uri of await vscode.workspace.findFiles("**/*.tour")) {
+//     known.add(uri);
+//   }
 
-  // Find .tour files in each of the tour directories specified in config
-  for (const dirPath of await tourDirectories()) {
-    for (const tourPath of await readdir(dirPath)) {
-      const uri = vscode.Uri.file(join(dirPath, tourPath));
-      if (tourPath.endsWith(".tour")) {
-        known.add(uri);
-      }
-    }
-  }
+//   // Find .tour files in each of the tour directories specified in config
+//   for (const dirPath of await tourDirectories()) {
+//     for (const tourPath of await readdir(dirPath)) {
+//       const uri = vscode.Uri.file(join(dirPath, tourPath));
+//       if (tourPath.endsWith(".tour")) {
+//         known.add(uri);
+//       }
+//     }
+//   }
 
-  const tfPromises = [] as Array<Promise<TourFile | undefined>>;
-  for (const uri of known) {
-    tfPromises.push(findWithUri(uri));
-  }
+//   const tfPromises = [] as Array<Promise<TourId | undefined>>;
+//   for (const uri of known) {
+//     tfPromises.push(findWithUri(uri));
+//   }
 
-  // Parse in parallel, then add them to known tours
-  for (const tf of await Promise.all(tfPromises)) {
-    if (tf) {
-      newTourFile(tf);
-    }
-  }
-}
+//   // Parse in parallel, then add them to known tours
+//   for (const tf of await Promise.all(tfPromises)) {
+//     if (tf) {
+//       newTourFile(tf);
+//     }
+//   }
+// }
 
 /**
  * Returns a list of all known tour files
  */
-export function knownTours(): TourFile[] {
-  return knownTourFiles;
+export async function knownTours(): Promise<[TourId, string]> {
+  return (await touristClient.listTours());
 }
 
 /**
  * Remove a tour file from the known list
  * @param tf The tour to forget
  */
-export function forgetTour(tf: TourFile) {
-  knownTourFiles.splice(knownTourFiles!.indexOf(tf), 1);
+export function forgetTour(tourId: TourId) {
+  touristClient.forgetTour(tourId);
 }
 
 /**
  * Adds a tour file to the known list
  * @param tf The tour to keep track of
  */
-export function newTourFile(tf?: TourFile) {
-  const isDupe = (tfUri: vscode.Uri) => {
-    for (const knownTF of knownTourFiles) {
-      if (pathsEqual(tfUri.fsPath, knownTF.path.fsPath)) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  if (tf && !isDupe(tf.path)) {
-    knownTourFiles.push(tf);
+export async function newTourFile(path?: string) {
+  if (path) {
+    touristClient.openTour(path, false);
   }
 }

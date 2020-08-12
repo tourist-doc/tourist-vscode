@@ -1,15 +1,13 @@
 import { TourStop } from "tourist-core";
 import {
-  AbsoluteTourStop,
-  BrokenTourStop,
   RepoState,
   Tour,
 } from "tourist-core/src/types";
-import { ProgressLocation, Uri, window, workspace } from "vscode";
+import { ProgressLocation, Uri, window } from "vscode";
 
 import { showError } from "./commands";
 import * as globals from "./globals";
-import { pathsEqual } from "./util";
+import { TourId } from "./touristClient";
 
 /**
  * A subtype of tourist::TourFile that holds a file path
@@ -26,7 +24,7 @@ export interface TourFile {
   path: Uri;
 }
 
-export function isTourFile(thing: any): thing is TourFile {
+export function isTourId(thing: any): thing is TourId {
   // TODO: more robust check - probably fine for now
   return thing.protocolVersion && thing.generator && thing.id;
 }
@@ -72,60 +70,60 @@ export async function resolve(
  * Finds the tour with the given URI, if one exists. Reads from disk if necessary.
  * @param uri The TourFile URI
  */
-export async function findWithUri(uri: Uri): Promise<TourFile | undefined> {
-  for (const knownTF of globals.knownTours()) {
-    if (pathsEqual(knownTF.path.path, uri.path)) {
-      return knownTF;
-    }
-  }
+// export async function findWithUri(uri: Uri): Promise<TourId | undefined> {
+//   for (const knownTF of globals.knownTours()) {
+//     if (pathsEqual(knownTF.path.path, uri.path)) {
+//       return knownTF;
+//     }
+//   }
 
-  // Read from disk
-  const tf = await parseTourFile(uri);
-  globals.newTourFile(tf);
-  return tf;
-}
+//   // Read from disk
+//   const tf = await parseTourFile(uri);
+//   globals.newTourFile(tf);
+//   return tf;
+// }
 
-export function getStopIndex(stop: AbsoluteTourStop | BrokenTourStop) {
-  const idx = globals.tourState!.tour.stops.findIndex((s) => {
-    return s.id === stop!.id;
-  });
-  return idx === -1 ? undefined : idx;
-}
+// export function getStopIndex(stop: StopId | undefined) {
+//   const idx = globals.tourState!.tour.stops.findIndex((s) => {
+//     return s.id === stop;
+//   });
+//   return idx === -1 ? undefined : idx;
+// }
 
 /**
  * Returns the tour with the given id, if one is known.
  * @param id A TourFile ID
  */
-export function findWithID(id: string): TourFile | undefined {
-  for (const tf of globals.knownTours()) {
-    if (tf.id === id) {
-      return tf;
-    }
-  }
+// export function findWithID(id: string): To | undefined {
+//   for (const tf of globals.knownTours()) {
+//     if (tf.id === id) {
+//       return tf;
+//     }
+//   }
 
-  return undefined;
-}
+//   return undefined;
+// }
 
 /**
  * Parses a TourFile from a location on disk
  * @param path The path to the TourFile
  */
-async function parseTourFile(tfUri: Uri): Promise<TourFile | undefined> {
-  const doc = await workspace.openTextDocument(tfUri);
-  try {
-    const tf = globals.tourist.deserializeTourFile(doc.getText());
-    return {
-      path: tfUri,
-      ...tf,
-    };
-  } catch (error) {
-    switch (error.code) {
-      case 400: // Invalid JSON string
-      case 401: // Invalid tour file
-      default:
-        showError(error, false);
-        break;
-    }
-    return undefined;
-  }
-}
+// async function parseTourFile(tfUri: Uri): Promise<TourFile | undefined> {
+//   const doc = await workspace.openTextDocument(tfUri);
+//   try {
+//     const tf = globals.tourist.deserializeTourFile(doc.getText());
+//     return {
+//       path: tfUri,
+//       ...tf,
+//     };
+//   } catch (error) {
+//     switch (error.code) {
+//       case 400: // Invalid JSON string
+//       case 401: // Invalid tour file
+//       default:
+//         showError(error, false);
+//         break;
+//     }
+//     return undefined;
+//   }
+// }
