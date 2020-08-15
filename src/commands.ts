@@ -18,7 +18,7 @@ import {
 } from "./userInput";
 import { findRepoRoot } from "./util";
 import { TouristWebview } from "./webview";
-import { TourId, StopId } from "./touristClient";
+import { TourId, StopId, Path } from "./touristClient";
 
 /**
  * Exports a function corresponding to every VSCode command we contribute.
@@ -33,7 +33,7 @@ const commands = {
   "tourist.editTitle": editTitle,
   "tourist.editTour": editTour,
   "tourist.gotoTourstop": gotoTourStop,
-  "tourist.linkTour": linkTour,
+  "tourist.linkStop": linkStop,
   "tourist.mapRepo": mapRepo,
   "tourist.moveTourstop": moveTourstop,
   "tourist.moveTourstopDown": moveTourstopDown,
@@ -42,7 +42,6 @@ const commands = {
   "tourist.nextTourstop": nextTourStop,
   "tourist.openTourFile": openTourFile,
   "tourist.prevTourstop": prevTourStop,
-  "tourist.refreshTour": refreshTour,
   "tourist.renameTour": renameTour,
   "tourist.startTour": startTour,
   "tourist.stopTour": stopTour,
@@ -487,22 +486,6 @@ export async function stopTour(): Promise<void> {
 }
 
 /**
- * Update the tourstop locations in a TourFile to reflect the current version
- */
-export async function refreshTour(uri: vscode.Uri, tourId?: TourId): Promise<void> {
-  if (!tourId) {
-    tourId = await quickPickTourFile();
-  }
-  if (!tourId) {
-    return;
-  }
-
-  globals.touristClient.refreshTour(tourId);
-
-  await processTourFile(tourId, uri, true);
-}
-
-/**
  * Changes the title of the tour
  */
 export async function renameTour(tf?: TourId, name?: string): Promise<void> {
@@ -669,36 +652,29 @@ export async function newTour(path?: vscode.Uri): Promise<TourId | undefined> {
   return tourId;
 }
 
-export async function openTourFile(tf?: TourId) {
-  if (!tf) {
-    tf = await quickPickTourFile();
+export async function openTourFile(path: Path) {
+  let tour: string | undefined;
+  if (!path) {
+    tour = await quickPickTourFile();
   }
-  if (!tf) {
+  if (!tour) {
     return;
   }
 
-  await globals.touristClient.openTour();
+  await globals.touristClient.openTour(path, true);
 }
 
-export async function linkTour(tf?: TourId) {
-  if (!tf) {
-    tf = await quickPickTourFile();
+export async function linkStop(path: vscode.Uri, tourId: TourId, stopId: StopId, otherTourId: string, otherStopId: StopId) {
+  let qptourId: string | undefined;
+  if (!tourId) {
+    qptourId = await quickPickTourFile();
   }
-  if (!tf) {
+  if (!qptourId) {
     return;
   }
 
-  ) {
-    globals.tourist.link(
-      globals.tourState!.tourFile,
-      globals.tourState!.currentStop!.id!,
-      {
-        tourId: tf.id,
-        stopNum: 0,
-      },
-    );
-    await processTourFile(globals.tourState!.tourFile);
-  }
+  await globals.touristClient.linkStop(tourId, stopId, otherTourId, otherStopId);
+  await processTourFile(tourId, path, true);
 }
 
 /**
@@ -777,4 +753,4 @@ export function showError(error: TouristError, expected = true) {
       });
   }
 }
-}
+

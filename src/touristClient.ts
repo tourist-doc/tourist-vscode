@@ -23,7 +23,7 @@ type Method =
   | "delete_tour"
   | "index_repository";
 
-type Path = string;
+export type Path = string;
 
 export type TourId = string;
 
@@ -221,7 +221,7 @@ export class TouristRpcClient {
 
   // Save a tour to disk. If the tour is new, a path must be provided; otherwise the path can be
   // left empty.
-  public async saveTour(tourId: TourId, path: Path) {
+  public async saveTour(tourId: TourId, path?: Path) {
     return this.makeRequest("save_tour", [tourId, path]);
   }
 
@@ -259,10 +259,10 @@ export class TouristRpcClient {
     });
 
     console.log(`RPC request: ${request}`);
-    try{ 
+    try {
       this.touristProcess!.stdin.write(request + "\n");
     }
-    catch(err) {
+    catch (err) {
       console.log(err);
       throw err;
     }
