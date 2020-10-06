@@ -1,8 +1,5 @@
 import { TourStop } from "tourist-core";
-import {
-  RepoState,
-  Tour,
-} from "tourist-core/src/types";
+import { RepoState, Tour } from "tourist-core/src/types";
 import { ProgressLocation, Uri, window } from "vscode";
 
 import { showError } from "./commands";

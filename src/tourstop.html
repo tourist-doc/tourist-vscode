@@ -183,9 +183,7 @@
 
       <h2>Linked Stops</h2>
       {{?}} {{? !it.readOnly && it.stop.children.length === 0 }}
-      <div id="no-linked">
-        You can link to stops on other tours here!
-      </div>
+      <div id="no-linked">You can link to stops on other tours here!</div>
       {{?}} {{~it.stop.children :stop}}
       <a
         class="child-stop"
@@ -206,9 +204,7 @@
     </div>
 
     {{? it.isBroken }}
-    <div class="errors">
-      STOP IS BROKEN
-    </div>
+    <div class="errors">STOP IS BROKEN</div>
     {{?}}
   </body>
 </html>

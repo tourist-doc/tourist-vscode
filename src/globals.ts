@@ -44,13 +44,15 @@ export class TourState {
   public async prevTourStop(): Promise<StopId | undefined> {
     const tourView = await touristClient.viewTour(this.tourId);
     let ind = 0;
-    while (ind < tourView.stops.length && tourView.stops[ind][0] != this.stopId) {
+    while (
+      ind < tourView.stops.length &&
+      tourView.stops[ind][0] != this.stopId
+    ) {
       ind++;
     }
     if (ind == 0 || ind == tourView.stops.length) {
       return undefined;
-    }
-    else {
+    } else {
       return tourView.stops[ind - 1][0];
     }
   }
@@ -63,13 +65,15 @@ export class TourState {
   public async nextTourStop(): Promise<StopId | undefined> {
     const tourView = await touristClient.viewTour(this.tourId);
     let ind = 0;
-    while (ind < tourView.stops.length && tourView.stops[ind][0] != this.stopId) {
+    while (
+      ind < tourView.stops.length &&
+      tourView.stops[ind][0] != this.stopId
+    ) {
       ind++;
     }
     if (ind == tourView.stops.length) {
       return undefined;
-    }
-    else {
+    } else {
       return tourView.stops[ind + 1][0];
     }
   }
@@ -152,7 +156,7 @@ export function clearTourState() {
  * Returns a list of all known tour files
  */
 export async function knownTours(): Promise<[TourId, string]> {
-  return (await touristClient.listTours());
+  return await touristClient.listTours();
 }
 
 /**

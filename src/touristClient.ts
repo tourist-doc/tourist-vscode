@@ -261,8 +261,7 @@ export class TouristRpcClient {
     console.log(`RPC request: ${request}`);
     try {
       this.touristProcess!.stdin.write(request + "\n");
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw err;
     }

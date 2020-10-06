@@ -1,8 +1,5 @@
 import { dirname, join } from "path";
-import {
-  AbsoluteTourStop,
-  TouristError,
-} from "tourist-core";
+import { AbsoluteTourStop, TouristError } from "tourist-core";
 import * as vscode from "vscode";
 
 // tslint:disable-next-line: no-var-requires
@@ -11,6 +8,7 @@ import * as config from "./config";
 import { context, processTourFile, updateGUI } from "./extension";
 import * as globals from "./globals";
 import { isTourId } from "./tourFile";
+import { Path, StopId, TourId } from "./touristClient";
 import {
   quickPickRepoName,
   quickPickTourFile,
@@ -18,7 +16,6 @@ import {
 } from "./userInput";
 import { findRepoRoot } from "./util";
 import { TouristWebview } from "./webview";
-import { TourId, StopId, Path } from "./touristClient";
 
 /**
  * Exports a function corresponding to every VSCode command we contribute.
@@ -50,7 +47,7 @@ const commands = {
 };
 
 export async function testCommand() {
-  let ret = await globals.touristClient.createTour("firstTour");
+  const ret = await globals.touristClient.createTour("firstTour");
   console.error(ret);
 }
 
@@ -144,7 +141,12 @@ export async function addTourStop(
   };
 
   try {
-    await globals.touristClient.createStop(globals.tourState.tourId, stop.title, stop.absPath, stop.line);
+    await globals.touristClient.createStop(
+      globals.tourState.tourId,
+      stop.title,
+      stop.absPath,
+      stop.line,
+    );
   } catch (error) {
     switch (error.code) {
       case 200: // Repo not mapped to path
@@ -182,17 +184,15 @@ export async function addTourStop(
     console.error(error);
   }
   await processTourFile(globals.tourState.tourId, fileUri, true);
-  const stops = (await globals.touristClient.viewTour(globals.tourState.tourId)).stops;
+  const stops = (await globals.touristClient.viewTour(globals.tourState.tourId))
+    .stops;
   await gotoTourStop(stops[stops.length - 1][0], true);
 }
 
 /**
  * Goes to the given tourstop in the active editor
  */
-export async function gotoTourStop(
-  stop?: StopId,
-  editing = false,
-) {
+export async function gotoTourStop(stop?: StopId, editing = false) {
   if (!globals.tourState) {
     return;
   }
@@ -210,7 +210,14 @@ export async function gotoTourStop(
   const lookupStop = await globals.touristClient.locateStop(tour, stop, true);
 
   if (lookupStop) {
-    const file = vscode.Uri.file((await globals.touristClient.viewStop(globals.tourState.tourId, globals.tourState.stopId)).title);
+    const file = vscode.Uri.file(
+      (
+        await globals.touristClient.viewStop(
+          globals.tourState.tourId,
+          globals.tourState.stopId,
+        )
+      ).title,
+    );
     const doc = await vscode.workspace.openTextDocument(file);
     const viewCol =
       config.webviewColumn() === vscode.ViewColumn.One
@@ -233,7 +240,7 @@ export async function gotoTourStop(
  */
 export async function deleteTour(tour?: TourId) {
   if (tour) {
-    globals.touristClient.deleteTour(tour)
+    globals.touristClient.deleteTour(tour);
     updateGUI();
   }
 }
@@ -262,7 +269,10 @@ export async function editTitle(
   }
 
   if (stop) {
-    const stopView = await globals.touristClient.viewStop(globals.tourState.tourId, stop);
+    const stopView = await globals.touristClient.viewStop(
+      globals.tourState.tourId,
+      stop,
+    );
     const title = await vscode.window.showInputBox({
       prompt: "What's the new title?",
       value: stopView.title,
@@ -271,7 +281,11 @@ export async function editTitle(
     if (title !== undefined) {
       if (stop) {
         try {
-          await globals.touristClient.editStopMetadata(globals.tourState.tourId, stop, { title: title })
+          await globals.touristClient.editStopMetadata(
+            globals.tourState.tourId,
+            stop,
+            { title },
+          );
         } catch (error) {
           switch (error.code) {
             case 0:
@@ -301,7 +315,10 @@ export async function editBody(
     stop = await quickPickTourstop();
   }
   if (stop) {
-    const stopView = await globals.touristClient.viewStop(globals.tourState.tourId, stop);
+    const stopView = await globals.touristClient.viewStop(
+      globals.tourState.tourId,
+      stop,
+    );
     if (body === undefined) {
       body = await vscode.window.showInputBox({
         prompt: "What's the new body?",
@@ -313,7 +330,11 @@ export async function editBody(
     if (body !== undefined) {
       if (stop) {
         try {
-          await globals.touristClient.editStopMetadata(globals.tourState.tourId, stop, { description: body })
+          await globals.touristClient.editStopMetadata(
+            globals.tourState.tourId,
+            stop,
+            { description: body },
+          );
         } catch (error) {
           switch (error.code) {
             case 0:
@@ -331,7 +352,10 @@ export async function editBody(
 /**
  * Swaps the given tourstop with the one above it
  */
-export async function moveTourstopUp(uri: vscode.Uri, stop?: StopId | undefined) {
+export async function moveTourstopUp(
+  uri: vscode.Uri,
+  stop?: StopId | undefined,
+) {
   if (!globals.tourState) {
     return;
   }
@@ -342,7 +366,11 @@ export async function moveTourstopUp(uri: vscode.Uri, stop?: StopId | undefined)
   if (stop) {
     if (stop) {
       try {
-        await globals.touristClient.reorderStop(globals.tourState.tourId, stop, -1);
+        await globals.touristClient.reorderStop(
+          globals.tourState.tourId,
+          stop,
+          -1,
+        );
       } catch (error) {
         switch (error.code) {
           case 1:
@@ -373,7 +401,11 @@ export async function moveTourstopDown(
 
   if (stop) {
     try {
-      await globals.touristClient.reorderStop(globals.tourState.tourId, stop, 1);
+      await globals.touristClient.reorderStop(
+        globals.tourState.tourId,
+        stop,
+        1,
+      );
     } catch (error) {
       switch (error.code) {
         case 1:
@@ -388,11 +420,8 @@ export async function moveTourstopDown(
 
 /**
  * Changes a TourStop's location
-*/
-export async function moveTourstop(
-  uri: vscode.Uri,
-  stop?: StopId | undefined,
-) {
+ */
+export async function moveTourstop(uri: vscode.Uri, stop?: StopId | undefined) {
   if (!globals.tourState) {
     return;
   }
@@ -406,7 +435,12 @@ export async function moveTourstop(
       await editor.document.save();
       const newLocation = editor.selection.active;
       try {
-        await globals.touristClient.moveStop(globals.tourState.tourId, stop, editor.document.fileName, newLocation.line + 1);
+        await globals.touristClient.moveStop(
+          globals.tourState.tourId,
+          stop,
+          editor.document.fileName,
+          newLocation.line + 1,
+        );
       } catch (error) {
         switch (error.code) {
           case 200: // Repo not mapped to path
@@ -457,7 +491,11 @@ export async function startTour(tf?: TourId): Promise<void> {
     globals.clearTourState();
 
     if (globals.tourState) {
-      await processTourFile(globals.tourState.tourId, vscode.Uri.file(tf), false);
+      await processTourFile(
+        globals.tourState.tourId,
+        vscode.Uri.file(tf),
+        false,
+      );
     }
   }
 }
@@ -472,7 +510,11 @@ export async function editTour(tf?: TourId): Promise<void> {
     globals.clearTourState();
 
     if (globals.tourState) {
-      await processTourFile(globals.tourState.tourId, vscode.Uri.file(tf), false);
+      await processTourFile(
+        globals.tourState.tourId,
+        vscode.Uri.file(tf),
+        false,
+      );
     }
   }
 }
@@ -549,7 +591,7 @@ export async function editDescription(tf?: TourId, description?: string) {
     return;
   }
 
-  await globals.touristClient.editTourMetadata(tf, { description: description });
+  await globals.touristClient.editTourMetadata(tf, { description });
   await globals.touristClient.saveTour(tf);
   updateGUI();
 }
@@ -664,7 +706,13 @@ export async function openTourFile(path: Path) {
   await globals.touristClient.openTour(path, true);
 }
 
-export async function linkStop(path: vscode.Uri, tourId: TourId, stopId: StopId, otherTourId: string, otherStopId: StopId) {
+export async function linkStop(
+  path: vscode.Uri,
+  tourId: TourId,
+  stopId: StopId,
+  otherTourId: string,
+  otherStopId: StopId,
+) {
   let qptourId: string | undefined;
   if (!tourId) {
     qptourId = await quickPickTourFile();
@@ -673,7 +721,12 @@ export async function linkStop(path: vscode.Uri, tourId: TourId, stopId: StopId,
     return;
   }
 
-  await globals.touristClient.linkStop(tourId, stopId, otherTourId, otherStopId);
+  await globals.touristClient.linkStop(
+    tourId,
+    stopId,
+    otherTourId,
+    otherStopId,
+  );
   await processTourFile(tourId, path, true);
 }
 
@@ -692,7 +745,7 @@ export async function addBreakpoints(): Promise<void> {
   if (!globals.tourState) {
     return;
   }
- 
+
   const breakpoints = [] as vscode.SourceBreakpoint[];
   for (const stop of globals.tourState.tour.stops) {
     if (isNotBroken(stop)) {
@@ -706,7 +759,7 @@ export async function addBreakpoints(): Promise<void> {
       );
     }
   }
- 
+
   vscode.debug.addBreakpoints(breakpoints);
   */
 }
@@ -753,4 +806,3 @@ export function showError(error: TouristError, expected = true) {
       });
   }
 }
-

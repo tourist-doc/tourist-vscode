@@ -130,24 +130,39 @@ export async function showDecorations() {
     if (!globals.tourState.stopId) {
       return;
     }
-    const currentLocated = await globals.touristClient.locateStop(globals.tourState.tourId, globals.tourState.stopId, true);
+    const currentLocated = await globals.touristClient.locateStop(
+      globals.tourState.tourId,
+      globals.tourState.stopId,
+      true,
+    );
     if (
       current &&
       currentLocated &&
       util.pathsEqual(currentLocated[0], editor.document.fileName)
     ) {
       activeTourStops = [
-        editor.document.lineAt(new vscode.Position(currentLocated[1] - 1, 0)).range,
+        editor.document.lineAt(new vscode.Position(currentLocated[1] - 1, 0))
+          .range,
       ];
     }
 
-    const stopInfo = await globals.touristClient.locateStop(globals.tourState.tourId, globals.tourState.stopId, true);
+    const stopInfo = await globals.touristClient.locateStop(
+      globals.tourState.tourId,
+      globals.tourState.stopId,
+      true,
+    );
     if (stopInfo) {
-      const inactiveTourStops = (await globals.touristClient.viewTour(globals.tourState.tourId))
-        .stops.filter(
+      const inactiveTourStops = (
+        await globals.touristClient.viewTour(globals.tourState.tourId)
+      ).stops
+        .filter(
           async (stop) =>
             globals.tourState &&
-            (await globals.touristClient.locateStop(globals.tourState.tourId, stop[0], true)) !== current &&
+            (await globals.touristClient.locateStop(
+              globals.tourState.tourId,
+              stop[0],
+              true,
+            )) !== current &&
             stopInfo &&
             util.pathsEqual(stopInfo[0], editor.document.fileName),
         )
