@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
 
-import * as globals from "./globals";
-import { findWithUri, TourFile } from "./tourFile";
 import { newTour } from "./commands";
-import { TourView, StopId, TourId } from "./touristClient";
+import * as globals from "./globals";
+import { StopId, TourId } from "./touristClient";
 
 /**
  * Controls how tourstops are displayed in QuickPicks

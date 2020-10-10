@@ -8,10 +8,10 @@ import * as globals from "./globals";
 import * as resources from "./resources";
 import * as statusBar from "./statusBar";
 import { TourFile } from "./tourFile";
+import { TourId } from "./touristClient";
 import * as treeView from "./treeView";
 import * as util from "./util";
 import { TouristWebview } from "./webview";
-import { TourId } from "./touristClient";
 
 export let context: vscode.ExtensionContext | undefined;
 

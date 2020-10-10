@@ -1,12 +1,10 @@
 import { template } from "dot";
-import { Tour } from "tourist-core";
+import * as vscode from "vscode";
 import * as commands from "./commands";
 import * as config from "./config";
-import { tourState, touristClient, tourist } from "./globals";
-import { TourFile } from "./tourFile";
+import { touristClient, tourState } from "./globals";
 import { TourView } from "./touristClient";
 import { TouristWebview } from "./webview";
-import * as vscode from "vscode";
 
 interface TourTemplateArgs {
   tourView: TourView;

@@ -2,8 +2,7 @@ import { dirname, join } from "path";
 import { AbsoluteTourStop, TouristError } from "tourist-core";
 import * as vscode from "vscode";
 
-// tslint:disable-next-line: no-var-requires
-const sanitize = require("sanitize-filename");
+import sanitize from "sanitize-filename";
 import * as config from "./config";
 import { context, processTourFile, updateGUI } from "./extension";
 import * as globals from "./globals";

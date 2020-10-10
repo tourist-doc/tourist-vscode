@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import * as commands from "./commands";
 import * as config from "./config";
 import { context } from "./extension";
-import { tourState, touristClient } from "./globals";
+import { tourState } from "./globals";
 import { TourStopWebview } from "./tourStopWebview";
 import { TourWebview } from "./tourWebview";
 

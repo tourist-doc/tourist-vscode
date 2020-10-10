@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { statusBarItemColor } from "./config";
-import { tourState, touristClient } from "./globals";
+import { touristClient, tourState } from "./globals";
 
 const statusBarItem = vscode.window.createStatusBarItem(
   vscode.StatusBarAlignment.Right,

@@ -2,10 +2,9 @@ import { template } from "dot";
 import * as vscode from "vscode";
 import * as commands from "./commands";
 import * as config from "./config";
-import { tourState, touristClient } from "./globals";
-import { findWithID } from "./tourFile";
-import { TouristWebview } from "./webview";
+import { touristClient, tourState } from "./globals";
 import { StopView } from "./touristClient";
+import { TouristWebview } from "./webview";
 
 interface TourStopTemplateArgs {
   stop: StopView;

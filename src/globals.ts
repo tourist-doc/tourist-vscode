@@ -2,8 +2,7 @@ import { Tourist } from "tourist-core";
 
 import { binaryPath } from "./config";
 import { context } from "./extension";
-import { TouristRpcClient, StopId } from "./touristClient";
-import { TourId } from "./touristClient";
+import { StopId, TourId, TouristRpcClient } from "./touristClient";
 
 /**
  * Global state and resources
@@ -156,7 +155,7 @@ export function clearTourState() {
  * Returns a list of all known tour files
  */
 export async function knownTours(): Promise<[TourId, string]> {
-  return await touristClient.listTours();
+  return touristClient.listTours();
 }
 
 /**
