@@ -1,4 +1,3 @@
-import { AbsoluteTourStop, BrokenTourStop, isNotBroken } from "tourist-core";
 import * as vscode from "vscode";
 
 import * as config from "./config";
@@ -15,32 +14,43 @@ class TouristCodeLensProvider implements vscode.CodeLensProvider {
   public readonly onDidChangeCodeLenses: vscode.Event<void> = this
     ._onDidChangeCodeLenses.event;
 
-  public provideCodeLenses(
+  public async provideCodeLenses(
     document: vscode.TextDocument,
     token: vscode.CancellationToken,
-  ): vscode.ProviderResult<vscode.CodeLens[]> {
+  ): Promise<vscode.CodeLens[]> {
     if (!config.useCodeLens()) {
       return [];
     }
 
     const lenses = [] as vscode.CodeLens[];
     if (globals.tourState) {
-      globals.tourState.tour.stops.forEach(
-        (stop: AbsoluteTourStop | BrokenTourStop) => {
-          if (isNotBroken(stop)) {
-            if (util.pathsEqual(document.fileName, stop.absPath)) {
-              const position = new vscode.Position(stop.line - 1, 0);
-              lenses.push(
-                new vscode.CodeLens(new vscode.Range(position, position), {
-                  arguments: [stop],
-                  command: "tourist.gotoTourstop",
-                  title: stop.title,
-                }),
-              );
-            }
+      const tv = await globals.touristClient.viewTour(globals.tourState.tourId);
+
+      for (const [stopId, _] of tv.stops) {
+        const stop = await globals.touristClient.viewStop(
+          globals.tourState.tourId,
+          stopId,
+        );
+        const loc = await globals.touristClient.locateStop(
+          globals.tourState.tourId,
+          stopId,
+          true,
+        );
+
+        if (loc) {
+          const [path, line] = loc;
+          if (util.pathsEqual(document.fileName, path)) {
+            const position = new vscode.Position(line - 1, 0);
+            lenses.push(
+              new vscode.CodeLens(new vscode.Range(position, position), {
+                arguments: [stop],
+                command: "tourist.gotoTourstop",
+                title: stop.title,
+              }),
+            );
           }
-        },
-      );
+        }
+      }
     }
 
     return lenses;

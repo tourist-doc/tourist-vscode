@@ -59,8 +59,8 @@ export class TouristWebview {
     }
   }
 
-  public static setEditing(editing: boolean) {
-    this.tourStopWebview.setEditing(editing);
+  public static async setEditing(editing: boolean) {
+    await this.tourStopWebview.setEditing(editing);
   }
 
   public static getPanel(): vscode.WebviewPanel {

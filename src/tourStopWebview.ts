@@ -57,6 +57,16 @@ export class TourStopWebview {
     }
   }
 
+  public async setEditing(editing: boolean) {
+    if (tourState && tourState.stopId) {
+      const sv = await touristClient.viewStop(
+        tourState.tourId,
+        tourState.stopId,
+      );
+      this.editingBody = editing ? sv.description : undefined;
+    }
+  }
+
   public async handleMessage(message: any) {
     if (!tourState || !tourState.stopId) {
       return;
@@ -69,7 +79,7 @@ export class TourStopWebview {
         await commands.prevTourStop();
         break;
       case "editTitle":
-        await commands.editTitle();
+        // await commands.editTitle();
         break;
       case "editBody":
         const sv = await touristClient.viewStop(
@@ -95,14 +105,14 @@ export class TourStopWebview {
         tourState.stopId = undefined;
         break;
       case "gotoChildStop":
-        const tf = findWithID(message.tourId);
-        if (tf) {
-          // TODO: startTour reads and parses the URI, but we already have the TourFile!
-          await commands.startTour(tf.path);
-        }
+        // const tf = findWithID(message.tourId);
+        // if (tf) {
+        //   // TODO: startTour reads and parses the URI, but we already have the TourFile!
+        //   await commands.startTour(tf.path);
+        // }
         break;
       case "linkStop":
-        await commands.linkTour();
+        // await commands.linkTour();
         break;
     }
 

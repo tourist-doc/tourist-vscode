@@ -206,8 +206,8 @@ export async function processTourFile(
   console.debug(`Processing TourFile ${tourId}`);
 
   if (save) {
-    globals.touristClient.saveTour(tourId, path.toString());
+    await globals.touristClient.saveTour(tourId, path.fsPath);
   }
 
-  updateGUI();
+  await updateGUI();
 }

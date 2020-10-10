@@ -9,7 +9,7 @@ import { TouristRpcClient } from "../touristClient";
 suite("TouristClient", () => {
   test("can list tours", async () => {
     const client = new TouristRpcClient();
-    await client.connect();
+    // await client.connect();
 
     const response = await client.listTours();
 

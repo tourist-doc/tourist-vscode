@@ -82,11 +82,7 @@ async function getTourFileURI(): Promise<vscode.Uri | undefined> {
     },
   });
 
-  if (uris) {
-    return uris[0];
-  }
-
-  return undefined;
+  return uris ? uris[0] : undefined;
 }
 
 /**
@@ -114,10 +110,12 @@ export async function quickPickTourFile(
     return item.tf;
   } else if (item) {
     if (item.label === "Open .tour file") {
-      const uri = await getTourFileURI();
-      if (uri) {
-        return findWithUri(uri);
-      }
+      // const uri = await getTourFileURI();
+      // if (uri) {
+      //   return findWithUri(uri);
+      // }
+      // TODO: re-implement
+      return undefined;
     } else if (item.label === "Create new .tour file") {
       const uri = await getTourFileURI();
       if (uri) {

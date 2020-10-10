@@ -45,11 +45,11 @@ export class TourState {
     let ind = 0;
     while (
       ind < tourView.stops.length &&
-      tourView.stops[ind][0] != this.stopId
+      tourView.stops[ind][0] !== this.stopId
     ) {
       ind++;
     }
-    if (ind == 0 || ind == tourView.stops.length) {
+    if (ind === 0 || ind === tourView.stops.length) {
       return undefined;
     } else {
       return tourView.stops[ind - 1][0];
@@ -66,11 +66,11 @@ export class TourState {
     let ind = 0;
     while (
       ind < tourView.stops.length &&
-      tourView.stops[ind][0] != this.stopId
+      tourView.stops[ind][0] !== this.stopId
     ) {
       ind++;
     }
-    if (ind == tourView.stops.length) {
+    if (ind === tourView.stops.length) {
       return undefined;
     } else {
       return tourView.stops[ind + 1][0];

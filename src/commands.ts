@@ -2,7 +2,7 @@ import { dirname, join } from "path";
 import { AbsoluteTourStop, TouristError } from "tourist-core";
 import * as vscode from "vscode";
 
-import sanitize from "sanitize-filename";
+const sanitize = require("sanitize-filename");
 import * as config from "./config";
 import { context, processTourFile, updateGUI } from "./extension";
 import * as globals from "./globals";
@@ -203,7 +203,7 @@ export async function gotoTourStop(stop?: StopId, editing = false) {
   }
 
   globals.tourState.stopId = stop;
-  TouristWebview.setEditing(editing);
+  await TouristWebview.setEditing(editing);
 
   const tour = globals.tourState.tourId;
   const lookupStop = await globals.touristClient.locateStop(tour, stop, true);
@@ -677,9 +677,11 @@ export async function newTour(path?: vscode.Uri): Promise<TourId | undefined> {
   }
 
   if (!path) {
-    const defaultUri = vscode.Uri.file(
-      join(config.defaultTourSaveLocation(), sanitize(title) + ".tour"),
+    const filePath = join(
+      config.defaultTourSaveLocation(),
+      sanitize(title) + ".tour",
     );
+    const defaultUri = vscode.Uri.file(filePath);
     path = await vscode.window.showSaveDialog({ defaultUri });
   }
 
